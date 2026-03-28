@@ -34,7 +34,6 @@ export type Copy = {
   labelAnnualProd: string;
   hintAnnualProd: string;
   labelConsumption: string;
-  labelDailyConsumption: string;
   labelBattery: string;
   labelBatteryKwh: string;
   hintBatteryKwh: string;
@@ -115,7 +114,6 @@ export const copy: Record<Locale, Copy> = {
     labelAnnualProd: "Aastane tootmine (kWh)",
     hintAnnualProd: "Kui täpset toodangut ei tea, kasuta hinnangut 850–1000 kWh per kW aastas.",
     labelConsumption: "Aastane elektritarbimine (kWh)",
-    labelDailyConsumption: "Päevane tarbimine (kWh)",
     labelBattery: "Aku olemasolu",
     labelBatteryKwh: "Aku mahtuvus (kWh)",
     hintBatteryKwh: "Täida ainult siis, kui aku on olemas.",
@@ -151,7 +149,7 @@ export const copy: Record<Locale, Copy> = {
     kpiExport: "Võrku müük",
     kpiTotalPeriod: "Kogutulu perioodis",
     kpiBatteryValue: "Aku lisaväärtus",
-    paybackNa: "Ei arvutatav",
+    paybackNa: "Pole võimalik arvutada",
     yearsSuffix: "aastat",
     compareTitle: "Ilma akuta vs akuga",
     compareNoBattery: "Ilma akuta aastane netokasu",
@@ -223,7 +221,6 @@ export const copy: Record<Locale, Copy> = {
     labelAnnualProd: "Annual production (kWh)",
     hintAnnualProd: "If you are unsure, use a rough range of 850–1000 kWh per kW per year.",
     labelConsumption: "Annual electricity use (kWh)",
-    labelDailyConsumption: "Average daily use (kWh)",
     labelBattery: "Battery installed",
     labelBatteryKwh: "Battery capacity (kWh)",
     hintBatteryKwh: "Only fill in if a battery is installed.",
@@ -259,7 +256,7 @@ export const copy: Record<Locale, Copy> = {
     kpiExport: "Export to grid",
     kpiTotalPeriod: "Total benefit over period",
     kpiBatteryValue: "Battery added value",
-    paybackNa: "Not calculable",
+    paybackNa: "Cannot be calculated",
     yearsSuffix: "years",
     compareTitle: "Without battery vs with battery",
     compareNoBattery: "Annual net benefit without battery",

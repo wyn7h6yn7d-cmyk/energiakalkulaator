@@ -185,6 +185,38 @@ export function SolarCalculatorPage() {
     }
   };
 
+  // Kui valitud on Nord Pool, lae börsihind automaatselt (leiab + uuendab välja); nupp "Uuenda" teeb sama uuesti.
+  useEffect(() => {
+    if (!storageReady) return;
+    if (input.priceSource !== "nordpool") return;
+    let cancelled = false;
+    const run = async () => {
+      setNordPoolState({ loading: true, message: copy[lang].nordLoading, source: "none" });
+      try {
+        const response = await fetch(`/api/nordpool?lang=${lang}`);
+        const data = (await response.json()) as {
+          source: "live" | "fallback";
+          averagePrice: number;
+          message: string;
+        };
+        if (cancelled) return;
+        setInput((prev) => ({ ...prev, nordPoolAveragePrice: data.averagePrice }));
+        setNordPoolState({ loading: false, message: data.message, source: data.source });
+      } catch {
+        if (cancelled) return;
+        setNordPoolState({
+          loading: false,
+          message: copy[lang].nordFetchFailed,
+          source: "fallback",
+        });
+      }
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [storageReady, input.priceSource, lang]);
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     setErrors(validationErrors);
@@ -286,9 +318,6 @@ export function SolarCalculatorPage() {
                   </Field>
                   <Field label={t.labelConsumption}>
                     <input className="input" type="number" value={input.annualConsumptionKwh} onChange={(e) => setInput({ ...input, annualConsumptionKwh: Number(e.target.value), dailyConsumptionKwh: Number(e.target.value) / 365 })} />
-                  </Field>
-                  <Field label={t.labelDailyConsumption}>
-                    <input className="input" type="number" value={formatNum(input.dailyConsumptionKwh, 1, lang)} readOnly />
                   </Field>
                   <Field label={t.labelBattery}>
                     <select className="input" value={input.hasBattery ? "jah" : "ei"} onChange={(e) => setInput({ ...input, hasBattery: e.target.value === "jah" })}>
@@ -435,15 +464,15 @@ export function SolarCalculatorPage() {
               <h3 className="section-title">{t.compareTitle}</h3>
               <div className="grid gap-3 text-sm">
                 <div className="compare-row">
-                  <span>{t.compareNoBattery}</span>
+                  <span className="compare-label">{t.compareNoBattery}</span>
                   <strong>{fmtEur(result.withoutBattery.annualNetBenefitEur)}</strong>
                 </div>
                 <div className="compare-row">
-                  <span>{t.compareWithBattery}</span>
+                  <span className="compare-label">{t.compareWithBattery}</span>
                   <strong>{fmtEur(result.withBattery.annualNetBenefitEur)}</strong>
                 </div>
                 <div className="compare-row">
-                  <span>{t.compareGridReduction}</span>
+                  <span className="compare-label">{t.compareGridReduction}</span>
                   <strong>{formatNum(result.withBattery.gridDependenceReductionPercent, 1, lang)}%</strong>
                 </div>
               </div>
