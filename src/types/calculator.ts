@@ -2,6 +2,7 @@ export type PanelDirection = "louna" | "ida-laas" | "muu";
 export type ConsumptionProfile = "kodu-paev" | "tool-ohtul" | "ettevote" | "kohandatud";
 export type PriceSource = "manual" | "nordpool";
 export type PeriodYears = 10 | 15 | 20 | 25;
+export type InterpretationKind = "needs_input" | "fast" | "moderate" | "long";
 
 export interface CalculatorInput {
   pvPowerKw: number;
@@ -62,6 +63,6 @@ export interface ComparisonResult {
   totalInvestmentEur: number;
   paybackYears: number;
   batteryAddedValuePeriodEur: number;
-  interpretation: string;
+  interpretationKind: InterpretationKind;
   effectiveEnergyPrice: number;
 }

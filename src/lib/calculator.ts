@@ -1,4 +1,4 @@
-import { CalculatorInput, ComparisonResult, ScenarioResult } from "@/types/calculator";
+import { CalculatorInput, ComparisonResult, InterpretationKind, ScenarioResult } from "@/types/calculator";
 
 const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
@@ -87,11 +87,11 @@ function computeScenario(input: CalculatorInput, withBattery: boolean): Scenario
   };
 }
 
-function interpretationFromPayback(paybackYears: number): string {
-  if (!Number.isFinite(paybackYears)) return "Tasuvus vajab täpsemaid sisendeid";
-  if (paybackYears <= 7) return "Kiire tasuvus - investeering on väga tugev";
-  if (paybackYears <= 12) return "Mõõdukas tasuvus - stabiilne pikaajaline väärtus";
-  return "Pikaajaline investeering - tasub hinnata täiendavaid optimeeringuid";
+function interpretationKindFromPayback(paybackYears: number): InterpretationKind {
+  if (!Number.isFinite(paybackYears)) return "needs_input";
+  if (paybackYears <= 7) return "fast";
+  if (paybackYears <= 12) return "moderate";
+  return "long";
 }
 
 export function calculateComparison(input: CalculatorInput): ComparisonResult {
@@ -121,7 +121,7 @@ export function calculateComparison(input: CalculatorInput): ComparisonResult {
     totalInvestmentEur,
     paybackYears,
     batteryAddedValuePeriodEur,
-    interpretation: interpretationFromPayback(paybackYears),
+    interpretationKind: interpretationKindFromPayback(paybackYears),
     effectiveEnergyPrice,
   };
 }

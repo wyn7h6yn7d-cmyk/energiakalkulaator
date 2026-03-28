@@ -2,12 +2,28 @@ import { NextResponse } from "next/server";
 
 const fallbackPrices = [0.089, 0.094, 0.101, 0.097, 0.105, 0.11, 0.087];
 
-export async function GET() {
+function messages(lang: "et" | "en") {
+  return {
+    live:
+      lang === "en"
+        ? "Nord Pool Estonia: 7-day average spot price."
+        : "Nord Pool Eesti 7 päeva keskmine hind.",
+    fallback:
+      lang === "en"
+        ? "Live spot price could not be loaded. Using fallback values; you can enter a price manually."
+        : "Reaalajas börsihinda ei õnnestunud laadida. Kasutame hetkel varuandmestikku, soovi korral sisesta hind käsitsi.",
+  };
+}
+
+export async function GET(request: Request) {
+  const langParam = new URL(request.url).searchParams.get("lang");
+  const lang = langParam === "en" ? "en" : "et";
+  const msg = messages(lang);
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2500);
 
-    // Eleringi API annab Eesti piirkonna tunnipõhise börsihinna.
     const now = new Date();
     const end = now.toISOString();
     const start = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 7).toISOString();
@@ -45,7 +61,7 @@ export async function GET() {
     return NextResponse.json({
       source: "live",
       averagePrice: Number(average.toFixed(4)),
-      message: "Nord Pool Eesti 7 päeva keskmine hind.",
+      message: msg.live,
     });
   } catch {
     const fallbackAverage =
@@ -54,8 +70,7 @@ export async function GET() {
     return NextResponse.json({
       source: "fallback",
       averagePrice: Number(fallbackAverage.toFixed(4)),
-      message:
-        "Reaalajas börsihinda ei õnnestunud laadida. Kasutame hetkel varuandmestikku, soovi korral sisesta hind käsitsi.",
+      message: msg.fallback,
     });
   }
 }
