@@ -207,7 +207,11 @@ function AreaChart({
         {hover ? (
           <div
             className="pointer-events-none absolute z-10 -translate-x-1/2 rounded-xl border border-white/10 bg-zinc-950/85 px-3 py-2 text-xs text-zinc-200 shadow-[0_0_30px_rgba(0,0,0,0.45)] backdrop-blur-2xl"
-            style={{ left: `${(hover.x / w) * 100}%`, top: 0 }}
+            style={{
+              // hoia tooltip alati vaate sees (mobiilis tekitas "üle ääre" layouti)
+              left: `${Math.min(90, Math.max(10, (hover.x / w) * 100))}%`,
+              top: 0,
+            }}
           >
             <div className="text-zinc-400">{fmtTimeEt(points[hover.i]?.ts ?? 0)}</div>
             <div className="font-semibold text-zinc-50">
@@ -434,16 +438,16 @@ export function PriceViewClient({
   const intervalSec = effectiveInterval * 60;
 
   return (
-    <section className="mt-8 grid gap-6">
+    <section className="mt-8 grid gap-6 max-w-full overflow-x-hidden">
       <div className="glass-panel rounded-3xl p-6 sm:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-zinc-50">Börsihinna dashboard</h2>
             <p className="mt-2 text-sm text-zinc-400">
               Eesti (EE) turuhind Eleringi andmetel. Vaikimisi näitame hinna käibemaksuga (24%).
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 flex-wrap gap-2">
             <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1">
               <button
                 type="button"
@@ -480,7 +484,7 @@ export function PriceViewClient({
               </button>
             </div>
 
-            <div className="-mx-1 flex items-center gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02] p-1 px-1 [-webkit-overflow-scrolling:touch]">
+            <div className="flex max-w-full items-center gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02] p-1 px-1 [-webkit-overflow-scrolling:touch]">
               <button
                 type="button"
                 className={`rounded-xl px-3 py-2 text-sm ${period === "today" ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
