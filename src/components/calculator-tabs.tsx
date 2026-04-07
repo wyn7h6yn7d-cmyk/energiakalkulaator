@@ -16,14 +16,15 @@ export function CalculatorTabs() {
 
   return (
     <div className="glass-panel rounded-3xl p-2">
-      <div className="flex flex-wrap gap-2">
+      <div className="-mx-1 overflow-x-auto px-1 [-webkit-overflow-scrolling:touch]">
+        <div className="flex min-w-max gap-2">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`rounded-2xl px-4 py-2 text-sm transition-colors ${
+              className={`whitespace-nowrap rounded-2xl px-4 py-2 text-sm transition-colors ${
                 active
                   ? "bg-gradient-to-r from-emerald-400/20 to-teal-400/20 text-zinc-50 ring-1 ring-emerald-300/25"
                   : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"
@@ -33,6 +34,7 @@ export function CalculatorTabs() {
             </Link>
           );
         })}
+        </div>
       </div>
     </div>
   );

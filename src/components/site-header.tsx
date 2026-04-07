@@ -25,19 +25,19 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/80 backdrop-blur-lg">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-3"
+          className="flex min-w-0 items-center gap-3"
           onClick={() => setMobileOpen(false)}
           aria-label="Energiakalkulaator avalehele"
         >
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-400 shadow-[0_0_18px_rgba(16,185,129,0.22)]" />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold tracking-tight text-zinc-50">
+          <div className="min-w-0 leading-tight">
+            <div className="truncate text-sm font-semibold tracking-tight text-zinc-50">
               Energiakalkulaator
             </div>
-            <div className="text-xs text-zinc-400">Rohelise energia otsused</div>
+            <div className="hidden truncate text-xs text-zinc-400 sm:block">Rohelise energia otsused</div>
           </div>
         </Link>
 
@@ -57,7 +57,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             className="btn-ghost inline-flex md:hidden"
@@ -67,8 +67,8 @@ export function SiteHeader() {
           >
             Menüü
           </button>
-          <Link href="/kalkulaatorid/paikesejaam" className="btn-glow inline-flex">
-            Ava Täisanalüüs
+          <Link href="/kalkulaatorid/paikesejaam" className="btn-glow inline-flex whitespace-nowrap px-4 py-2.5 sm:px-[1.1rem] sm:py-[0.7rem]">
+            Täisanalüüs
           </Link>
         </div>
       </div>

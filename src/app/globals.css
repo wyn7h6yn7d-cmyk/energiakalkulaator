@@ -26,6 +26,10 @@ body {
   overflow-x: hidden;
 }
 
+* {
+  max-width: 100%;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
