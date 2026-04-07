@@ -185,16 +185,21 @@ export function VppPageClient() {
         <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-sm text-zinc-200">
           <strong className="block text-zinc-50">Täisanalüüs</strong>
           <p className="mt-1 text-zinc-300">
-            Detailne VPP simulatsioon (turuplokid, stsenaariumid, risk, cashflow tabel, eksport) avaneb
-            täisanalüüsis.
+            {FEATURES.paywallEnabled
+              ? "Detailne VPP simulatsioon (turuplokid, stsenaariumid, risk, cashflow tabel, eksport) avaneb täisanalüüsis."
+              : "Tasuta beetaversioonis on detailsem analüüs nähtav. Täida väljad ja vaata ka tundlikkust."}
           </p>
         </div>
       </section>
 
       <PaywallCard
         locked={!canViewFullAnalysis(unlock)}
-        title="Täisanalüüs"
-        description="avab VPP detailse simulatsiooni (stsenaariumid, risk, cashflow tabel, eksport) selle projekti jaoks."
+        title={FEATURES.paywallEnabled ? "Täisanalüüs" : "Detailne analüüs"}
+        description={
+          FEATURES.paywallEnabled
+            ? "avab VPP detailse simulatsiooni (stsenaariumid, risk, cashflow tabel, eksport) selle projekti jaoks."
+            : "detailsem vaade VPP tasuvusele koos tundlikkuse ja soovitustega."
+        }
         ctaLabel={purchaseBusy === "full_analysis" ? "Suunamine..." : "Ava Täisanalüüs 9,99 €"}
         secondaryLabel="Kontrolli makse staatust"
         onCta={() => startCheckout("full_analysis")}
@@ -228,8 +233,52 @@ export function VppPageClient() {
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>See on V1 lihtsustatud mudel, mis kasutab sisestatud tulueeldust.</li>
             <li>Efektiivsus vähendab eelduslikku tulu proportsionaalselt.</li>
-            <li>Täisanalüüs lisab turuandmed, stsenaariumid ja detailse rahavoo.</li>
+            <li>Täpsem simulatsioon ja turuandmed lisanduvad edaspidi.</li>
           </ul>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <article className="card">
+            <h3 className="section-title">Tundlikkus (tulu ±20%)</h3>
+            {(() => {
+              const inv = num(investmentEur);
+              const rev = num(annualRevenueEur);
+              const eff = Math.min(Math.max(num(efficiencyPct), 50), 99) / 100;
+              const net = (r: number) => Math.max(r * eff, 0);
+              const payback = (r: number) => (net(r) > 0 ? inv / net(r) : Infinity);
+              const low = payback(rev * 0.8);
+              const base = payback(rev);
+              const high = payback(rev * 1.2);
+              return (
+                <div className="grid gap-3 text-sm">
+                  <div className="compare-row">
+                    <span className="compare-label">Madalam tulu (−20%)</span>
+                    <strong>{Number.isFinite(low) ? `${low.toFixed(1)} a` : "—"}</strong>
+                  </div>
+                  <div className="compare-row">
+                    <span className="compare-label">Baas</span>
+                    <strong>{Number.isFinite(base) ? `${base.toFixed(1)} a` : "—"}</strong>
+                  </div>
+                  <div className="compare-row">
+                    <span className="compare-label">Kõrgem tulu (+20%)</span>
+                    <strong>{Number.isFinite(high) ? `${high.toFixed(1)} a` : "—"}</strong>
+                  </div>
+                </div>
+              );
+            })()}
+            <p className="mt-3 text-xs text-zinc-400">
+              VPP puhul mõjutab tulemust enim tulueeldus (€/a) ja aku kasutuskoormus.
+            </p>
+          </article>
+
+          <article className="card">
+            <h3 className="section-title">Soovitused</h3>
+            <ul className="list-disc space-y-2 pl-5 text-sm text-zinc-300">
+              <li>Testi vähemalt 3 stsenaariumi: madal / baas / kõrge tulu.</li>
+              <li>Kui eesmärk on stabiilsus, kasuta konservatiivset tulueeldust ja jäta varu hoolduseks.</li>
+              <li>Kui tasuvus on pikk, vaata üle investeering või realistlik tulu.</li>
+            </ul>
+          </article>
         </div>
 
         {FEATURES.paywallEnabled ? (

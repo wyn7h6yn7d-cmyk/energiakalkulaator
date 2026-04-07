@@ -106,9 +106,6 @@ export function PeakShavingPageClient() {
                 <input className="input" value={demandFeeEurPerKwMonth} inputMode="decimal" onChange={(e) => setDemandFeeEurPerKwMonth(e.target.value)} />
               </label>
             </div>
-            <p className="mt-3 text-xs text-zinc-400">
-              Mudel: lõigatav tipp = min(\(peak-limit\), aku kW, aku kWh / tiputund).
-            </p>
           </article>
 
           <article className="card">

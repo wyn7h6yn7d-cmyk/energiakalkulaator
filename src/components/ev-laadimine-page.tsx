@@ -126,9 +126,6 @@ export function EvLaadiminePageClient() {
                 <input className="input" value={reserveKw} inputMode="decimal" onChange={(e) => setReserveKw(e.target.value)} />
               </label>
             </div>
-            <p className="mt-3 text-xs text-zinc-400">
-              Loogika: 1-faasiline \(P \approx 230V \times I\), 3-faasiline \(P \approx \sqrt{3} \times 400V \times I\). Lisame ~20% varu ning lahutame “reservi”.
-            </p>
           </article>
 
           <article className="card">
