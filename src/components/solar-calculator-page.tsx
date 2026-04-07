@@ -99,9 +99,25 @@ function Field({
     <label className="grid gap-2 text-sm">
       <span className="text-zinc-100">{label}</span>
       {children}
-      {hint ? <span className="text-xs text-zinc-400">{hint}</span> : null}
+      {hint ? (
+        <span className="text-xs text-zinc-400">{hint}</span>
+      ) : (
+        // Hoia väljade kõrgus ühtlane (mobiil/desktop joondus)
+        <span className="text-xs text-zinc-400 opacity-0">.</span>
+      )}
     </label>
   );
+}
+
+function numValue(value: number): string | number {
+  return value === 0 ? "" : value;
+}
+
+function toNumber(value: string): number {
+  if (value.trim() === "") return 0;
+  const normalized = value.replace(",", ".");
+  const n = Number(normalized);
+  return Number.isFinite(n) ? n : 0;
 }
 
 export function SolarCalculatorPage() {
@@ -295,13 +311,40 @@ export function SolarCalculatorPage() {
                 <h3 className="section-title">{t.sectionSystem}</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label={t.labelPvKw}>
-                    <input className="input" type="number" value={input.pvPowerKw} onChange={(e) => setInput({ ...input, pvPowerKw: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="decimal"
+                      value={numValue(input.pvPowerKw)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, pvPowerKw: toNumber(e.target.value) })}
+                      placeholder="nt 12"
+                    />
                   </Field>
                   <Field label={t.labelAnnualProd} hint={t.hintAnnualProd}>
-                    <input className="input" type="number" value={input.annualProductionKwh} onChange={(e) => setInput({ ...input, annualProductionKwh: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="numeric"
+                      value={numValue(input.annualProductionKwh)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, annualProductionKwh: toNumber(e.target.value) })}
+                      placeholder="nt 11000"
+                    />
                   </Field>
                   <Field label={t.labelConsumption}>
-                    <input className="input" type="number" value={input.annualConsumptionKwh} onChange={(e) => setInput({ ...input, annualConsumptionKwh: Number(e.target.value), dailyConsumptionKwh: Number(e.target.value) / 365 })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="numeric"
+                      value={numValue(input.annualConsumptionKwh)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const v = toNumber(e.target.value);
+                        setInput({ ...input, annualConsumptionKwh: v, dailyConsumptionKwh: v / 365 });
+                      }}
+                      placeholder="nt 9000"
+                    />
                   </Field>
                   <Field label={t.labelBattery}>
                     <select className="input" value={input.hasBattery ? "jah" : "ei"} onChange={(e) => setInput({ ...input, hasBattery: e.target.value === "jah" })}>
@@ -310,7 +353,15 @@ export function SolarCalculatorPage() {
                     </select>
                   </Field>
                   <Field label={t.labelBatteryKwh} hint={t.hintBatteryKwh}>
-                    <input className="input" type="number" value={input.batteryCapacityKwh} onChange={(e) => setInput({ ...input, batteryCapacityKwh: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="decimal"
+                      value={numValue(input.batteryCapacityKwh)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, batteryCapacityKwh: toNumber(e.target.value) })}
+                      placeholder="nt 10"
+                    />
                   </Field>
                 </div>
               </article>
@@ -326,12 +377,28 @@ export function SolarCalculatorPage() {
                   </Field>
                   {input.priceSource === "manual" ? (
                     <Field label={t.labelSpot}>
-                      <input className="input" type="number" step="0.001" value={input.manualSpotPrice} onChange={(e) => setInput({ ...input, manualSpotPrice: Number(e.target.value) })} />
+                      <input
+                        className="input"
+                        type="text"
+                        inputMode="decimal"
+                        value={numValue(input.manualSpotPrice)}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => setInput({ ...input, manualSpotPrice: toNumber(e.target.value) })}
+                        placeholder="nt 0,12"
+                      />
                     </Field>
                   ) : (
                     <Field label={t.labelNordAvg}>
                       <div className="flex gap-2">
-                        <input className="input flex-1" type="number" step="0.001" value={input.nordPoolAveragePrice} onChange={(e) => setInput({ ...input, nordPoolAveragePrice: Number(e.target.value) })} />
+                        <input
+                          className="input flex-1"
+                          type="text"
+                          inputMode="decimal"
+                          value={numValue(input.nordPoolAveragePrice)}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(e) => setInput({ ...input, nordPoolAveragePrice: toNumber(e.target.value) })}
+                          placeholder="nt 0,10"
+                        />
                         <button type="button" className="btn-ghost min-w-32 shrink-0" onClick={fetchNordPool}>
                           {nordPoolState.loading ? t.btnLoading : t.btnRefresh}
                         </button>
@@ -339,37 +406,105 @@ export function SolarCalculatorPage() {
                     </Field>
                   )}
                   <Field label={t.labelGridFee}>
-                    <input className="input" type="number" step="0.001" value={input.gridFeePrice} onChange={(e) => setInput({ ...input, gridFeePrice: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="decimal"
+                      value={numValue(input.gridFeePrice)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, gridFeePrice: toNumber(e.target.value) })}
+                      placeholder="nt 0,05"
+                    />
                   </Field>
                   <Field label={t.labelSellBack}>
-                    <input className="input" type="number" step="0.001" value={input.sellBackPrice} onChange={(e) => setInput({ ...input, sellBackPrice: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="decimal"
+                      value={numValue(input.sellBackPrice)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, sellBackPrice: toNumber(e.target.value) })}
+                      placeholder="nt 0,06"
+                    />
                   </Field>
                   <Field label={t.labelMargin}>
-                    <input className="input" type="number" step="0.001" value={input.marginPrice} onChange={(e) => setInput({ ...input, marginPrice: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="decimal"
+                      value={numValue(input.marginPrice)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, marginPrice: toNumber(e.target.value) })}
+                      placeholder="nt 0,01"
+                    />
                   </Field>
                 </div>
                 {nordPoolState.message ? (
                   <p className="mt-3 text-xs text-cyan-200">{nordPoolState.message}</p>
                 ) : null}
+                <p className="mt-2 text-xs text-zinc-400">
+                  Efektiivne ostuhind = börsihind + võrgutasu + margin. Praegu:{" "}
+                  <span className="font-medium text-zinc-200">{formatNum(draftResult.effectiveEnergyPrice, 3, lang)} €/kWh</span>
+                </p>
               </article>
 
               <article className="card">
                 <h3 className="section-title">{t.sectionInvest}</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label={t.labelPvCost}>
-                    <input className="input" type="number" value={input.pvCostEur} onChange={(e) => setInput({ ...input, pvCostEur: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="numeric"
+                      value={numValue(input.pvCostEur)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, pvCostEur: toNumber(e.target.value) })}
+                      placeholder="nt 12000"
+                    />
                   </Field>
                   <Field label={t.labelBatteryCost}>
-                    <input className="input" type="number" value={input.batteryCostEur} onChange={(e) => setInput({ ...input, batteryCostEur: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="numeric"
+                      value={numValue(input.batteryCostEur)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, batteryCostEur: toNumber(e.target.value) })}
+                      placeholder="nt 6000"
+                    />
                   </Field>
                   <Field label={t.labelExtraInstall}>
-                    <input className="input" type="number" value={input.extraInstallCostEur} onChange={(e) => setInput({ ...input, extraInstallCostEur: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="numeric"
+                      value={numValue(input.extraInstallCostEur)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, extraInstallCostEur: toNumber(e.target.value) })}
+                      placeholder="nt 1500"
+                    />
                   </Field>
                   <Field label={t.labelSupport}>
-                    <input className="input" type="number" value={input.supportEur} onChange={(e) => setInput({ ...input, supportEur: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="numeric"
+                      value={numValue(input.supportEur)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, supportEur: toNumber(e.target.value) })}
+                      placeholder="nt 1000"
+                    />
                   </Field>
                   <Field label={t.labelMaintenance}>
-                    <input className="input" type="number" value={input.annualMaintenanceEur} onChange={(e) => setInput({ ...input, annualMaintenanceEur: Number(e.target.value) })} />
+                    <input
+                      className="input"
+                      type="text"
+                      inputMode="numeric"
+                      value={numValue(input.annualMaintenanceEur)}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => setInput({ ...input, annualMaintenanceEur: toNumber(e.target.value) })}
+                      placeholder="nt 200"
+                    />
                   </Field>
                   <Field label={t.labelPeriodYears}>
                     <select className="input" value={input.periodYears} onChange={(e) => setInput({ ...input, periodYears: Number(e.target.value) as CalculatorInput["periodYears"] })}>
