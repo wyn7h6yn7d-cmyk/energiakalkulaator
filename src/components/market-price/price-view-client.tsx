@@ -438,7 +438,7 @@ export function PriceViewClient({
   const intervalSec = effectiveInterval * 60;
 
   return (
-    <section className="mt-8 grid gap-6">
+    <section className="mt-8 grid grid-cols-1 gap-6">
       <div className="glass-panel rounded-3xl p-5 sm:p-8">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -447,7 +447,7 @@ export function PriceViewClient({
               Eesti (EE) turuhind Eleringi andmetel. Vaikimisi näitame hinna käibemaksuga (24%).
             </p>
           </div>
-          <div className="grid min-w-0 gap-2 sm:flex sm:flex-wrap">
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:flex sm:flex-wrap">
             <div className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:grid-cols-2">
               <button
                 type="button"
@@ -550,7 +550,7 @@ export function PriceViewClient({
         </div>
 
         {/* B) Main chart */}
-        <div className="mt-5 card rounded-3xl p-5 sm:p-6">
+        <div className="mt-5 card rounded-3xl p-5 sm:p-6 lg:-mx-6 lg:rounded-[28px] lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <div className="text-sm font-semibold text-zinc-50">Hinnagraafik</div>
@@ -568,14 +568,14 @@ export function PriceViewClient({
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-12">
-          <div className="lg:col-span-7 grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-7">
             <WindowCard hours={1} pick={windowPicks.cheapest["1"]} vat={vat} />
             <WindowCard hours={2} pick={windowPicks.cheapest["2"]} vat={vat} />
             <WindowCard hours={3} pick={windowPicks.cheapest["3"]} vat={vat} />
             <WindowCard hours={4} pick={windowPicks.cheapest["4"]} vat={vat} />
           </div>
 
-          <div className="lg:col-span-5 grid gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:col-span-5">
             <SlotTable title="Odavaimad 3 perioodi" points={topSlots.cheapest} vat={vat} intervalMinutes={intervalMinutes} />
             <SlotTable title="Kalleimad 3 perioodi" points={topSlots.priciest} vat={vat} intervalMinutes={intervalMinutes} />
           </div>
