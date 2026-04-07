@@ -144,7 +144,7 @@ function HeatRow({ points, vat }: { points: MarketPricePoint[]; vat: boolean }) 
           return (
             <div
               key={p.ts}
-              className={`h-3.5 rounded-sm ${bg} ring-1 ring-white/10 sm:h-4`}
+              className={`h-3 rounded-sm ${bg} ring-1 ring-white/10 sm:h-4`}
               title={`${fmtTimeEt(p.ts)} · ${fmtSnt(p.price_eur_per_kwh, vat)} snt/kWh`}
             />
           );
@@ -221,7 +221,7 @@ function AreaChart({
         ) : null}
         <svg
           viewBox={`0 0 ${w} ${h}`}
-          className="h-[200px] w-full sm:h-[160px]"
+          className="h-[170px] w-full sm:h-[160px]"
           onMouseLeave={() => setHover(null)}
           onMouseMove={(e) => {
             const rect = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
@@ -439,7 +439,7 @@ export function PriceViewClient({
 
   return (
     <section className="mt-8 grid gap-6 max-w-full overflow-x-hidden">
-      <div className="glass-panel rounded-3xl p-6 sm:p-8">
+      <div className="glass-panel rounded-3xl p-5 sm:p-8">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-zinc-50">Börsihinna dashboard</h2>
@@ -511,41 +511,41 @@ export function PriceViewClient({
         </div>
 
         {/* A) Summary ribbon */}
-        <div className="mt-6 grid gap-3 grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
             <div className="text-xs text-zinc-400">{nowCard?.label ?? "Praegune hind"}</div>
-            <div className="mt-1 text-2xl font-semibold text-zinc-50">
+            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
               {nowCard ? fmtSnt(nowCard.eurPerKwh, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt/kWh</span>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
             <div className="text-xs text-zinc-400">Päeva madalaim</div>
-            <div className="mt-1 text-2xl font-semibold text-zinc-50">
+            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
               {statsToday ? fmtSnt(statsToday.min, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
             <div className="text-xs text-zinc-400">Päeva kõrgeim</div>
-            <div className="mt-1 text-2xl font-semibold text-zinc-50">
+            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
               {statsToday ? fmtSnt(statsToday.max, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
             <div className="text-xs text-zinc-400">Päeva keskmine</div>
-            <div className="mt-1 text-2xl font-semibold text-zinc-50">
+            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
               {statsToday ? fmtSnt(statsToday.mean, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
             <div className="text-xs text-zinc-400">Homme (keskmine)</div>
-            <div className="mt-1 text-2xl font-semibold text-zinc-50">
+            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
               {statsTomorrow ? fmtSnt(statsTomorrow.mean, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
             </div>
           </div>
         </div>
 
         {/* B) Main chart */}
-        <div className="mt-6 card rounded-3xl p-6">
+        <div className="mt-5 card rounded-3xl p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <div className="text-sm font-semibold text-zinc-50">Hinnagraafik</div>
