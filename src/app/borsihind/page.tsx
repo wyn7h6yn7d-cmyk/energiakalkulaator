@@ -38,7 +38,7 @@ export default async function BorsihindPage() {
       </div>
 
       <main className="relative mx-auto w-full max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
-        <header className="glass-panel rounded-3xl p-6 sm:p-10">
+        <header className="glass-panel rounded-3xl p-5 sm:p-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-xs tracking-wide text-emerald-200">
@@ -48,7 +48,7 @@ export default async function BorsihindPage() {
                 Börsihind
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-zinc-300 sm:text-base">
-                Siin näed hetkehinda, päeva kokkuvõtet ja soovitusi, millal on mõistlikum tarbimist nihutada.
+                Andmerikas vaade Eesti (EE) börsihinnale: kokkuvõte, graafik, tabel ja olulisemad aknad.
               </p>
             </div>
             <Link href="/kalkulaatorid" className="btn-ghost inline-flex">

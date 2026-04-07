@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
@@ -44,6 +44,11 @@ export const metadata: Metadata = {
     title: "Energiakalkulaator",
     description: "Päikesejaama, VPP, elektripaketi, EV laadimise ja peak shaving kalkulaatorid ühes kohas.",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

@@ -29,14 +29,14 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/80 backdrop-blur-lg">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2 sm:gap-4 sm:px-6 sm:py-3 lg:px-8">
         <Link
           href="/"
           className="flex min-w-0 items-center gap-3"
           onClick={() => setMobileOpen(false)}
           aria-label="Energiakalkulaator avalehele"
         >
-          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-emerald-300/55 shadow-[0_0_26px_rgba(16,185,129,0.22)] sm:h-14 sm:w-14">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-emerald-300/55 shadow-[0_0_26px_rgba(16,185,129,0.22)] sm:h-14 sm:w-14">
             <Image
               src="/logo.png"
               alt="Energiakalkulaator"
@@ -51,7 +51,7 @@ export function SiteHeader() {
           </div>
           <div className="min-w-0 leading-tight">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="text-[15px] font-semibold leading-tight tracking-tight text-zinc-50 sm:text-lg">
+              <div className="text-[14px] font-semibold leading-tight tracking-tight text-zinc-50 sm:text-lg">
                 Energiakalkulaator
               </div>
               <LivePriceBadge />
@@ -93,7 +93,7 @@ export function SiteHeader() {
           </button>
           <Link
             href="/kalkulaatorid"
-            className="btn-glow inline-flex whitespace-nowrap px-4 py-2.5 sm:px-[1.1rem] sm:py-[0.7rem]"
+            className="btn-glow inline-flex whitespace-nowrap px-3 py-2 sm:px-[1.1rem] sm:py-[0.7rem]"
           >
             Proovi
           </Link>
