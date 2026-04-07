@@ -34,9 +34,8 @@ export function SiteHeader() {
         >
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-400 shadow-[0_0_18px_rgba(16,185,129,0.22)]" />
           <div className="min-w-0 leading-tight">
-            <div className="text-sm font-semibold tracking-tight text-zinc-50">
-              <span className="sm:hidden">Energia</span>
-              <span className="hidden sm:inline">Energiakalkulaator</span>
+            <div className="text-[13px] font-semibold leading-tight tracking-tight text-zinc-50 sm:text-sm">
+              Energiakalkulaator
             </div>
             <div className="hidden truncate text-xs text-zinc-400 sm:block">Rohelise energia otsused</div>
           </div>
