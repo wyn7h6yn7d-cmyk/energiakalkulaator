@@ -23,9 +23,12 @@ export const metadata: Metadata = {
     canonical: "https://energiakalkulaator.ee",
   },
   icons: {
-    icon: [{ url: "/icon", type: "image/png" }],
-    shortcut: "/icon",
-    apple: "/icon",
+    icon: [
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png", sizes: "48x48" },
+    ],
+    shortcut: "/icon.png",
+    apple: [{ url: "/icon.png", sizes: "180x180" }],
   },
   openGraph: {
     title: "Energiakalkulaator",
