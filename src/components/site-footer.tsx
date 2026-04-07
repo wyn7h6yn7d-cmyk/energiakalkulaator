@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const calcLinks = [
   { href: "/kalkulaatorid/paikesejaam", label: "Päikesejaama tasuvus" },
@@ -24,7 +25,16 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-12 lg:px-8">
         <div className="lg:col-span-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-400 shadow-[0_0_22px_rgba(16,185,129,0.25)]" />
+            <div className="relative h-10 w-10 overflow-hidden rounded-2xl border border-emerald-300/45 shadow-[0_0_24px_rgba(16,185,129,0.20)]">
+              <Image
+                src="/logo.png"
+                alt="Energiakalkulaator"
+                fill
+                sizes="40px"
+                quality={100}
+                className="object-cover"
+              />
+            </div>
             <div>
               <div className="text-sm font-semibold text-zinc-50">Energiakalkulaator</div>
               <div className="text-xs text-zinc-400">

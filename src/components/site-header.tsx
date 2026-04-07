@@ -38,7 +38,8 @@ export function SiteHeader() {
               src="/logo.png"
               alt="Energiakalkulaator"
               fill
-              sizes="44px"
+              sizes="(min-width: 640px) 44px, 40px"
+              quality={100}
               className="object-cover"
               priority
             />
