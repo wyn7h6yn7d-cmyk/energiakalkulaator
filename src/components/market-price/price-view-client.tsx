@@ -447,8 +447,8 @@ export function PriceViewClient({
               Eesti (EE) turuhind Eleringi andmetel. Vaikimisi näitame hinna käibemaksuga (24%).
             </p>
           </div>
-          <div className="flex min-w-0 flex-wrap gap-2">
-            <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1">
+          <div className="grid min-w-0 gap-2 sm:flex sm:flex-wrap">
+            <div className="flex w-full items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:justify-start">
               <button
                 type="button"
                 className={`rounded-xl px-3 py-2 text-sm ${!vat ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
@@ -465,7 +465,7 @@ export function PriceViewClient({
               </button>
             </div>
 
-            <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1">
+            <div className="flex w-full items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:justify-start">
               <button
                 type="button"
                 className={`rounded-xl px-3 py-2 text-sm ${effectiveInterval === 15 ? "bg-emerald-400/15 text-zinc-50 ring-1 ring-emerald-300/20" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
@@ -484,7 +484,7 @@ export function PriceViewClient({
               </button>
             </div>
 
-            <div className="flex max-w-full items-center gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02] p-1 px-1 [-webkit-overflow-scrolling:touch]">
+            <div className="grid w-full grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:grid-cols-3">
               <button
                 type="button"
                 className={`rounded-xl px-3 py-2 text-sm ${period === "today" ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
@@ -511,35 +511,42 @@ export function PriceViewClient({
         </div>
 
         {/* A) Summary ribbon */}
-        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-            <div className="text-xs text-zinc-400">{nowCard?.label ?? "Praegune hind"}</div>
-            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
-              {nowCard ? fmtSnt(nowCard.eurPerKwh, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt/kWh</span>
+        <div className="mt-5 -mx-1 overflow-x-auto px-1 [-webkit-overflow-scrolling:touch] lg:mx-0 lg:overflow-visible lg:px-0">
+          <div className="flex min-w-max gap-3 lg:grid lg:min-w-0 lg:grid-cols-5">
+            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+              <div className="text-xs text-zinc-400">{nowCard?.label ?? "Praegune hind"}</div>
+              <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
+                {nowCard ? fmtSnt(nowCard.eurPerKwh, vat) : "—"}{" "}
+                <span className="text-sm font-semibold text-zinc-300">snt/kWh</span>
+              </div>
             </div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-            <div className="text-xs text-zinc-400">Päeva madalaim</div>
-            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
-              {statsToday ? fmtSnt(statsToday.min, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
+            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+              <div className="text-xs text-zinc-400">Päeva madalaim</div>
+              <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
+                {statsToday ? fmtSnt(statsToday.min, vat) : "—"}{" "}
+                <span className="text-sm font-semibold text-zinc-300">snt</span>
+              </div>
             </div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-            <div className="text-xs text-zinc-400">Päeva kõrgeim</div>
-            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
-              {statsToday ? fmtSnt(statsToday.max, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
+            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+              <div className="text-xs text-zinc-400">Päeva kõrgeim</div>
+              <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
+                {statsToday ? fmtSnt(statsToday.max, vat) : "—"}{" "}
+                <span className="text-sm font-semibold text-zinc-300">snt</span>
+              </div>
             </div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-            <div className="text-xs text-zinc-400">Päeva keskmine</div>
-            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
-              {statsToday ? fmtSnt(statsToday.mean, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
+            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+              <div className="text-xs text-zinc-400">Päeva keskmine</div>
+              <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
+                {statsToday ? fmtSnt(statsToday.mean, vat) : "—"}{" "}
+                <span className="text-sm font-semibold text-zinc-300">snt</span>
+              </div>
             </div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-            <div className="text-xs text-zinc-400">Homme (keskmine)</div>
-            <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
-              {statsTomorrow ? fmtSnt(statsTomorrow.mean, vat) : "—"} <span className="text-sm font-semibold text-zinc-300">snt</span>
+            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+              <div className="text-xs text-zinc-400">Homme (keskmine)</div>
+              <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
+                {statsTomorrow ? fmtSnt(statsTomorrow.mean, vat) : "—"}{" "}
+                <span className="text-sm font-semibold text-zinc-300">snt</span>
+              </div>
             </div>
           </div>
         </div>
