@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { calculateComparison } from "@/lib/calculator";
-import { copy, getStoredLocale, persistLocale, type Locale } from "@/lib/i18n";
 import { CalculatorInput } from "@/types/calculator";
 
 /** Igakuuva alguses: nullid / tühjad — ei salvestata brauserisse, iga refresh sama puhas lähtepunkt. */
@@ -45,45 +44,11 @@ const defaults: CalculatorInput = {
 
 type NordPoolState = { loading: boolean; message: string; source: "live" | "fallback" | "none" };
 
-function formatNum(value: number, maxDigits: number, locale: Locale): string {
-  return new Intl.NumberFormat(locale === "en" ? "en-GB" : "et-EE", {
+function formatNum(value: number, maxDigits: number): string {
+  return new Intl.NumberFormat("et-EE", {
     maximumFractionDigits: maxDigits,
     minimumFractionDigits: maxDigits,
   }).format(value);
-}
-
-function FlagEE({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="24"
-      height="18"
-      viewBox="0 0 36 24"
-      aria-hidden
-    >
-      <rect width="36" height="8" fill="#0072CE" rx="2" />
-      <rect y="8" width="36" height="8" fill="#000" />
-      <rect y="16" width="36" height="8" fill="#fff" rx="2" />
-    </svg>
-  );
-}
-
-function FlagGB({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="24"
-      height="18"
-      viewBox="0 0 60 40"
-      aria-hidden
-    >
-      <rect width="60" height="40" rx="2" fill="#012169" />
-      <path stroke="#fff" strokeWidth="10" d="M0,0 L60,40 M60,0 L0,40" />
-      <path stroke="#C8102E" strokeWidth="6" d="M0,0 L60,40 M60,0 L0,40" />
-      <path stroke="#fff" strokeWidth="14" d="M30,0 V40 M0,20 H60" />
-      <path stroke="#C8102E" strokeWidth="8" d="M30,0 V40 M0,20 H60" />
-    </svg>
-  );
 }
 
 function Field({
@@ -123,7 +88,6 @@ function toNumber(value: string): number {
 export function SolarCalculatorPage() {
   const calculatorRef = useRef<HTMLElement | null>(null);
   // Vormi ei salvestata brauserisse — iga külastus/uuendus on puhas sessioon (teised ei näe sinu numbreid kunagi serveri poolelt).
-  const [lang, setLang] = useState<Locale>("et");
   const [input, setInput] = useState<CalculatorInput>(defaults);
   const [errors, setErrors] = useState<string[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -135,8 +99,6 @@ export function SolarCalculatorPage() {
   });
   const [result, setResult] = useState(() => calculateComparison(defaults));
 
-  const t = copy[lang];
-
   useEffect(() => {
     try {
       // Eemalda vana vormi võti (varem salvestatud lokaalselt) — et ei tekiks muljet „jagatud andmetest“.
@@ -144,32 +106,24 @@ export function SolarCalculatorPage() {
     } catch {
       /* ignore */
     }
-    queueMicrotask(() => setLang(getStoredLocale()));
   }, []);
-
-  useEffect(() => {
-    persistLocale(lang);
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = lang === "en" ? "en" : "et";
-      document.title = t.htmlTitle;
-    }
-  }, [lang, t.htmlTitle]);
 
   const draftResult = useMemo(() => calculateComparison(input), [input]);
 
   const validationErrors = useMemo(() => {
     const list: string[] = [];
-    if (input.annualProductionKwh <= 0) list.push(t.errProduction);
-    if (input.annualConsumptionKwh <= 0) list.push(t.errConsumption);
-    if (input.manualSpotPrice < 0) list.push(t.errPrice);
-    if (input.hasBattery && input.batteryCapacityKwh <= 0) list.push(t.errBattery);
+    if (input.annualProductionKwh <= 0) list.push("Aastane tootmine peab olema suurem kui 0.");
+    if (input.annualConsumptionKwh <= 0) list.push("Aastane tarbimine peab olema suurem kui 0.");
+    if (input.manualSpotPrice < 0) list.push("Elektri hind ei tohi olla negatiivne.");
+    if (input.hasBattery && input.batteryCapacityKwh <= 0)
+      list.push("Akuga stsenaariumis lisa aku mahtuvus.");
     return list;
-  }, [input, t]);
+  }, [input]);
 
   const fetchNordPool = async () => {
-    setNordPoolState({ loading: true, message: copy[lang].nordLoading, source: "none" });
+    setNordPoolState({ loading: true, message: "Laen Nord Pool hinda...", source: "none" });
     try {
-      const response = await fetch(`/api/nordpool?lang=${lang}`);
+      const response = await fetch(`/api/nordpool?lang=et`);
       const data = (await response.json()) as {
         source: "live" | "fallback";
         averagePrice: number;
@@ -180,7 +134,7 @@ export function SolarCalculatorPage() {
     } catch {
       setNordPoolState({
         loading: false,
-        message: copy[lang].nordFetchFailed,
+        message: "Börsihinna laadimine ebaõnnestus. Kasuta käsitsi sisestust.",
         source: "fallback",
       });
     }
@@ -191,9 +145,9 @@ export function SolarCalculatorPage() {
     if (input.priceSource !== "nordpool") return;
     let cancelled = false;
     const run = async () => {
-      setNordPoolState({ loading: true, message: copy[lang].nordLoading, source: "none" });
+      setNordPoolState({ loading: true, message: "Laen Nord Pool hinda...", source: "none" });
       try {
-        const response = await fetch(`/api/nordpool?lang=${lang}`);
+        const response = await fetch(`/api/nordpool?lang=et`);
         const data = (await response.json()) as {
           source: "live" | "fallback";
           averagePrice: number;
@@ -206,7 +160,7 @@ export function SolarCalculatorPage() {
         if (cancelled) return;
         setNordPoolState({
           loading: false,
-          message: copy[lang].nordFetchFailed,
+          message: "Börsihinna laadimine ebaõnnestus. Kasuta käsitsi sisestust.",
           source: "fallback",
         });
       }
@@ -215,7 +169,7 @@ export function SolarCalculatorPage() {
     return () => {
       cancelled = true;
     };
-  }, [input.priceSource, lang]);
+  }, [input.priceSource]);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -240,79 +194,43 @@ export function SolarCalculatorPage() {
     1,
   );
 
-  const fmtEur = (value: number) => `${formatNum(value, 0, lang)} €`;
-  const fmtKwh = (value: number) => `${formatNum(value, 0, lang)} kWh`;
+  const fmtEur = (value: number) => `${formatNum(value, 0)} €`;
+  const fmtKwh = (value: number) => `${formatNum(value, 0)} kWh`;
   const isEmptyInputs =
     input.annualConsumptionKwh <= 0 || (input.annualProductionKwh <= 0 && input.pvPowerKw <= 0);
 
   return (
-    <div className="relative overflow-hidden pb-28 text-zinc-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(0,229,255,0.18),transparent_35%),radial-gradient(circle_at_80%_20%,rgba(72,112,255,0.2),transparent_34%),radial-gradient(circle_at_50%_90%,rgba(0,255,153,0.14),transparent_38%)]" />
-
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/85 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-end gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <span className="sr-only">Keel / Language</span>
-          <button
-            type="button"
-            onClick={() => setLang("et")}
-            className={`flex items-center justify-center rounded-lg border p-1.5 transition-colors ${
-              lang === "et"
-                ? "border-cyan-400/60 bg-cyan-400/15 shadow-[0_0_16px_rgba(34,211,238,0.2)]"
-                : "border-white/10 bg-white/5 hover:border-white/20"
-            }`}
-            aria-label="Eesti keel"
-            aria-pressed={lang === "et"}
-          >
-            <FlagEE />
-          </button>
-          <button
-            type="button"
-            onClick={() => setLang("en")}
-            className={`flex items-center justify-center rounded-lg border p-1.5 transition-colors ${
-              lang === "en"
-                ? "border-cyan-400/60 bg-cyan-400/15 shadow-[0_0_16px_rgba(34,211,238,0.2)]"
-                : "border-white/10 bg-white/5 hover:border-white/20"
-            }`}
-            aria-label="English"
-            aria-pressed={lang === "en"}
-          >
-            <FlagGB />
-          </button>
-        </div>
-      </header>
-
-      <main className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pb-8 pt-6 sm:px-6 lg:px-8">
-        <section className="glass-panel mt-4 rounded-3xl p-7 sm:p-10">
-          <p className="mb-4 inline-flex rounded-full border border-cyan-300/25 bg-cyan-400/10 px-3 py-1 text-xs tracking-wide text-cyan-200">
-            WattWise
+    <div className="glass-panel rounded-3xl p-6 sm:p-8">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-zinc-50">Päikesejaama tasuvus</h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            Sisesta põhiandmed ja saa selge ülevaade säästust, omakasutusest ja rahavoost.
           </p>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-tight sm:text-5xl">WattWise</h1>
-          <p className="mt-4 max-w-2xl text-zinc-300">{t.heroIntro}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" className="btn-glow" onClick={scrollToCalculator}>
-              {t.startCalc}
-            </button>
-          </div>
-        </section>
+        </div>
+        <button type="button" className="btn-ghost" onClick={scrollToCalculator}>
+          Kerige sisendite juurde
+        </button>
+      </div>
 
         <section
           id="kalkulaator"
           ref={calculatorRef}
-          className={`glass-panel rounded-3xl p-6 transition-all duration-300 sm:p-8 ${
+          className={`rounded-3xl border border-white/10 bg-white/[0.02] p-6 transition-all duration-300 sm:p-8 ${
             highlightCalculator ? "ring-2 ring-cyan-300/70 shadow-[0_0_40px_rgba(34,211,238,0.25)]" : ""
           }`}
         >
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-            <h2 className="text-2xl font-semibold">{t.calcTitle}</h2>
-            <p className="text-sm text-zinc-400">{t.calcSubtitle}</p>
+            <h3 className="text-xl font-semibold text-zinc-50">Sisendid</h3>
+            <p className="text-sm text-zinc-400">Lihtsustatud vaade: ainult kõige olulisemad sisendid.</p>
           </div>
 
           <form className="grid gap-6" onSubmit={onSubmit}>
             <div className="card-grid">
               <article className="card">
-                <h3 className="section-title">{t.sectionSystem}</h3>
+                <h4 className="section-title">1) Süsteem ja tarbimine</h4>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t.labelPvKw}>
+                  <Field label="Päikesepargi võimsus (kW)">
                     <input
                       className="input"
                       type="text"
@@ -323,7 +241,10 @@ export function SolarCalculatorPage() {
                       placeholder="nt 12"
                     />
                   </Field>
-                  <Field label={t.labelAnnualProd} hint={t.hintAnnualProd}>
+                  <Field
+                    label="Aastane tootmine (kWh)"
+                    hint="Kui täpset toodangut ei tea, kasuta hinnangut 850–1000 kWh per kW aastas."
+                  >
                     <input
                       className="input"
                       type="text"
@@ -334,7 +255,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 11000"
                     />
                   </Field>
-                  <Field label={t.labelConsumption}>
+                  <Field label="Aastane elektritarbimine (kWh)">
                     <input
                       className="input"
                       type="text"
@@ -348,13 +269,13 @@ export function SolarCalculatorPage() {
                       placeholder="nt 9000"
                     />
                   </Field>
-                  <Field label={t.labelBattery}>
+                  <Field label="Aku olemasolu">
                     <select className="input" value={input.hasBattery ? "jah" : "ei"} onChange={(e) => setInput({ ...input, hasBattery: e.target.value === "jah" })}>
-                      <option value="jah">{t.yes}</option>
-                      <option value="ei">{t.no}</option>
+                      <option value="jah">Jah</option>
+                      <option value="ei">Ei</option>
                     </select>
                   </Field>
-                  <Field label={t.labelBatteryKwh} hint={t.hintBatteryKwh}>
+                  <Field label="Aku mahtuvus (kWh)" hint="Täida ainult siis, kui aku on olemas.">
                     <input
                       className="input"
                       type="text"
@@ -369,16 +290,16 @@ export function SolarCalculatorPage() {
               </article>
 
               <article className="card">
-                <h3 className="section-title">{t.sectionPrice}</h3>
+                <h4 className="section-title">2) Elektrihind</h4>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t.labelPriceSource}>
+                  <Field label="Elektrihinna allikas">
                     <select className="input" value={input.priceSource} onChange={(e) => setInput({ ...input, priceSource: e.target.value as CalculatorInput["priceSource"] })}>
-                      <option value="manual">{t.priceManual}</option>
-                      <option value="nordpool">{t.priceNordpool}</option>
+                      <option value="manual">Käsitsi sisestus</option>
+                      <option value="nordpool">Nord Pool keskmine</option>
                     </select>
                   </Field>
                   {input.priceSource === "manual" ? (
-                    <Field label={t.labelSpot}>
+                    <Field label="Elektri börsihind (€/kWh)">
                       <input
                         className="input"
                         type="text"
@@ -390,7 +311,7 @@ export function SolarCalculatorPage() {
                       />
                     </Field>
                   ) : (
-                    <Field label={t.labelNordAvg}>
+                    <Field label="Nord Pool keskmine (€/kWh)">
                       <div className="flex gap-2">
                         <input
                           className="input flex-1"
@@ -402,12 +323,12 @@ export function SolarCalculatorPage() {
                           placeholder="nt 0,10"
                         />
                         <button type="button" className="btn-ghost min-w-32 shrink-0" onClick={fetchNordPool}>
-                          {nordPoolState.loading ? t.btnLoading : t.btnRefresh}
+                          {nordPoolState.loading ? "Laen..." : "Uuenda"}
                         </button>
                       </div>
                     </Field>
                   )}
-                  <Field label={t.labelGridFee}>
+                  <Field label="Võrgutasu ja muud tasud (€/kWh)">
                     <input
                       className="input"
                       type="text"
@@ -418,7 +339,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 0,05"
                     />
                   </Field>
-                  <Field label={t.labelSellBack}>
+                  <Field label="Müügi hind võrku (€/kWh)">
                     <input
                       className="input"
                       type="text"
@@ -429,7 +350,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 0,06"
                     />
                   </Field>
-                  <Field label={t.labelMargin}>
+                  <Field label="Margin / teenustasu (€/kWh)">
                     <input
                       className="input"
                       type="text"
@@ -446,14 +367,14 @@ export function SolarCalculatorPage() {
                 ) : null}
                 <p className="mt-2 text-xs text-zinc-400">
                   Efektiivne ostuhind = börsihind + võrgutasu + margin. Praegu:{" "}
-                  <span className="font-medium text-zinc-200">{formatNum(draftResult.effectiveEnergyPrice, 3, lang)} €/kWh</span>
+                  <span className="font-medium text-zinc-200">{formatNum(draftResult.effectiveEnergyPrice, 3)} €/kWh</span>
                 </p>
               </article>
 
               <article className="card">
-                <h3 className="section-title">{t.sectionInvest}</h3>
+                <h4 className="section-title">3) Investeering</h4>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t.labelPvCost}>
+                  <Field label="PV süsteemi maksumus (€)">
                     <input
                       className="input"
                       type="text"
@@ -464,7 +385,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 12000"
                     />
                   </Field>
-                  <Field label={t.labelBatteryCost}>
+                  <Field label="Aku maksumus (€)">
                     <input
                       className="input"
                       type="text"
@@ -475,7 +396,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 6000"
                     />
                   </Field>
-                  <Field label={t.labelExtraInstall}>
+                  <Field label="Muud paigalduskulud (€)">
                     <input
                       className="input"
                       type="text"
@@ -486,7 +407,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 1500"
                     />
                   </Field>
-                  <Field label={t.labelSupport}>
+                  <Field label="Toetus (€)">
                     <input
                       className="input"
                       type="text"
@@ -497,7 +418,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 1000"
                     />
                   </Field>
-                  <Field label={t.labelMaintenance}>
+                  <Field label="Hoolduskulu aastas (€)">
                     <input
                       className="input"
                       type="text"
@@ -508,7 +429,7 @@ export function SolarCalculatorPage() {
                       placeholder="nt 200"
                     />
                   </Field>
-                  <Field label={t.labelPeriodYears}>
+                  <Field label="Arvutusperiood (aastat)">
                     <select className="input" value={input.periodYears} onChange={(e) => setInput({ ...input, periodYears: Number(e.target.value) as CalculatorInput["periodYears"] })}>
                       <option value={10}>10</option>
                       <option value={15}>15</option>
@@ -517,7 +438,10 @@ export function SolarCalculatorPage() {
                     </select>
                   </Field>
                 </div>
-                <p className="mt-3 text-xs text-zinc-400">{t.investFootnote}</p>
+                <p className="mt-3 text-xs text-zinc-400">
+                  Täpsemad tehnilised eeldused (suund, varjutus, kasutegur, degradatsioon, hinnakasv)
+                  on seadistatud konservatiivsete vaikimisi väärtustega.
+                </p>
               </article>
             </div>
 
@@ -529,7 +453,7 @@ export function SolarCalculatorPage() {
               </div>
             ) : null}
             <button type="submit" className="btn-glow w-fit">
-              {isCalculating ? t.submitUpdating : t.submitIdle}
+              {isCalculating ? "Arvutan..." : "Uuenda tulemused"}
             </button>
             {isCalculating ? (
               <div
@@ -543,79 +467,84 @@ export function SolarCalculatorPage() {
           </form>
         </section>
 
-        <section className="glass-panel rounded-3xl p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold">{t.resultsTitle}</h2>
+        <section className="mt-6 rounded-3xl border border-white/10 bg-white/[0.02] p-6 sm:p-8">
+          <h3 className="text-2xl font-semibold text-zinc-50">Tulemused</h3>
           <p className="mt-2 text-zinc-300">
-            {t.effectivePrice} <strong>{formatNum(result.effectiveEnergyPrice, 3, lang)} €/kWh</strong>
+            Efektiivne elektri hind arvutuses:{" "}
+            <strong>{formatNum(result.effectiveEnergyPrice, 3)} €/kWh</strong>
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="result-card">
-              <p>{t.kpiAnnualSaving}</p>
+              <p>Hinnanguline aastane sääst</p>
               <strong>{fmtEur(result.selected.annualSavingsEur)}</strong>
             </div>
             <div className="result-card">
-              <p>{t.kpiPayback}</p>
+              <p>Lihtne tasuvusaeg</p>
               <strong>
                 {Number.isFinite(result.paybackYears)
-                  ? `${formatNum(result.paybackYears, 1, lang)} ${t.yearsSuffix}`
-                  : t.paybackNa}
+                  ? `${result.paybackYears.toFixed(1)} aastat`
+                  : "Pole võimalik arvutada"}
               </strong>
             </div>
             <div className="result-card">
-              <p>{t.kpiSelfConsumption}</p>
-              <strong>{formatNum(result.selected.selfConsumptionRatePercent, 1, lang)}%</strong>
+              <p>Omakasutus</p>
+              <strong>{formatNum(result.selected.selfConsumptionRatePercent, 1)}%</strong>
             </div>
             <div className="result-card">
-              <p>{t.kpiExport}</p>
+              <p>Võrku müük</p>
               <strong>{fmtKwh(result.selected.exportedKwh)}</strong>
             </div>
             <div className="result-card">
-              <p>{t.kpiTotalPeriod}</p>
+              <p>Kogutulu perioodis</p>
               <strong>{fmtEur(result.selected.totalNetBenefitPeriodEur)}</strong>
             </div>
             <div className="result-card">
-              <p>{t.kpiBatteryValue}</p>
+              <p>Aku lisaväärtus</p>
               <strong>{fmtEur(result.batteryAddedValuePeriodEur)}</strong>
             </div>
           </div>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
             <article className="card">
-              <h3 className="section-title">{t.compareTitle}</h3>
+              <h4 className="section-title">Ilma akuta vs akuga</h4>
               <div className="grid gap-3 text-sm">
                 <div className="compare-row">
-                  <span className="compare-label">{t.compareNoBattery}</span>
+                  <span className="compare-label">Ilma akuta aastane netokasu</span>
                   <strong>{fmtEur(result.withoutBattery.annualNetBenefitEur)}</strong>
                 </div>
                 <div className="compare-row">
-                  <span className="compare-label">{t.compareWithBattery}</span>
+                  <span className="compare-label">Akuga aastane netokasu</span>
                   <strong>{fmtEur(result.withBattery.annualNetBenefitEur)}</strong>
                 </div>
                 <div className="compare-row">
-                  <span className="compare-label">{t.compareGridReduction}</span>
-                  <strong>{formatNum(result.withBattery.gridDependenceReductionPercent, 1, lang)}%</strong>
+                  <span className="compare-label">Võrgu sõltuvuse vähenemine (akuga)</span>
+                  <strong>{formatNum(result.withBattery.gridDependenceReductionPercent, 1)}%</strong>
                 </div>
               </div>
             </article>
 
             <article className="card">
-              <h3 className="section-title">{t.verdictTitle}</h3>
+              <h4 className="section-title">Kas see investeering tundub mõistlik?</h4>
               <p className="rounded-2xl border border-cyan-300/25 bg-cyan-400/10 p-4 text-zinc-100">
-                {t.interpret[result.interpretationKind]}{" "}
-                {t.verdictCo2Suffix}{" "}
-                <strong>{formatNum(result.selected.co2ReductionKgYear, 0, lang)} kg</strong>.
+                Tasuvuse hinnang: <strong>{result.interpretationKind}</strong>. Sinu valitud stsenaariumis
+                on hinnanguline aastane CO2 vähenemine{" "}
+                <strong>{formatNum(result.selected.co2ReductionKgYear, 0)} kg</strong>.
               </p>
             </article>
           </div>
 
           <article className="card mt-6 overflow-hidden">
-            <h3 className="section-title">{t.chartTitle}</h3>
+            <h4 className="section-title">Rahavoo prognoos aastate lõikes</h4>
             {result.selected.cashflowByYear.length === 0 ? (
-              <p className="mt-3 text-sm text-zinc-400">{t.chartEmpty}</p>
+              <p className="mt-3 text-sm text-zinc-400">
+                Rahavoogu ei saanud arvutada. Kontrolli sisestatud andmeid.
+              </p>
             ) : (
               <>
-                <p className="mt-2 px-0 text-xs text-zinc-500 md:hidden">{t.chartScrollHint}</p>
+                <p className="mt-2 px-0 text-xs text-zinc-500 md:hidden">
+                  Mobiilis: libista horisontaalselt, et näha kõiki aastaid.
+                </p>
                 <div className="relative mt-3 w-full">
                   <div className="-mx-1 overflow-x-auto overflow-y-visible px-1 pb-2 [-webkit-overflow-scrolling:touch] sm:mx-0 sm:px-0 md:overflow-visible">
                     <div className="flex min-h-[13.5rem] min-w-max items-end gap-1.5 pb-1 sm:gap-2 md:min-h-0 md:min-w-0 md:w-full md:justify-between md:gap-2">
@@ -628,7 +557,7 @@ export function SolarCalculatorPage() {
                           className="group relative flex w-7 shrink-0 flex-col items-stretch gap-1 md:min-w-0 md:flex-1"
                         >
                           <div className="pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-cyan-300/30 bg-zinc-950/95 px-2 py-1 text-[11px] font-medium text-cyan-200 opacity-0 shadow-[0_0_20px_rgba(34,211,238,0.2)] transition-opacity duration-150 group-hover:opacity-100 sm:block">
-                            {formatNum(value, 0, lang)} €
+                            {formatNum(value, 0)} €
                           </div>
                           <div
                             className="box-border flex w-full flex-col justify-end rounded-md bg-white/[0.06] px-0.5 pt-1"
@@ -637,8 +566,8 @@ export function SolarCalculatorPage() {
                             <div
                               className="w-full shrink-0 rounded bg-gradient-to-t from-cyan-500/80 to-blue-400/90"
                               style={{ height: barPx }}
-                              aria-label={`${t.yearAria} ${index + 1}`}
-                              title={`${formatNum(value, 0, lang)} €`}
+                              aria-label={`Aasta ${index + 1}`}
+                              title={`${formatNum(value, 0)} €`}
                             />
                           </div>
                           <span className="text-center text-[10px] leading-none text-zinc-400 sm:text-[11px]">
@@ -655,10 +584,10 @@ export function SolarCalculatorPage() {
           </article>
 
           <article className="card mt-6">
-            <h3 className="section-title">{t.energyFlowsTitle}</h3>
+            <h4 className="section-title">Energiavood</h4>
             <div className="mt-3 grid gap-2 text-sm">
               <div>
-                <p className="mb-1 text-zinc-300">{t.energySelf}</p>
+                <p className="mb-1 text-zinc-300">Omakasutatud energia</p>
                 <div className="h-3 rounded-full bg-zinc-800">
                   <div
                     className="h-full rounded-full bg-cyan-400"
@@ -671,7 +600,7 @@ export function SolarCalculatorPage() {
                 </div>
               </div>
               <div>
-                <p className="mb-1 text-zinc-300">{t.energyExport}</p>
+                <p className="mb-1 text-zinc-300">Võrku müüdud energia</p>
                 <div className="h-3 rounded-full bg-zinc-800">
                   <div
                     className="h-full rounded-full bg-violet-400"
@@ -692,38 +621,15 @@ export function SolarCalculatorPage() {
           </article>
 
           <article className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300">
-            <h3 className="mb-2 font-medium text-zinc-100">{t.assumptionsTitle}</h3>
+            <h4 className="mb-2 font-medium text-zinc-100">Arvutuse alused</h4>
             <ul className="list-disc space-y-1 pl-5">
-              <li>{t.assumption1}</li>
-              <li>{t.assumption2}</li>
-              <li>{t.assumption3}</li>
-              <li>{t.assumption4}</li>
+              <li>Tootmist korrigeeritakse suuna, varjutuse, kasuteguri ja hooajalisuse teguriga.</li>
+              <li>Akuga stsenaariumis kasvab omakasutus aku kasutatava mahuga.</li>
+              <li>Rahavoog arvestab elektrihinna kasvu, süsteemi degradatsiooni ja diskontomäära.</li>
+              <li>Nord Pool tõrke korral kasutatakse varuandmeid ning saad alati käsitsi hinda muuta.</li>
             </ul>
           </article>
         </section>
-
-        <section className="glass-panel rounded-3xl p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold">{t.contactTitle}</h2>
-          <p className="mt-2 text-zinc-300">
-            {t.contactBody}{" "}
-            <a className="text-cyan-300 underline decoration-cyan-300/60 underline-offset-4" href="mailto:kennethalto95@gmail.com">
-              kennethalto95@gmail.com
-            </a>
-          </p>
-        </section>
-
-        <section className="glass-panel rounded-3xl p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold">{t.faqTitle}</h2>
-          <div className="mt-4 grid gap-3">
-            {t.faq.map(({ q, a }) => (
-              <details key={q} className="faq-details rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-                <summary className="faq-summary font-medium text-zinc-100">{q}</summary>
-                <p className="mt-2 pl-8 text-sm leading-relaxed text-zinc-300 md:text-base">{a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-      </main>
     </div>
   );
 }

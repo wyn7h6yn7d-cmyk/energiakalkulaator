@@ -14,9 +14,10 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(145deg, #16a34a 0%, #15803d 100%)",
+          background: "linear-gradient(145deg, #10b981 0%, #0ea5a4 100%)",
           borderRadius: 8,
-          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.2)",
+          boxShadow:
+            "inset 0 0 0 1px rgba(255,255,255,0.22), 0 0 18px rgba(16,185,129,0.25)",
         }}
       >
         <span
@@ -30,7 +31,7 @@ export default function Icon() {
             marginTop: -1,
           }}
         >
-          W
+          E
         </span>
       </div>
     ),

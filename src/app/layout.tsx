@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from "@vercel/analytics/next";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -13,13 +15,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WattWise - päikesekalkulaator",
+  title: "Energiakalkulaator - rohelise energia tasuvus",
   description:
-    "Arvuta päikesepargi ja aku investeeringu tasuvus Eesti tingimustes. Võrdle akuga ja akuta stsenaariume, kasuta Nord Pool hinnaloogikat ning saa selge ülevaade säästust.",
+    "Päikesejaama, VPP, elektripaketi, EV laadimise ja peak shaving kalkulaatorid ühes kohas. Arvuta tasuvus, sääst ja rahavoog Eesti tingimustes.",
+  metadataBase: new URL("https://energiakalkulaator.ee"),
+  alternates: {
+    canonical: "https://energiakalkulaator.ee",
+  },
   icons: {
     icon: [{ url: "/icon", type: "image/png" }],
     shortcut: "/icon",
     apple: "/icon",
+  },
+  openGraph: {
+    title: "Energiakalkulaator",
+    description:
+      "Arvuta energiaotsuste tasuvus targemalt. Päikesejaama, VPP, elektripaketi, EV laadimise ja peak shaving kalkulaatorid ühes kohas.",
+    url: "https://energiakalkulaator.ee",
+    siteName: "Energiakalkulaator",
+    locale: "et_EE",
+    type: "website",
   },
 };
 
@@ -34,9 +49,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-  {children}
-  <Analytics />
-</body>
+        <SiteHeader />
+        <div className="flex-1">{children}</div>
+        <SiteFooter />
+        <Analytics />
+      </body>
     </html>
   );
 }
