@@ -5,6 +5,8 @@ import { canDownloadPdf, canViewFullAnalysis } from "@/lib/unlock";
 import { useProjectUnlock } from "@/lib/useProjectUnlock";
 import { PaywallCard } from "@/components/paywall-card";
 import { FEATURES } from "@/lib/features";
+import { buildCumulative, irr, npv } from "@/lib/calculators/finance";
+import { MiniCashflowChart } from "@/components/charts/mini-cashflow-chart";
 
 function num(v: string): number {
   const n = Number(v.replace(",", "."));
@@ -20,19 +22,74 @@ export function VppPageClient() {
   const [capacityKwh, setCapacityKwh] = useState("");
   const [powerKw, setPowerKw] = useState("");
   const [investmentEur, setInvestmentEur] = useState("");
-  const [annualRevenueEur, setAnnualRevenueEur] = useState("");
+  const [annualRevenueEur, setAnnualRevenueEur] = useState(""); // baas-stsenaarium
+  const [cyclesPerYear, setCyclesPerYear] = useState("250");
   const [lifetimeYears, setLifetimeYears] = useState("10");
   const [efficiencyPct, setEfficiencyPct] = useState("92");
+  const [degradationPct, setDegradationPct] = useState("1,5");
+  const [annualOandMEur, setAnnualOandMEur] = useState("250");
+  const [discountRatePct, setDiscountRatePct] = useState("6");
 
-  const result = useMemo(() => {
-    const inv = num(investmentEur);
-    const rev = num(annualRevenueEur);
+  const model = useMemo(() => {
+    const inv = Math.max(num(investmentEur), 0);
+    const baseRev = Math.max(num(annualRevenueEur), 0);
     const eff = Math.min(Math.max(num(efficiencyPct), 50), 99) / 100;
-    const netRev = Math.max(rev * eff, 0);
-    const payback = netRev > 0 ? inv / netRev : Infinity;
-    const total = netRev * Math.max(num(lifetimeYears), 1) - inv;
-    return { netRev, payback, total };
-  }, [annualRevenueEur, efficiencyPct, investmentEur, lifetimeYears]);
+    const years = Math.max(Math.round(num(lifetimeYears)), 1);
+    const degr = Math.min(Math.max(num(degradationPct), 0), 10) / 100;
+    const opex = Math.max(num(annualOandMEur), 0);
+    const disc = Math.min(Math.max(num(discountRatePct), 0), 20) / 100;
+
+    // Cycles affect how realistic the revenue is (simple sanity factor).
+    const cycles = Math.min(Math.max(num(cyclesPerYear), 0), 1500);
+    const cycleFactor = cycles >= 50 ? 1 : 0.7;
+
+    const scenarios = [
+      { key: "konservatiivne", label: "Konservatiivne", rev: baseRev * 0.75 },
+      { key: "baas", label: "Baas", rev: baseRev },
+      { key: "optimistlik", label: "Optimistlik", rev: baseRev * 1.25 },
+    ] as const;
+
+    const perScenario = scenarios.map((s) => {
+      const cashflows: number[] = [];
+      cashflows.push(-inv);
+      let factor = 1;
+      for (let y = 1; y <= years; y += 1) {
+        const gross = s.rev * eff * cycleFactor * factor;
+        const net = Math.max(gross - opex, 0);
+        cashflows.push(net);
+        factor *= 1 - degr;
+      }
+      const cum = buildCumulative(cashflows);
+      const npvValue = npv(disc, cashflows);
+      const irrValue = irr(cashflows);
+      const payback =
+        cum.findIndex((v) => v >= 0) === -1 ? null : (() => {
+          // reuse cumulative for approximate payback year without importing helper again
+          for (let t = 1; t < cum.length; t += 1) {
+            if (cum[t] >= 0) {
+              const prev = cum[t - 1];
+              const curr = cum[t];
+              if (prev >= 0) return t - 1;
+              const frac = (curr - prev) !== 0 ? (-prev) / (curr - prev) : 1;
+              return (t - 1) + Math.min(Math.max(frac, 0), 1);
+            }
+          }
+          return null;
+        })();
+      return {
+        ...s,
+        cashflows,
+        cum,
+        netRevYear1: cashflows[1] ?? 0,
+        totalProfit: cum[cum.length - 1] ?? -inv,
+        npv: npvValue,
+        irr: irrValue,
+        paybackYears: payback,
+      };
+    });
+
+    return { inv, eff, years, degr, opex, disc, cycles, perScenario };
+  }, [annualOandMEur, annualRevenueEur, cyclesPerYear, degradationPct, discountRatePct, efficiencyPct, investmentEur, lifetimeYears]);
 
   const downloadPdf = async () => {
     if (!projectId) return;
@@ -63,16 +120,31 @@ export function VppPageClient() {
                   { label: "Efektiivsus", value: `${efficiencyPct}%` },
                 ],
               },
+              {
+                group: "Kulud ja eeldused",
+                items: [
+                  { label: "Hooldus (€/a)", value: annualOandMEur ? `${annualOandMEur} €` : "—" },
+                  { label: "Degradatsioon", value: `${degradationPct}%/a` },
+                  { label: "Tsüklid", value: `${cyclesPerYear}/a` },
+                ],
+              },
             ],
-            assumptions: [{ label: "Märkus", value: "V1 mudel kasutab sisestatud tulueeldust (turuandmeid ei päringu)." }],
+            assumptions: [{ label: "Märkus", value: "Mudel tugineb sisestatud tulueeldustele. Turupõhine tegelik tulu võib erineda." }],
             metrics: [
-              { label: "Netotulu aastas", value: fmtEur(result.netRev) },
-              { label: "Lihtne tasuvusaeg", value: Number.isFinite(result.payback) ? `${result.payback.toFixed(1)} a` : "—" },
-              { label: "Kogukasum eluajal", value: fmtEur(result.total) },
+              { label: "Baas: netotulu (aasta 1)", value: fmtEur(model.perScenario[1]?.netRevYear1 ?? 0) },
+              { label: "Baas: tasuvusaeg", value: model.perScenario[1]?.paybackYears ? `${model.perScenario[1].paybackYears.toFixed(1)} a` : "—" },
+              { label: "Baas: NPV", value: fmtEur(model.perScenario[1]?.npv ?? 0) },
+              { label: "Baas: IRR", value: model.perScenario[1]?.irr ? `${(model.perScenario[1].irr * 100).toFixed(1)}%` : "—" },
               { label: "Efektiivsus", value: `${efficiencyPct}%` },
               { label: "Eluiga", value: `${lifetimeYears} a` },
               { label: "Investeering", value: investmentEur ? `${investmentEur} €` : "—" },
             ],
+            charts: {
+              cashflowByYear: (model.perScenario[1]?.cashflows ?? []).slice(1).map((v, idx) => ({
+                year: idx + 1,
+                cashflow: v,
+              })),
+            },
           },
         }),
       });
@@ -161,6 +233,16 @@ export function VppPageClient() {
             />
           </label>
           <label className="grid gap-2 text-sm">
+            <span className="text-zinc-100">Tsüklid aastas</span>
+            <input
+              className="input"
+              value={cyclesPerYear}
+              inputMode="numeric"
+              onChange={(e) => setCyclesPerYear(e.target.value)}
+              placeholder="nt 250"
+            />
+          </label>
+          <label className="grid gap-2 text-sm">
             <span className="text-zinc-100">Aku eluiga (a)</span>
             <select className="input" value={lifetimeYears} onChange={(e) => setLifetimeYears(e.target.value)}>
               <option value="5">5</option>
@@ -178,6 +260,36 @@ export function VppPageClient() {
               inputMode="decimal"
               onChange={(e) => setEfficiencyPct(e.target.value)}
               placeholder="nt 92"
+            />
+          </label>
+          <label className="grid gap-2 text-sm">
+            <span className="text-zinc-100">Degradatsioon (%/a)</span>
+            <input
+              className="input"
+              value={degradationPct}
+              inputMode="decimal"
+              onChange={(e) => setDegradationPct(e.target.value)}
+              placeholder="nt 1,5"
+            />
+          </label>
+          <label className="grid gap-2 text-sm">
+            <span className="text-zinc-100">Hooldus (€/a)</span>
+            <input
+              className="input"
+              value={annualOandMEur}
+              inputMode="numeric"
+              onChange={(e) => setAnnualOandMEur(e.target.value)}
+              placeholder="nt 250"
+            />
+          </label>
+          <label className="grid gap-2 text-sm">
+            <span className="text-zinc-100">Diskontomäär (%/a)</span>
+            <input
+              className="input"
+              value={discountRatePct}
+              inputMode="decimal"
+              onChange={(e) => setDiscountRatePct(e.target.value)}
+              placeholder="nt 6"
             />
           </label>
         </div>
@@ -213,55 +325,74 @@ export function VppPageClient() {
         <h2 className="text-2xl font-semibold text-zinc-50">Tulemused</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="result-card">
-            <p>Netotulu aastas (efektiivsusega)</p>
-            <strong>{fmtEur(result.netRev)}</strong>
+            <p>Baas: netotulu (aasta 1)</p>
+            <strong>{fmtEur(model.perScenario[1]?.netRevYear1 ?? 0)}</strong>
           </div>
           <div className="result-card">
-            <p>Lihtne tasuvusaeg</p>
+            <p>Baas: tasuvusaeg</p>
             <strong>
-              {Number.isFinite(result.payback) ? `${result.payback.toFixed(1)} aastat` : "Pole võimalik arvutada"}
+              {model.perScenario[1]?.paybackYears ? `${model.perScenario[1].paybackYears.toFixed(1)} aastat` : "—"}
             </strong>
           </div>
-          <div className="result-card sm:col-span-2">
-            <p>Kogukasum eluaja jooksul</p>
-            <strong>{fmtEur(result.total)}</strong>
+          <div className="result-card">
+            <p>Baas: NPV</p>
+            <strong>{fmtEur(model.perScenario[1]?.npv ?? 0)}</strong>
+          </div>
+          <div className="result-card">
+            <p>Baas: IRR</p>
+            <strong>{model.perScenario[1]?.irr ? `${(model.perScenario[1].irr * 100).toFixed(1)}%` : "—"}</strong>
           </div>
         </div>
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300">
           <p className="font-medium text-zinc-100">Märkused</p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>See on V1 lihtsustatud mudel, mis kasutab sisestatud tulueeldust.</li>
-            <li>Efektiivsus vähendab eelduslikku tulu proportsionaalselt.</li>
-            <li>Täpsem simulatsioon ja turuandmed lisanduvad edaspidi.</li>
+            <li>Mudel tugineb sisestatud tulueeldustele; tegelik tulu sõltub turuolukorrast ja lepingust.</li>
+            <li>Efektiivsus, hooldus ja degradatsioon mõjutavad tulemusi oluliselt.</li>
+            <li>Vaata kolme stsenaariumi ja vali konservatiivne eeldus, kui tulemus läheb otsuse aluseks.</li>
           </ul>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <article className="card">
+            <h3 className="section-title">Stsenaariumid</h3>
+            <div className="grid gap-3 text-sm">
+              {model.perScenario.map((s) => (
+                <div key={s.key} className="compare-row">
+                  <span className="compare-label">{s.label}</span>
+                  <strong>
+                    {s.paybackYears ? `${s.paybackYears.toFixed(1)} a` : "—"} · NPV {fmtEur(s.npv)}
+                  </strong>
+                </div>
+              ))}
+            </div>
+          </article>
+          <article className="card">
+            <h3 className="section-title">Rahavoog (baas)</h3>
+            <MiniCashflowChart cashflows={(model.perScenario[1]?.cashflows ?? []).slice(1)} />
+          </article>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <article className="card">
             <h3 className="section-title">Tundlikkus (tulu ±20%)</h3>
             {(() => {
-              const inv = num(investmentEur);
-              const rev = num(annualRevenueEur);
-              const eff = Math.min(Math.max(num(efficiencyPct), 50), 99) / 100;
-              const net = (r: number) => Math.max(r * eff, 0);
-              const payback = (r: number) => (net(r) > 0 ? inv / net(r) : Infinity);
-              const low = payback(rev * 0.8);
-              const base = payback(rev);
-              const high = payback(rev * 1.2);
+              const low = model.perScenario[0]?.paybackYears ?? null;
+              const base = model.perScenario[1]?.paybackYears ?? null;
+              const high = model.perScenario[2]?.paybackYears ?? null;
               return (
                 <div className="grid gap-3 text-sm">
                   <div className="compare-row">
                     <span className="compare-label">Madalam tulu (−20%)</span>
-                    <strong>{Number.isFinite(low) ? `${low.toFixed(1)} a` : "—"}</strong>
+                    <strong>{low ? `${low.toFixed(1)} a` : "—"}</strong>
                   </div>
                   <div className="compare-row">
                     <span className="compare-label">Baas</span>
-                    <strong>{Number.isFinite(base) ? `${base.toFixed(1)} a` : "—"}</strong>
+                    <strong>{base ? `${base.toFixed(1)} a` : "—"}</strong>
                   </div>
                   <div className="compare-row">
                     <span className="compare-label">Kõrgem tulu (+20%)</span>
-                    <strong>{Number.isFinite(high) ? `${high.toFixed(1)} a` : "—"}</strong>
+                    <strong>{high ? `${high.toFixed(1)} a` : "—"}</strong>
                   </div>
                 </div>
               );
