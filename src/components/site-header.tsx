@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { FEATURES } from "@/lib/features";
+import { LivePriceBadge } from "@/components/live-price-badge";
 
 const nav = [
   { href: "/", label: "Avaleht" },
   { href: "/kalkulaatorid", label: "Kalkulaatorid" },
+  { href: "/borsihind", label: "Jälgi börsihinda siit!" },
   ...(FEATURES.paywallEnabled ? ([{ href: "/pricing", label: "Hinnad" }] as const) : ([] as const)),
   { href: "/kontakt", label: "Kontakt" },
 ];
@@ -48,8 +50,11 @@ export function SiteHeader() {
             />
           </div>
           <div className="min-w-0 leading-tight">
-            <div className="text-[15px] font-semibold leading-tight tracking-tight text-zinc-50 sm:text-lg">
-              Energiakalkulaator
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-[15px] font-semibold leading-tight tracking-tight text-zinc-50 sm:text-lg">
+                Energiakalkulaator
+              </div>
+              <LivePriceBadge />
             </div>
             {/* Tagline eemaldatud (nõue: ainult Energiakalkulaator) */}
           </div>
