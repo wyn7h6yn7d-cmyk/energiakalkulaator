@@ -438,7 +438,7 @@ export function PriceViewClient({
   const intervalSec = effectiveInterval * 60;
 
   return (
-    <section className="mt-8 grid gap-6 max-w-full overflow-x-hidden">
+    <section className="mt-8 grid gap-6">
       <div className="glass-panel rounded-3xl p-5 sm:p-8">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -448,27 +448,27 @@ export function PriceViewClient({
             </p>
           </div>
           <div className="grid min-w-0 gap-2 sm:flex sm:flex-wrap">
-            <div className="flex w-full items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:justify-start">
+            <div className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:grid-cols-2">
               <button
                 type="button"
-                className={`rounded-xl px-3 py-2 text-sm ${!vat ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
+                className={`w-full rounded-xl px-3 py-2 text-sm ${!vat ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
                 onClick={() => setVat(false)}
               >
                 Ilma KM-ta
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-3 py-2 text-sm ${vat ? "bg-emerald-400/15 text-zinc-50 ring-1 ring-emerald-300/20" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
+                className={`w-full rounded-xl px-3 py-2 text-sm ${vat ? "bg-emerald-400/15 text-zinc-50 ring-1 ring-emerald-300/20" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
                 onClick={() => setVat(true)}
               >
                 KM-ga
               </button>
             </div>
 
-            <div className="flex w-full items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:justify-start">
+            <div className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:grid-cols-2">
               <button
                 type="button"
-                className={`rounded-xl px-3 py-2 text-sm ${effectiveInterval === 15 ? "bg-emerald-400/15 text-zinc-50 ring-1 ring-emerald-300/20" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
+                className={`w-full rounded-xl px-3 py-2 text-sm ${effectiveInterval === 15 ? "bg-emerald-400/15 text-zinc-50 ring-1 ring-emerald-300/20" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
                 onClick={() => setViewInterval(15)}
                 disabled={sourceInterval !== 15}
                 title={sourceInterval === 15 ? "15 min vaade" : "15 min andmeid ei ole saadaval"}
@@ -477,7 +477,7 @@ export function PriceViewClient({
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-3 py-2 text-sm ${effectiveInterval === 60 ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
+                className={`w-full rounded-xl px-3 py-2 text-sm ${effectiveInterval === 60 ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
                 onClick={() => setViewInterval(60)}
               >
                 1h
@@ -487,21 +487,21 @@ export function PriceViewClient({
             <div className="grid w-full grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1 sm:w-auto sm:grid-cols-3">
               <button
                 type="button"
-                className={`rounded-xl px-3 py-2 text-sm ${period === "today" ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
+                className={`w-full rounded-xl px-3 py-2 text-sm ${period === "today" ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
                 onClick={() => setPeriod("today")}
               >
                 Täna
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-3 py-2 text-sm ${period === "today_tomorrow" ? "bg-emerald-400/15 text-zinc-50 ring-1 ring-emerald-300/20" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
+                className={`w-full rounded-xl px-3 py-2 text-sm ${period === "today_tomorrow" ? "bg-emerald-400/15 text-zinc-50 ring-1 ring-emerald-300/20" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
                 onClick={() => setPeriod("today_tomorrow")}
               >
                 Täna + homme
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-3 py-2 text-sm ${period === "tomorrow" ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
+                className={`w-full rounded-xl px-3 py-2 text-sm ${period === "tomorrow" ? "bg-white/10 text-zinc-50" : "text-zinc-300 hover:bg-white/5 hover:text-zinc-50"}`}
                 onClick={() => setPeriod("tomorrow")}
               >
                 Homme
@@ -511,44 +511,42 @@ export function PriceViewClient({
         </div>
 
         {/* A) Summary ribbon */}
-        <div className="mt-5 -mx-1 overflow-x-auto px-1 [-webkit-overflow-scrolling:touch] lg:mx-0 lg:overflow-visible lg:px-0">
-          <div className="flex min-w-max gap-3 lg:grid lg:min-w-0 lg:grid-cols-5">
-            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+        <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
               <div className="text-xs text-zinc-400">{nowCard?.label ?? "Praegune hind"}</div>
               <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
                 {nowCard ? fmtSnt(nowCard.eurPerKwh, vat) : "—"}{" "}
                 <span className="text-sm font-semibold text-zinc-300">snt/kWh</span>
               </div>
             </div>
-            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
               <div className="text-xs text-zinc-400">Päeva madalaim</div>
               <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
                 {statsToday ? fmtSnt(statsToday.min, vat) : "—"}{" "}
                 <span className="text-sm font-semibold text-zinc-300">snt</span>
               </div>
             </div>
-            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
               <div className="text-xs text-zinc-400">Päeva kõrgeim</div>
               <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
                 {statsToday ? fmtSnt(statsToday.max, vat) : "—"}{" "}
                 <span className="text-sm font-semibold text-zinc-300">snt</span>
               </div>
             </div>
-            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
               <div className="text-xs text-zinc-400">Päeva keskmine</div>
               <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
                 {statsToday ? fmtSnt(statsToday.mean, vat) : "—"}{" "}
                 <span className="text-sm font-semibold text-zinc-300">snt</span>
               </div>
             </div>
-            <div className="min-w-[170px] rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4 lg:min-w-0">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
               <div className="text-xs text-zinc-400">Homme (keskmine)</div>
               <div className="mt-1 text-xl font-semibold text-zinc-50 sm:text-2xl">
                 {statsTomorrow ? fmtSnt(statsTomorrow.mean, vat) : "—"}{" "}
                 <span className="text-sm font-semibold text-zinc-300">snt</span>
               </div>
             </div>
-          </div>
         </div>
 
         {/* B) Main chart */}
