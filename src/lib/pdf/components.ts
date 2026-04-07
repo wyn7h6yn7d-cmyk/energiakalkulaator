@@ -57,7 +57,7 @@ export function drawSummaryCard(
 ) {
   drawPanel(page, box, pdfTheme.colors.emeraldSoft);
   drawText(page, opts.headline, { x: box.x + 16, y: box.y + box.h - 22, size: 12, font: fonts.bold, color: pdfTheme.colors.text });
-  drawText(page, opts.note, {
+  const note = drawText(page, opts.note, {
     x: box.x + 16,
     y: box.y + box.h - 40,
     size: 9,
@@ -69,12 +69,13 @@ export function drawSummaryCard(
   drawText(page, opts.primaryLabel, { x: box.x + 16, y: box.y + 44, size: 9, font: fonts.regular, color: pdfTheme.colors.muted });
   drawText(page, opts.primaryValue, { x: box.x + 16, y: box.y + 22, size: 18, font: fonts.bold, color: pdfTheme.colors.emerald });
 
-  const startX = box.x + box.w * 0.55;
-  let y = box.y + box.h - 70;
+  const startX = box.x + box.w * 0.56;
+  const rightW = box.x + box.w - startX - 16;
+  let y = box.y + box.h - 40 - note.height - 18;
   for (const [k, v] of opts.secondary.slice(0, 4)) {
-    drawText(page, k, { x: startX, y, size: 9, font: fonts.regular, color: pdfTheme.colors.muted });
-    drawText(page, v, { x: startX, y: y - 14, size: 11, font: fonts.bold, color: pdfTheme.colors.text });
-    y -= 34;
+    const kh = drawText(page, k, { x: startX, y, size: 9, font: fonts.regular, color: pdfTheme.colors.muted, maxWidth: rightW, maxLines: 2 });
+    const vh = drawText(page, v, { x: startX, y: y - kh.height - 2, size: 11, font: fonts.bold, color: pdfTheme.colors.text, maxWidth: rightW, maxLines: 1 });
+    y -= Math.max(kh.height + vh.height + 10, 28);
   }
 }
 
@@ -99,10 +100,28 @@ export function drawMetricGrid(page: PDFPage, fonts: PdfFonts, box: Box, metrics
       borderColor: pdfTheme.colors.line,
       borderWidth: 1,
     });
-    drawText(page, m.label, { x: cx + 12, y: cy + cellH - 20, size: 9, font: fonts.regular, color: pdfTheme.colors.muted, maxWidth: cellW - 24 });
-    drawText(page, m.value, { x: cx + 12, y: cy + cellH - 42, size: 14, font: fonts.bold, color: pdfTheme.colors.text, maxWidth: cellW - 24 });
+    // Hoia grid stabiilne: label max 2 rida, value 1 rida (vältida kattumist).
+    const topY = cy + cellH - 20;
+    const label = drawText(page, m.label, {
+      x: cx + 12,
+      y: topY,
+      size: 9,
+      font: fonts.regular,
+      color: pdfTheme.colors.muted,
+      maxWidth: cellW - 24,
+      maxLines: 2,
+    });
+    drawText(page, m.value, {
+      x: cx + 12,
+      y: topY - label.height - 6,
+      size: 13.5,
+      font: fonts.bold,
+      color: pdfTheme.colors.text,
+      maxWidth: cellW - 24,
+      maxLines: 1,
+    });
     if (m.sub) {
-      drawText(page, m.sub, { x: cx + 12, y: cy + 16, size: 8.5, font: fonts.regular, color: pdfTheme.colors.muted, maxWidth: cellW - 24 });
+      drawText(page, m.sub, { x: cx + 12, y: cy + 18, size: 8.5, font: fonts.regular, color: pdfTheme.colors.muted, maxWidth: cellW - 24, maxLines: 2 });
     }
   });
 }
@@ -116,12 +135,37 @@ export function drawAssumptionsTable(
 ) {
   drawPanel(page, box, pdfTheme.colors.panel);
   drawText(page, title, { x: box.x + 14, y: box.y + box.h - 22, size: 11, font: fonts.bold, color: pdfTheme.colors.text });
+  const leftPad = 14;
+  const rightPad = 14;
+  const gap = 28;
+  const leftW = 170; // fikseeritud vasak veerg, et parempoolne tekst ei jookseks peale
+  const rightW = Math.max(box.w - leftPad - rightPad - leftW - gap, 80);
+
   let y = box.y + box.h - 44;
   for (const r of rows.slice(0, 10)) {
-    drawText(page, r.label, { x: box.x + 14, y, size: 9, font: fonts.regular, color: pdfTheme.colors.muted, maxWidth: box.w * 0.55 });
-    drawText(page, r.value, { x: box.x + box.w * 0.6, y, size: 9.5, font: fonts.bold, color: pdfTheme.colors.text, maxWidth: box.w * 0.38 });
-    y -= 16;
-    if (y < box.y + 18) break;
+    const lh = 12;
+    const label = drawText(page, r.label, {
+      x: box.x + leftPad,
+      y,
+      size: 9,
+      font: fonts.regular,
+      color: pdfTheme.colors.muted,
+      maxWidth: leftW,
+      lineHeight: lh,
+      maxLines: 3,
+    });
+    const value = drawText(page, r.value, {
+      x: box.x + leftPad + leftW + gap,
+      y,
+      size: 9.5,
+      font: fonts.bold,
+      color: pdfTheme.colors.text,
+      maxWidth: rightW,
+      lineHeight: lh,
+      maxLines: 6,
+    });
+    y -= Math.max(label.height, value.height) + 8;
+    if (y < box.y + 22) break;
   }
 }
 
@@ -144,9 +188,27 @@ export function drawGroupedInputs(
     drawText(page, g.group, { x: box.x + 14, y, size: 9.5, font: fonts.bold, color: pdfTheme.colors.emerald });
     y -= 14;
     for (const it of g.items) {
-      drawText(page, `• ${it.label}`, { x: box.x + 18, y, size: 9, font: fonts.regular, color: pdfTheme.colors.muted, maxWidth: box.w * 0.62 });
-      drawText(page, it.value, { x: box.x + box.w * 0.68, y, size: 9.5, font: fonts.bold, color: pdfTheme.colors.text, maxWidth: box.w * 0.30 });
-      y -= 14;
+      const label = drawText(page, `• ${it.label}`, {
+        x: box.x + 18,
+        y,
+        size: 9,
+        font: fonts.regular,
+        color: pdfTheme.colors.muted,
+        maxWidth: box.w * 0.60,
+        lineHeight: 12,
+        maxLines: 3,
+      });
+      const value = drawText(page, it.value, {
+        x: box.x + box.w * 0.68,
+        y,
+        size: 9.5,
+        font: fonts.bold,
+        color: pdfTheme.colors.text,
+        maxWidth: box.w * 0.30,
+        lineHeight: 12,
+        maxLines: 3,
+      });
+      y -= Math.max(label.height, value.height) + 4;
       if (y < box.y + 20) return;
     }
     y -= 8;
