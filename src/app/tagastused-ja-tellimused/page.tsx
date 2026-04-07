@@ -4,37 +4,53 @@ export default function RefundsPage() {
   return (
     <LegalLayout title="Tagastused ja tellimused" updatedAt="07.04.2026">
       <p className="text-zinc-200">
-        See leht kirjeldab tellimuste ja digiteenuse kasutamise põhimõtteid. Enne teenuse päris
+        See leht kirjeldab digiteenuste ostu ja tagasimaksete põhimõtteid. Enne teenuse päris
         kasutuselevõttu palume sisu juristiga üle vaadata.
       </p>
 
-      <h2 className="mt-8 text-lg font-semibold text-zinc-50">1. Tellimused (subscription)</h2>
+      <h2 className="mt-8 text-lg font-semibold text-zinc-50">1. Digiteenused ja hinnad</h2>
       <p className="mt-2">
-        Pro paketid võivad olla korduvad tellimused (kuu/aasta). Tellimus pikeneb automaatselt kuni
-        tühistamiseni. Tühistamise järel kehtib ligipääs üldjuhul kuni jooksva perioodi lõpuni.
+        Hetkel pakume järgmisi digiteenuseid:
+      </p>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>
+          <strong>Täisanalüüs</strong> – 9,99 € (detailsem tulemuste vaade ja analüüs ühe projekti kohta).
+        </li>
+        <li>
+          <strong>PDF raport</strong> – 2,99 € (kokkuvõtte eksport ühele projektile).
+        </li>
+      </ul>
+
+      <h2 className="mt-8 text-lg font-semibold text-zinc-50">2. Digitaalse teenuse osutamine</h2>
+      <p className="mt-2">
+        Digiteenus loetakse osutatuks, kui ligipääs täisanalüüsile või raporti eksport on kasutajale
+        avatud. Teenuse osutamine võib toimuda kohe pärast makse kinnitamist.
       </p>
 
-      <h2 className="mt-8 text-lg font-semibold text-zinc-50">2. Ühekordne Pro raport</h2>
+      <h2 className="mt-8 text-lg font-semibold text-zinc-50">3. Enne ostu kinnitatavad tingimused</h2>
       <p className="mt-2">
-        Pro raport on ühekordne digiteenus ühe projekti kohta (nt PDF/Excel kokkuvõte). Teenus loetakse
-        osutatuks, kui raporti ligipääs/eksport on kasutajale avatud.
+        Checkouti juures peab kasutaja kinnitama vähemalt:
       </p>
-
-      <h2 className="mt-8 text-lg font-semibold text-zinc-50">3. Tühistamine</h2>
-      <p className="mt-2">
-        Tellimust saab tühistada konto lehel või klienditoe kaudu: <strong>[SIIN LISA E-POST]</strong>.
-      </p>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>“Olen tutvunud kasutustingimustega.”</li>
+        <li>“Olen tutvunud privaatsuspoliitikaga.”</li>
+        <li>
+          “Nõustun, et digitaalse teenuse kohene osutamine võib mõjutada minu taganemisõigust vastavalt
+          kohaldatavale õigusele.”
+        </li>
+      </ul>
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">4. Tagasimaksed</h2>
       <p className="mt-2">
         Tagasimakseid käsitletakse juhtumipõhiselt, arvestades digiteenuse osutamise asjaolusid ja
-        kohaldatavat õigust. Palun esita taotlus e-postile: <strong>[SIIN LISA E-POST]</strong>.
+        kohaldatavat õigust. Palun esita taotlus e-postile:{" "}
+        <strong>kennethalto95@gmail.com</strong>.
       </p>
 
-      <h2 className="mt-8 text-lg font-semibold text-zinc-50">5. Digitaalse teenuse osutamine</h2>
+      <h2 className="mt-8 text-lg font-semibold text-zinc-50">5. Kontakt</h2>
       <p className="mt-2">
-        Digiteenuse puhul võib kohene ligipääs mõjutada taganemisõigust vastavalt kohaldatavale
-        õigusele. Checkoutis lisatakse vastavad kinnitused.
+        Teenusepakkuja: <strong>Kenneth Alto</strong> · Kontakt:{" "}
+        <strong>kennethalto95@gmail.com</strong>
       </p>
     </LegalLayout>
   );

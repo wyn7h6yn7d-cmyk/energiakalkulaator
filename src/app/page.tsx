@@ -27,7 +27,7 @@ export default function Home() {
                 Proovi kalkulaatorit
               </Link>
               <Link href="/pricing" className="btn-ghost inline-flex">
-                Vaata Pro pakette
+                Vaata hindu
               </Link>
             </div>
           </div>
@@ -44,8 +44,8 @@ export default function Home() {
               d: "Eeldused ja hinnaloogika on kohandatud Eesti turule ning Nord Poolile.",
             },
             {
-              t: "Pro tase analüüs",
-              d: "Täpsed stsenaariumid, detailsemad mudelid ja eksport ühes töövoos (Pro).",
+              t: "Tasuline analüüs",
+              d: "Täisanalüüs ja PDF raport aitavad otsuseid dokumenteerida ja jagada.",
             },
           ].map((item) => (
             <article key={item.t} className="card rounded-3xl p-6">
@@ -90,7 +90,7 @@ export default function Home() {
 
         <section className="grid gap-6 lg:grid-cols-2">
           <article className="glass-panel rounded-3xl p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold text-zinc-50">Miks Pro?</h2>
+            <h2 className="text-2xl font-semibold text-zinc-50">Miks tasuline analüüs?</h2>
             <p className="mt-2 text-sm text-zinc-400">
               Kui teed otsuseid investeeringute või ettevõtte energiakulu kohta, on detailid olulised.
             </p>
@@ -118,7 +118,7 @@ export default function Home() {
               {[
                 [
                   "Kas tulemused on täpsed?",
-                  "Tulemused on informatiivsed ja sõltuvad sisenditest ning eeldustest. Pro versioonis saad täpsemad mudelid ja rohkem kontrolli.",
+                  "Tulemused on informatiivsed ja sõltuvad sisenditest ning eeldustest. Täisanalüüsis saad rohkem detaili ja selgema rahavoo vaate.",
                 ],
                 [
                   "Kas sobib ettevõttele?",

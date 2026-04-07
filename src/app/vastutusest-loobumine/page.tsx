@@ -4,8 +4,9 @@ export default function DisclaimerPage() {
   return (
     <LegalLayout title="Vastutusest loobumine" updatedAt="07.04.2026">
       <p className="text-zinc-200">
-        Energiakalkulaatori tulemused on informatiivsed hinnangud. Enne teenuse päris
-        kasutuselevõttu palume sisu juristiga üle vaadata.
+        Energiakalkulaatori tulemused on informatiivsed hinnangud. Teenust osutab hetkel eraisik{" "}
+        <strong>Kenneth Alto</strong> (kontakt: <strong>kennethalto95@gmail.com</strong>). Enne teenuse
+        päris kasutuselevõttu palume sisu juristiga üle vaadata.
       </p>
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">1. Informatiivne iseloom</h2>

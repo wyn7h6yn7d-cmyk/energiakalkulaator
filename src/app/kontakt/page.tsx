@@ -12,8 +12,7 @@ export default function ContactPage() {
         <header className="glass-panel rounded-3xl p-7 sm:p-10">
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Kontakt</h1>
           <p className="mt-2 text-sm text-zinc-400">
-            Küsimuste ja koostöö korral võta ühendust. Enne teenuse ametlikku lansseerimist palun täida
-            allolevad ettevõtte andmed.
+            Küsimuste ja koostöö korral võta ühendust. Teenust osutab hetkel eraisik Kenneth Alto.
           </p>
         </header>
 
@@ -21,19 +20,25 @@ export default function ContactPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
               <div className="text-xs text-zinc-400">E-post</div>
-              <div className="mt-1 text-sm font-semibold text-zinc-50">[SIIN LISA E-POST]</div>
+              <div className="mt-1 text-sm font-semibold text-zinc-50">
+                <a className="text-emerald-200 underline underline-offset-4" href="mailto:kennethalto95@gmail.com">
+                  kennethalto95@gmail.com
+                </a>
+              </div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-              <div className="text-xs text-zinc-400">Ettevõte</div>
-              <div className="mt-1 text-sm font-semibold text-zinc-50">[SIIN LISA ETTEVÕTTE NIMI]</div>
+              <div className="text-xs text-zinc-400">Nimi</div>
+              <div className="mt-1 text-sm font-semibold text-zinc-50">Kenneth Alto</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-              <div className="text-xs text-zinc-400">Registrikood</div>
-              <div className="mt-1 text-sm font-semibold text-zinc-50">[SIIN LISA REGISTRIKOOD]</div>
+              <div className="text-xs text-zinc-400">Staatus</div>
+              <div className="mt-1 text-sm font-semibold text-zinc-50">Tegutseb hetkel eraisikuna</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-              <div className="text-xs text-zinc-400">Aadress</div>
-              <div className="mt-1 text-sm font-semibold text-zinc-50">[SIIN LISA AADRESS]</div>
+              <div className="text-xs text-zinc-400">Lisainfo</div>
+              <div className="mt-1 text-sm font-semibold text-zinc-50">
+                Täiendavad andmed lisatakse pärast ettevõtlusvormi vormistamist.
+              </div>
             </div>
           </div>
 
@@ -45,6 +50,17 @@ export default function ContactPage() {
                 ava kalkulaatorite hub
               </Link>
               .
+            </p>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+            <div className="text-sm font-semibold text-zinc-50">Kirjuta kohe</div>
+            <p className="mt-1 text-sm text-zinc-300">
+              Vajuta e-postile ja lisa oma küsimus / sisendid:
+              <br />
+              <a className="text-emerald-200 underline underline-offset-4" href="mailto:kennethalto95@gmail.com">
+                kennethalto95@gmail.com
+              </a>
             </p>
           </div>
         </section>

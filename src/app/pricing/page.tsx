@@ -9,26 +9,24 @@ const plans = [
     cta: { label: "Alusta tasuta", href: "/kalkulaatorid/paikesejaam", variant: "ghost" as const },
   },
   {
-    name: "Pro",
-    price: "6.90 €/kuu",
+    name: "Täisanalüüs",
+    price: "9,99 €",
     badge: "Soovitus",
-    desc: "Kõik kalkulaatorid ja detailne analüüs.",
+    desc: "Detailsem analüüs ühe projekti kohta.",
     features: [
-      "Kõik kalkulaatorid",
-      "Detailne analüüs ja cashflow",
-      "Projektide salvestamine",
-      "Eksport (PDF/Excel)",
-      "Stsenaariumid ja võrdlused",
+      "Detailsem tulemuste vaade",
+      "Selgemad eeldused ja kokkuvõte",
+      "Võrdlus (akuga vs akuta)",
+      "Arvutusperioodi mõju (rahavoo vaade)",
     ],
-    secondary: "59 €/aasta",
-    cta: { label: "Vaata Pro", href: "/kontakt", variant: "glow" as const },
+    cta: { label: "Ava Täisanalüüs", href: "/kontakt", variant: "glow" as const },
   },
   {
-    name: "Pro raport",
-    price: "9.90 €",
-    desc: "Ühekordne raport ühe projekti kohta.",
-    features: ["1 projekti raport", "PDF/Excel eksport", "Detailne kokkuvõte"],
-    cta: { label: "Soovin raportit", href: "/kontakt", variant: "ghost" as const },
+    name: "PDF raport",
+    price: "2,99 €",
+    desc: "Kokkuvõtte eksport ühe projekti kohta.",
+    features: ["1 projekti kokkuvõte", "PDF raport", "Sobib jagamiseks"],
+    cta: { label: "Lisa PDF raport", href: "/kontakt", variant: "ghost" as const },
   },
 ];
 
@@ -49,7 +47,8 @@ export default function PricingPage() {
             Vali tase, mis sobib sinu otsustega
           </h1>
           <p className="mt-4 max-w-2xl text-zinc-300">
-            Tasuta annab kiire ülevaate. Pro avab detailse analüüsi, stsenaariumid ja ekspordid.
+            Tasuta annab kiire ülevaate. Täisanalüüs avab detailsema vaate ja PDF raport lisab
+            mugava kokkuvõtte.
           </p>
         </header>
 
@@ -72,7 +71,6 @@ export default function PricingPage() {
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-semibold text-zinc-50">{p.price}</div>
-                  {p.secondary ? <div className="text-xs text-zinc-400">{p.secondary}</div> : null}
                 </div>
               </div>
 
@@ -104,13 +102,22 @@ export default function PricingPage() {
             {[
               ["Detailne cashflow", "Aastate lõikes tabel ja selged eeldused."],
               ["Stsenaariumid", "Võrdle akuga/akuta ja tundlikkust."],
-              ["Eksport", "PDF/Excel kokkuvõtted ühele projektile."],
+              ["PDF raport", "Ühe projekti kokkuvõte jagamiseks."],
             ].map(([t, d]) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
                 <div className="text-sm font-semibold text-zinc-50">{t}</div>
                 <div className="mt-2 text-sm text-zinc-400">{d}</div>
               </div>
             ))}
+          </div>
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300">
+            <p className="font-medium text-zinc-100">Teenusepakkuja</p>
+            <p className="mt-1">
+              Kenneth Alto ·{" "}
+              <a className="text-emerald-200 underline underline-offset-4" href="mailto:kennethalto95@gmail.com">
+                kennethalto95@gmail.com
+              </a>
+            </p>
           </div>
         </section>
       </main>

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const nav = [
   { href: "/kalkulaatorid/paikesejaam", label: "Kalkulaatorid" },
-  { href: "/pricing", label: "Pro paketid" },
+  { href: "/pricing", label: "Hinnad" },
   { href: "/kontakt", label: "Kontakt" },
 ];
 
@@ -46,7 +46,7 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <Link href="/pricing" className="btn-ghost hidden sm:inline-flex">
-            Vaata Pro
+            Hinnad
           </Link>
           <Link href="/kalkulaatorid/paikesejaam" className="btn-glow inline-flex">
             Proovi kalkulaatorit

@@ -8,7 +8,7 @@ export default function EvLaadiminePage() {
       </p>
 
       <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300">
-        <p className="font-medium text-zinc-100">Pro funktsioonid</p>
+        <p className="font-medium text-zinc-100">Tasulised funktsioonid</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>Odavaimate tundide leidmine Eleringi andmetega</li>
           <li>Laadimisgraafiku eksport</li>

@@ -36,6 +36,15 @@ export function SiteFooter() {
             Päikesejaama, VPP, elektripaketi, EV laadimise ja ettevõtte energiakulude kalkulaatorid
             ühes kohas. Tulemused on informatiivsed ja sõltuvad sisenditest.
           </p>
+          <p className="mt-4 text-sm text-zinc-400">
+            Teenust osutab hetkel eraisik <span className="font-medium text-zinc-200">Kenneth Alto</span>.
+          </p>
+          <p className="mt-2 text-sm text-zinc-400">
+            Küsimused:{" "}
+            <a className="text-emerald-200 underline underline-offset-4" href="mailto:kennethalto95@gmail.com">
+              kennethalto95@gmail.com
+            </a>
+          </p>
         </div>
 
         <div className="lg:col-span-3">
@@ -85,7 +94,7 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>© {year} Kenneth Alto</div>
           <div className="text-zinc-500">
-            [SIIN LISA ETTEVÕTTE NIMI] · [SIIN LISA REGISTRIKOOD] · [SIIN LISA KMKR, KUI ON]
+            Registrikood: lisatakse pärast ettevõtlusvormi valikut · KMKR: lisatakse vajadusel
           </div>
         </div>
       </div>

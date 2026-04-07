@@ -3,7 +3,7 @@ export default function PeakShavingPage() {
     <section className="glass-panel rounded-3xl p-6 sm:p-8">
       <h2 className="text-2xl font-semibold text-zinc-50">Peak shaving / ettevõtte võimsus</h2>
       <p className="mt-2 text-sm text-zinc-400">
-        See moodul on valmimas. Siia lisandub tippude lõikamise hinnang (Free) ning (Pro) täpne
+        See moodul on valmimas. Siia lisandub tippude lõikamise hinnang (tasuta) ning (tasuline) täpne
         simulatsioon 15-min CSV tarbimisest.
       </p>
 
@@ -12,7 +12,7 @@ export default function PeakShavingPage() {
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>Hinnang säästule võrgutasus ja võimsustasudes</li>
           <li>Soovituslik aku suurus kWh ja kW</li>
-          <li>(Pro) tippude analüüs ja rahavoog tabelina</li>
+          <li>(Tasuline) tippude analüüs ja rahavoog tabelina</li>
         </ul>
       </div>
     </section>

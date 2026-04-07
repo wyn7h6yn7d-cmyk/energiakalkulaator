@@ -10,8 +10,12 @@ export default function TermsPage() {
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">1. Üldsätted</h2>
       <p className="mt-2">
-        Teenusepakkuja: <strong>[SIIN LISA ETTEVÕTTE NIMI]</strong>, registrikood{" "}
-        <strong>[SIIN LISA REGISTRIKOOD]</strong>, e-post <strong>[SIIN LISA E-POST]</strong>.
+        Veebilehe <strong>energiakalkulaator.ee</strong> teenust osutab hetkel eraisik{" "}
+        <strong>Kenneth Alto</strong>. Kontakt: <strong>kennethalto95@gmail.com</strong>.
+      </p>
+      <p className="mt-2">
+        Ettevõtlusvormi muutumisel (nt ettevõtte asutamisel) uuendatakse teenusepakkuja andmeid
+        veebilehel.
       </p>
       <p className="mt-2">
         Teenus on suunatud nii eraisikutele kui ettevõtetele ning on mõeldud energiaotsuste
@@ -33,9 +37,9 @@ export default function TermsPage() {
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">4. Hinnad ja tasumine</h2>
       <p className="mt-2">
-        Tasuliste pakettide hinnad on avaldatud lehel <strong>/pricing</strong>. Tellimuse puhul võib
-        teenus pikeneda automaatselt vastavalt valitud arveldusperioodile, kuni kasutaja selle
-        tühistab.
+        Tasuliste teenuste hinnad on avaldatud lehel <strong>/pricing</strong>. Tegemist on digitaalse
+        teenusega; enne ostu kinnitab kasutaja tingimused ja mõistab, et teenuse kohene osutamine võib
+        mõjutada taganemisõigust vastavalt kohaldatavale õigusele.
       </p>
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">5. Intellektuaalne omand</h2>

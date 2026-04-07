@@ -101,10 +101,10 @@ export default function VppPage() {
         </div>
 
         <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-sm text-zinc-200">
-          <strong className="block text-zinc-50">Pro analüüs</strong>
+          <strong className="block text-zinc-50">Täisanalüüs</strong>
           <p className="mt-1 text-zinc-300">
             Detailne VPP simulatsioon (turuplokid, stsenaariumid, risk, cashflow tabel, eksport)
-            avaneb Pro paketis.
+            avaneb tasulises täisanalüüsis.
           </p>
         </div>
       </section>
@@ -133,7 +133,7 @@ export default function VppPage() {
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>See on V1 lihtsustatud mudel, mis kasutab sisestatud tulueeldust.</li>
             <li>Efektiivsus vähendab eelduslikku tulu proportsionaalselt.</li>
-            <li>Pro versioon lisab turuandmed, stsenaariumid ja detailse rahavoo.</li>
+            <li>Täisanalüüs lisab turuandmed, stsenaariumid ja detailse rahavoo.</li>
           </ul>
         </div>
       </section>

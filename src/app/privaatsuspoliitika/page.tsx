@@ -8,11 +8,21 @@ export default function PrivacyPage() {
         isikuandmeid. Enne teenuse päris kasutuselevõttu palume sisu juristiga üle vaadata.
       </p>
 
+      <h2 className="mt-8 text-lg font-semibold text-zinc-50">0. Vastutav töötleja</h2>
+      <p className="mt-2">
+        Vastutav töötleja: <strong>Kenneth Alto</strong>
+        <br />
+        Kontakt: <strong>kennethalto95@gmail.com</strong>
+      </p>
+      <p className="mt-2 text-zinc-300">
+        Täiendavad andmed lisatakse pärast ettevõtlusvormi vormistamist.
+      </p>
+
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">1. Milliseid andmeid kogume</h2>
       <ul className="mt-2 list-disc space-y-1 pl-5">
         <li>Kontaktandmed, kui sa võtad meiega ühendust (nt e-post).</li>
         <li>Kasutusandmed (nt lehevaatamised ja tehnilised logid) teenuse töökindluse jaoks.</li>
-        <li>Pro teenuse korral kontoandmed ja tellimuse info (nt Stripe/Supabase kaudu).</li>
+        <li>Tasulise teenuse korral ostuinfo ja makseandmed (nt Stripe kaudu).</li>
       </ul>
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">2. Milleks andmeid kasutame</h2>
@@ -49,7 +59,7 @@ export default function PrivacyPage() {
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">7. Kontakt</h2>
       <p className="mt-2">
-        Andmekaitse küsimustes kirjuta: <strong>[SIIN LISA ANDMEKAITSE E-POST]</strong>.
+        Andmekaitse küsimustes kirjuta: <strong>kennethalto95@gmail.com</strong>.
       </p>
     </LegalLayout>
   );
