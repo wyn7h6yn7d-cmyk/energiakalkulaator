@@ -196,7 +196,7 @@ export function SolarCalculatorPage() {
   };
 
   const downloadPdf = async () => {
-    if (!projectId || !unlock.fullAnalysisSessionId || !unlock.pdfSessionId) return;
+    if (!projectId) return;
     try {
       const res = await fetch("/api/pdf/generate", {
         method: "POST",
@@ -650,7 +650,7 @@ export function SolarCalculatorPage() {
                         onClick={() => startCheckout("pdf_report")}
                         disabled={purchaseBusy === "pdf_report"}
                       >
-                        {purchaseBusy === "pdf_report" ? "Suunamine..." : "Lisa PDF raport 2,99 €"}
+                        {purchaseBusy === "pdf_report" ? "Suunamine..." : "Lisa PDF raport"}
                       </button>
                     ) : (
                       <button type="button" className="btn-glow" onClick={downloadPdf} disabled={!canDownloadPdf(unlock)}>
@@ -661,6 +661,15 @@ export function SolarCalculatorPage() {
                   <p className="mt-2 text-xs text-zinc-300">
                     Projekt: <span className="font-medium text-zinc-100">{projectId}</span>
                   </p>
+                </div>
+              ) : !FEATURES.paywallEnabled ? (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm text-zinc-300">Laadi alla kokkuvõtte PDF.</p>
+                    <button type="button" className="btn-glow" onClick={downloadPdf}>
+                      Laadi PDF alla
+                    </button>
+                  </div>
                 </div>
               ) : null}
             </article>

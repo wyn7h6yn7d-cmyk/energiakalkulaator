@@ -35,7 +35,7 @@ export function VppPageClient() {
   }, [annualRevenueEur, efficiencyPct, investmentEur, lifetimeYears]);
 
   const downloadPdf = async () => {
-    if (!projectId || !unlock.fullAnalysisSessionId || !unlock.pdfSessionId) return;
+    if (!projectId) return;
     try {
       const res = await fetch("/api/pdf/generate", {
         method: "POST",
@@ -283,9 +283,7 @@ export function VppPageClient() {
 
         {FEATURES.paywallEnabled ? (
           <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-            <p className="text-sm text-zinc-200">
-              PDF raport (2,99 €) on saadaval pärast Täisanalüüsi avamist ning avab konkreetse projekti raporti allalaadimise.
-            </p>
+            <p className="text-sm text-zinc-200">PDF raport on saadaval pärast ligipääsu avamist.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {!unlock.pdfUnlocked ? (
                 <button
@@ -294,7 +292,7 @@ export function VppPageClient() {
                   onClick={() => startCheckout("pdf_report")}
                   disabled={purchaseBusy === "pdf_report"}
                 >
-                  {purchaseBusy === "pdf_report" ? "Suunamine..." : "Lisa PDF raport 2,99 €"}
+                  {purchaseBusy === "pdf_report" ? "Suunamine..." : "Lisa PDF raport"}
                 </button>
               ) : (
                 <button type="button" className="btn-glow" onClick={downloadPdf} disabled={!canDownloadPdf(unlock)}>
@@ -303,7 +301,16 @@ export function VppPageClient() {
               )}
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-zinc-300">Laadi alla kokkuvõtte PDF.</p>
+              <button type="button" className="btn-glow" onClick={downloadPdf}>
+                Laadi PDF alla
+              </button>
+            </div>
+          </div>
+        )}
       </PaywallCard>
     </div>
   );
