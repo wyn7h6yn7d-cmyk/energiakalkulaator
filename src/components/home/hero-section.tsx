@@ -92,7 +92,7 @@ export function HeroSection() {
             </div>
           </div>
           <p className="mt-3 text-xs text-zinc-400">
-            Märkus: see on näidis “product feel” eelvaade. Reaalsed tulemused sõltuvad sinu sisenditest.
+            Märkus: see on näidis!
           </p>
         </div>
       </div>
