@@ -16,8 +16,6 @@ export function SiteFooter() {
                 width={44}
                 height={44}
                 sizes="44px"
-                quality={100}
-                unoptimized
                 className="h-[92%] w-[92%] object-contain"
               />
             </div>

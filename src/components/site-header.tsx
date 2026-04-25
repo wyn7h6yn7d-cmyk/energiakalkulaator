@@ -133,7 +133,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 overflow-x-clip px-3 py-2 sm:px-5 sm:py-3 lg:px-8">
-      <div className="mx-auto flex h-[72px] w-full max-w-7xl min-w-0 items-center justify-between gap-3 rounded-2xl border border-emerald-300/24 bg-zinc-950/72 px-3 shadow-[0_12px_36px_rgba(0,0,0,0.42),0_0_28px_rgba(16,185,129,0.07)] backdrop-blur-xl sm:px-4 lg:h-[78px] lg:px-5">
+      <div className="mx-auto flex h-[72px] w-full max-w-7xl min-w-0 items-center justify-between gap-3 rounded-2xl border border-emerald-300/24 bg-zinc-950/72 px-3 shadow-[0_12px_36px_rgba(0,0,0,0.42),0_0_28px_rgba(16,185,129,0.07)] backdrop-blur-md sm:px-4 lg:h-[78px] lg:px-5">
         <Link
           href="/"
           className="flex min-w-0 max-w-[calc(100%-3.5rem)] items-center gap-2.5 sm:gap-3"
@@ -147,8 +147,6 @@ export function SiteHeader() {
               width={44}
               height={44}
               sizes="44px"
-              quality={100}
-              unoptimized
               className="h-[92%] w-[92%] object-contain"
               priority
             />
@@ -182,7 +180,7 @@ export function SiteHeader() {
         <div className="flex shrink-0 items-center justify-end gap-2">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/[0.06] text-zinc-100 shadow-[0_0_24px_rgba(16,185,129,0.08)] backdrop-blur-xl transition-colors hover:bg-white/[0.1] lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/[0.06] text-zinc-100 shadow-[0_0_24px_rgba(16,185,129,0.08)] backdrop-blur-md transition-colors hover:bg-white/[0.1] lg:hidden"
             aria-label={mobileOpen ? "Sulge menüü" : "Ava menüü"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
@@ -244,14 +242,14 @@ function MobileMenu({
   }, []);
 
   return (
-    <div className="lg:hidden">
+      <div className="lg:hidden">
       <div
-        className="fixed inset-0 z-40 bg-zinc-950/60 backdrop-blur-xl"
+        className="fixed inset-0 z-40 bg-zinc-950/60 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
       <div className="relative z-50 mx-auto max-w-7xl px-3 pb-4 pt-2 sm:px-5 lg:px-8">
-        <div className="min-w-0 overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/88 p-2 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+        <div className="min-w-0 overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/88 p-2 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur-md">
           <div className="flex items-center justify-between gap-2 px-2 py-2">
             <div className="flex min-w-0 items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-emerald-300/45 shadow-[0_0_16px_rgba(16,185,129,0.2)]">
@@ -261,8 +259,6 @@ function MobileMenu({
                   width={32}
                   height={32}
                   sizes="32px"
-                  quality={100}
-                  unoptimized
                   className="h-[92%] w-[92%] object-contain"
                 />
               </div>
