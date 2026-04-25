@@ -37,6 +37,57 @@ export type SolarScenarioResult = {
   };
 };
 
+export type SolarCoreFormulaInput = {
+  systemKw: number;
+  yieldKwhPerKw: number;
+  orientationFactor: number;
+  shadingPercent: number;
+  selfConsumptionPercent: number;
+  annualConsumptionKwh: number;
+  purchasePriceEurKwh: number;
+  exportPriceEurKwh: number;
+  annualMaintenanceCost: number;
+  investment: number;
+};
+
+export type SolarCoreFormulaResult = {
+  annualProductionKwh: number;
+  selfConsumedKwh: number;
+  exportedKwh: number;
+  annualSavings: number;
+  exportRevenue: number;
+  netBenefit: number;
+  paybackYears: number | null;
+};
+
+export function calculateSolarCoreFormulas(input: SolarCoreFormulaInput): SolarCoreFormulaResult {
+  const annualProductionKwh =
+    Math.max(input.systemKw, 0) *
+    Math.max(input.yieldKwhPerKw, 0) *
+    Math.max(input.orientationFactor, 0) *
+    (1 - clamp(input.shadingPercent, 0, 100) / 100);
+
+  const selfConsumedKwh = Math.min(
+    (annualProductionKwh * clamp(input.selfConsumptionPercent, 0, 100)) / 100,
+    Math.max(input.annualConsumptionKwh, 0),
+  );
+  const exportedKwh = Math.max(annualProductionKwh - selfConsumedKwh, 0);
+  const annualSavings = selfConsumedKwh * Math.max(input.purchasePriceEurKwh, 0);
+  const exportRevenue = exportedKwh * Math.max(input.exportPriceEurKwh, 0);
+  const netBenefit = annualSavings + exportRevenue - Math.max(input.annualMaintenanceCost, 0);
+  const paybackYears = netBenefit > 0 ? Math.max(input.investment, 0) / netBenefit : null;
+
+  return {
+    annualProductionKwh,
+    selfConsumedKwh,
+    exportedKwh,
+    annualSavings,
+    exportRevenue,
+    netBenefit,
+    paybackYears,
+  };
+}
+
 export function computeSolarScenario(input: SolarScenarioInput, a: SolarAssumptions): SolarScenarioResult {
   const years = Math.max(1, Math.round(a.years));
   const prod0 = Math.max(0, input.annualProductionKwh);
@@ -98,16 +149,8 @@ const directionFactorMap: Record<CalculatorInput["panelDirection"], number> = {
   muu: 0.85,
 };
 
-const profileFactorMap: Record<CalculatorInput["consumptionProfile"], number> = {
-  "kodu-paev": 1.08,
-  "tool-ohtul": 0.9,
-  ettevote: 1.14,
-  kohandatud: 1,
-};
-
 function computeScenario(input: CalculatorInput, withBattery: boolean): ScenarioResult {
   const directionFactor = directionFactorMap[input.panelDirection];
-  const profileFactor = profileFactorMap[input.consumptionProfile];
   const shadingFactor = clamp(1 - toRatio(input.shadingPercent), 0, 1);
   const tiltPenalty = Math.min(Math.abs(input.tiltDeg - 35) * 0.0025, 0.18);
   const tiltFactor = clamp(1 - tiltPenalty, 0.82, 1.02);
@@ -138,39 +181,36 @@ function computeScenario(input: CalculatorInput, withBattery: boolean): Scenario
     };
   }
 
-  const baseSelfConsumptionRate = clamp(
-    toRatio(input.selfConsumptionWithoutBatteryPercent) * profileFactor,
-    0.05,
-    0.98,
-  );
-  const batteryEfficiency = clamp(
-    toRatio(input.batteryEfficiencyPercent || input.batteryRoundTripPercent),
-    0.65,
-    1,
-  );
-  const batteryUsableKwh = input.batteryCapacityKwh * toRatio(input.batteryUsablePercent) * batteryEfficiency;
-  const batteryBoost = withBattery
-    ? clamp(
-        toRatio(input.selfConsumptionBoostWithBatteryPercent) +
-          clamp((batteryUsableKwh * 280) / Math.max(input.annualConsumptionKwh, 1), 0, 0.22),
-        0,
-        0.35,
-      )
+  const baseSelfConsumptionPercent = clamp(toRatio(input.selfConsumptionWithoutBatteryPercent) * 100, 0, 100);
+  const batteryBoostPercent = withBattery
+    ? clamp(toRatio(input.selfConsumptionBoostWithBatteryPercent) * 100, 0, 100)
     : 0;
-  const selfConsumptionRate = clamp(baseSelfConsumptionRate + batteryBoost, 0.05, 0.98);
-  const selfConsumedKwh = Math.min(annualProductionKwh * selfConsumptionRate, input.annualConsumptionKwh);
-  const exportedKwh = Math.max(annualProductionKwh - selfConsumedKwh, 0);
-  const avoidedGridPurchaseKwh = selfConsumedKwh;
-
+  const selfConsumptionPercent = clamp(baseSelfConsumptionPercent + batteryBoostPercent, 0, 100);
   const energyPrice = normalizeEurPerKwh(
     input.priceSource === "manual" ? input.manualSpotPrice : input.nordPoolAveragePrice,
   );
   const effectiveEnergyPrice =
     energyPrice + normalizeEurPerKwh(input.gridFeePrice) + normalizeEurPerKwh(input.marginPrice);
   const sellBackPrice = normalizeEurPerKwh(input.sellBackPrice);
-  const annualSavingsEur = avoidedGridPurchaseKwh * effectiveEnergyPrice;
-  const annualExportRevenueEur = exportedKwh * sellBackPrice;
-  const annualNetBenefitEur = annualSavingsEur + annualExportRevenueEur - input.annualMaintenanceEur;
+  const core = calculateSolarCoreFormulas({
+    systemKw: Math.max(input.pvPowerKw, 0),
+    yieldKwhPerKw: Math.max(specificYield * directionAndTiltFactor, 0),
+    orientationFactor: 1,
+    shadingPercent: input.shadingPercent,
+    selfConsumptionPercent,
+    annualConsumptionKwh: input.annualConsumptionKwh,
+    purchasePriceEurKwh: effectiveEnergyPrice,
+    exportPriceEurKwh: sellBackPrice,
+    annualMaintenanceCost: input.annualMaintenanceEur,
+    investment: 0,
+  });
+
+  const selfConsumedKwh = core.selfConsumedKwh;
+  const exportedKwh = core.exportedKwh;
+  const avoidedGridPurchaseKwh = selfConsumedKwh;
+  const annualSavingsEur = core.annualSavings;
+  const annualExportRevenueEur = core.exportRevenue;
+  const annualNetBenefitEur = core.netBenefit;
 
   const cashflowByYear: number[] = [];
   let totalNetBenefitPeriodEur = 0;
@@ -178,9 +218,11 @@ function computeScenario(input: CalculatorInput, withBattery: boolean): Scenario
   for (let year = 1; year <= input.periodYears; year += 1) {
     const growth = (1 + toRatio(input.annualPriceGrowthPercent)) ** (year - 1);
     const discount = (1 + toRatio(input.discountRatePercent)) ** year;
+    const yearlySelfConsumed = Math.min((production * selfConsumptionPercent) / 100, input.annualConsumptionKwh);
+    const yearlyExported = Math.max(production - yearlySelfConsumed, 0);
     const yearlyBenefit =
-      ((production * selfConsumptionRate * effectiveEnergyPrice * growth) +
-        (Math.max(production - production * selfConsumptionRate, 0) * sellBackPrice * growth) -
+      ((yearlySelfConsumed * effectiveEnergyPrice * growth) +
+        (yearlyExported * sellBackPrice * growth) -
         input.annualMaintenanceEur -
         (year === input.inverterReplacementYear ? input.inverterReplacementCostEur : 0)) /
       discount;
@@ -189,7 +231,7 @@ function computeScenario(input: CalculatorInput, withBattery: boolean): Scenario
     production *= 1 - toRatio(input.degradationPercent);
   }
 
-  const selfConsumptionRatePercent = selfConsumptionRate * 100;
+  const selfConsumptionRatePercent = selfConsumptionPercent;
   const gridDependenceReductionPercent = clamp(
     (avoidedGridPurchaseKwh / Math.max(input.annualConsumptionKwh, 1)) * 100,
     0,
@@ -213,8 +255,8 @@ function computeScenario(input: CalculatorInput, withBattery: boolean): Scenario
   };
 }
 
-function interpretationKindFromPayback(paybackYears: number): InterpretationKind {
-  if (!Number.isFinite(paybackYears)) return "needs_input";
+function interpretationKindFromPayback(paybackYears: number | null): InterpretationKind {
+  if (paybackYears === null || !Number.isFinite(paybackYears)) return "needs_input";
   if (paybackYears <= 7) return "fast";
   if (paybackYears <= 12) return "moderate";
   return "long";
@@ -231,8 +273,7 @@ export function calculateSolarComparison(input: CalculatorInput): ComparisonResu
     (input.hasBattery ? Math.max(input.batteryCostEur, input.batteryInvestmentEur) : 0) -
     input.supportEur;
 
-  const paybackYears =
-    selected.annualNetBenefitEur > 0 ? totalInvestmentEur / selected.annualNetBenefitEur : Number.POSITIVE_INFINITY;
+  const paybackYears = selected.annualNetBenefitEur > 0 ? totalInvestmentEur / selected.annualNetBenefitEur : null;
 
   const batteryAddedValuePeriodEur = withBattery.totalNetBenefitPeriodEur - withoutBattery.totalNetBenefitPeriodEur;
   const effectiveEnergyPrice =

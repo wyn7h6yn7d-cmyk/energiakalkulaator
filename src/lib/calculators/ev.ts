@@ -29,3 +29,71 @@ export function pickChargerStepKw(maxKw: number) {
   }
   return chosen;
 }
+
+export type EvChargingFormulaInput = {
+  amps: number;
+  phase: "1" | "3";
+  householdReserveKw: number;
+  energyToChargeKwh: number;
+  chargerKw: number;
+  priceEurKwh: number;
+};
+
+export type EvChargingFormulaResult = {
+  singlePhaseKw: number;
+  threePhaseKw: number;
+  mainFuseKw: number;
+  availableForEvKw: number;
+  chargingTimeHours: number;
+  chargingCost: number;
+  recommendedChargerKw: number;
+  fits11Kw: boolean;
+  fits22Kw: boolean;
+  loadManagementRecommended: boolean;
+  warning22Kw: string | null;
+};
+
+export function calculateEvCharging(input: EvChargingFormulaInput): EvChargingFormulaResult {
+  const amps = Math.max(input.amps, 0);
+  const reserveKw = Math.max(input.householdReserveKw, 0);
+  const energyKwh = Math.max(input.energyToChargeKwh, 0);
+  const chargerKw = Math.max(input.chargerKw, 0);
+  const priceEurKwh = Math.max(input.priceEurKwh, 0);
+
+  // Valemid:
+  // singlePhaseKw = 230 * amps / 1000
+  // threePhaseKw = Math.sqrt(3) * 400 * amps / 1000
+  // availableForEvKw = mainFuseKw * 0.8 - householdReserveKw
+  // chargingTimeHours = energyToChargeKwh / chargerKw
+  // chargingCost = energyToChargeKwh * priceEurKwh
+  const singlePhaseKw = (230 * amps) / 1000;
+  const threePhaseKw = (Math.sqrt(3) * 400 * amps) / 1000;
+  const mainFuseKw = input.phase === "1" ? singlePhaseKw : threePhaseKw;
+  const availableForEvKw = mainFuseKw * 0.8 - reserveKw;
+
+  const safeChargerKw = Math.max(chargerKw, 0.000001);
+  const chargingTimeHours = energyKwh / safeChargerKw;
+  const chargingCostValue = energyKwh * priceEurKwh;
+
+  const recommendedChargerKw = pickChargerStepKw(Math.max(availableForEvKw, 0));
+  const fits11Kw = availableForEvKw >= 11 - 1e-6;
+  const fits22Kw = availableForEvKw >= 22 - 1e-6;
+  const loadManagementRecommended = chargerKw > Math.max(availableForEvKw, 0) || fits22Kw === false;
+  const warning22Kw = fits22Kw
+    ? null
+    : "22 kW laadija eeldab tavaliselt suuremat peakaitset või koormusjuhtimist.";
+
+  return {
+    singlePhaseKw,
+    threePhaseKw,
+    mainFuseKw,
+    availableForEvKw,
+    chargingTimeHours,
+    chargingCost: chargingCostValue,
+    recommendedChargerKw,
+    fits11Kw,
+    fits22Kw,
+    loadManagementRecommended,
+    warning22Kw,
+  };
+}

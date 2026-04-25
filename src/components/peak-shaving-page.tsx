@@ -7,7 +7,7 @@ import { UsedAssumptionsBlock } from "@/components/used-assumptions-block";
 import { AdvancedInputAccordion } from "@/components/advanced-input-accordion";
 import { useMemo, useState } from "react";
 import {
-  requiredCutKw,
+  calculatePeakShaving,
 } from "@/lib/calculators/peak-shaving";
 
 function toNumber(value: string) {
@@ -63,30 +63,30 @@ export function PeakShavingPageClient() {
     const feeGrowth = Math.min(Math.max(toNumber(demandFeeGrowthPct), 0), 100) / 100;
     const years = Math.max(Math.round(toNumber(periodYears)), 1);
 
-    // vajalik_lõige = praegune_peak - soovitud_piir
-    const needCut = requiredCutKw(peak, limit);
-    const usableBatteryEnergyKwh = battKwh * usableSocRange * efficiency;
-    const energyLimitedCut = usableBatteryEnergyKwh / hours;
-    // võimalik_lõige = min(vajalik_lõige, aku_võimsus, energia_põhine_lõige)
-    const achievableCut = Math.max(Math.min(needCut, battKw, energyLimitedCut), 0);
+    const peakShaving = calculatePeakShaving({
+      currentPeakKw: peak,
+      targetPeakKw: limit,
+      batteryKwh: battKwh,
+      usableSocPercent: usableSocRange * 100,
+      efficiencyPercent: efficiency * 100,
+      batteryPowerKw: battKw,
+      peakDurationHours: hours,
+      demandChargeEurKwMonth: fee,
+      annualMaintenanceCost: maintenance,
+      investment: inv,
+    });
 
-    const powerLimits = needCut > 0 && battKw < needCut;
-    const energyLimits = needCut > 0 && energyLimitedCut < needCut;
-    const targetRealistic = needCut <= 0 || achievableCut >= needCut - 1e-9;
-    const durationLimits = needCut > 0 && !powerLimits && !energyLimits && hours > 2.5;
-    const limitingFactor = needCut <= 0
-      ? "puudub"
-      : powerLimits
-        ? "aku võimsus"
-        : energyLimits
-          ? "aku maht"
-          : durationLimits
-            ? "tipu kestus"
-            : "piirang puudub";
-
-    const annualSavings = achievableCut * fee * 12;
-    const netSavings = annualSavings - maintenance;
-    const paybackYears = netSavings > 0 ? inv / netSavings : Number.POSITIVE_INFINITY;
+    const needCut = peakShaving.requiredReductionKw;
+    const usableBatteryEnergyKwh = peakShaving.usableBatteryEnergyKwh;
+    const energyLimitedCut = peakShaving.energyLimitedReductionKw;
+    const achievableCut = peakShaving.possibleReductionKw;
+    const annualSavings = peakShaving.annualSavings;
+    const netSavings = peakShaving.netSavings;
+    const paybackYears = peakShaving.paybackYears;
+    const targetRealistic = peakShaving.targetAchievable;
+    const limitingFactor = peakShaving.limitingFactor;
+    const powerLimits = !targetRealistic && limitingFactor === "aku võimsus";
+    const energyLimits = !targetRealistic && (limitingFactor === "aku maht" || limitingFactor === "tipu kestus");
 
     let discountedNet = -inv;
     for (let year = 1; year <= years; year += 1) {
@@ -429,11 +429,11 @@ export function PeakShavingPageClient() {
                 <p className="metric-label">Tasuvusaeg</p>
                 <div className="metric-main">
                   <strong className="metric-value">
-                    {Number.isFinite(result.paybackYears) ? result.paybackYears.toFixed(1).replace(".", ",") : "—"}
+                    {result.paybackYears !== null ? result.paybackYears.toFixed(1).replace(".", ",") : "—"}
                   </strong>
-                  <span className="metric-unit">a</span>
+                  {result.paybackYears !== null ? <span className="metric-unit">a</span> : null}
                 </div>
-                <p className="metric-help">Investeering / netosääst.</p>
+                <p className="metric-help">Investeering / netosääst (kuvatakse kui netosääst &gt; 0).</p>
               </div>
               <div className="metric-card metric-card-accent-emerald">
                 <p className="metric-label">Piirav tegur</p>
@@ -441,6 +441,13 @@ export function PeakShavingPageClient() {
                   <strong className="metric-value">{result.limitingFactor}</strong>
                 </div>
                 <p className="metric-help">Mis piirab sihtlõike saavutamist enim.</p>
+              </div>
+              <div className="metric-card metric-card-accent-teal">
+                <p className="metric-label">Kas eesmärk on saavutatav</p>
+                <div className="metric-main">
+                  <strong className="metric-value">{result.targetRealistic ? "Jah" : "Ei"}</strong>
+                </div>
+                <p className="metric-help">Võrdlus: vajalik lõige vs võimalik lõige.</p>
               </div>
             </div>
             <div className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-sm text-zinc-200">

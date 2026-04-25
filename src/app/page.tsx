@@ -55,7 +55,8 @@ export default function Home() {
                 </span>
               </h1>
               <p className="mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-zinc-300 sm:text-base">
-                Vaata kiiresti, kas päikesejaam, aku või elektripaketi vahetus võiks sinu olukorras mõistlik olla.
+                Arvuta kiiresti, kas päikesejaam, aku, EV laadimine või elektripaketi vahetus võiks sinu olukorras
+                rahaliselt mõistlik olla.
               </p>
 
               <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
@@ -80,7 +81,9 @@ export default function Home() {
                     <span className="h-2 w-2 rounded-full bg-emerald-300" />
                     LIVE
                   </div>
-                  <div className="text-[11px] text-zinc-500">Uuendub reaalajas</div>
+                  <div className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-2 py-1 text-[11px] text-zinc-400">
+                    Näidisvaade / Demoandmed
+                  </div>
                 </div>
 
                 <div className="min-w-0 rounded-xl border border-emerald-300/26 bg-white/[0.03] px-3 py-3.5">

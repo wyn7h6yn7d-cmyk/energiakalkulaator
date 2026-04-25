@@ -7,11 +7,12 @@ import {
 } from "../elering";
 import { calculateComparison } from "../calculator";
 import type { CalculatorInput } from "../../types/calculator";
-import { mainFusePower3fKw } from "./ev";
-import { annualPeakShavingSavingsEur, possibleCutKw, requiredCutKw } from "./peak-shaving";
+import { calculateEvCharging, mainFusePower3fKw } from "./ev";
+import { annualPeakShavingSavingsEur, calculatePeakShaving, possibleCutKw, requiredCutKw } from "./peak-shaving";
 import { toRatio } from "../units";
-import { calculateVppModel } from "./vpp";
+import { calculateVppCore, calculateVppModel } from "./vpp";
 import { calculateElectricityPlan } from "./electricity-plan";
+import { calculateSolarCoreFormulas } from "./solar";
 
 function baseSolarInput(overrides: Partial<CalculatorInput> = {}): CalculatorInput {
   return {
@@ -77,9 +78,32 @@ describe("unit conversions", () => {
 });
 
 describe("solar calculator sanity", () => {
+  it("core solar formulas follow the requested equations", () => {
+    const core = calculateSolarCoreFormulas({
+      systemKw: 12,
+      yieldKwhPerKw: 975,
+      orientationFactor: 0.95,
+      shadingPercent: 8,
+      selfConsumptionPercent: 55,
+      annualConsumptionKwh: 9000,
+      purchasePriceEurKwh: 0.18,
+      exportPriceEurKwh: 0.07,
+      annualMaintenanceCost: 200,
+      investment: 13500,
+    });
+
+    expect(core.annualProductionKwh).toBeCloseTo(10225.8, 1);
+    expect(core.selfConsumedKwh).toBeCloseTo(5624.19, 2);
+    expect(core.exportedKwh).toBeCloseTo(4601.61, 2);
+    expect(core.annualSavings).toBeCloseTo(1012.3542, 2);
+    expect(core.exportRevenue).toBeCloseTo(322.1127, 2);
+    expect(core.netBenefit).toBeCloseTo(1134.4669, 2);
+    expect(core.paybackYears).toBeCloseTo(11.90, 2);
+  });
+
   it("solar annual net benefit formula gives expected value", () => {
     const result = calculateComparison(baseSolarInput());
-    expect(result.selected.annualNetBenefitEur).toBeCloseTo(914.56, 2);
+    expect(result.selected.annualNetBenefitEur).toBeCloseTo(966.4, 2);
   });
 
   it("self-consumption percent converts both 76 and 0.76 correctly", () => {
@@ -104,13 +128,37 @@ describe("solar calculator sanity", () => {
       }),
     );
     expect(result.selected.annualNetBenefitEur).toBeLessThanOrEqual(0);
-    expect(Number.isFinite(result.paybackYears)).toBe(false);
+    expect(result.paybackYears).toBeNull();
   });
 });
 
 describe("EV and peak shaving formulas", () => {
   it("EV 3-phase 16A is about 11 kW", () => {
     expect(mainFusePower3fKw(16)).toBeCloseTo(11.085, 3);
+  });
+
+  it("EV charging formulas return expected recommendation fields", () => {
+    const result = calculateEvCharging({
+      amps: 25,
+      phase: "3",
+      householdReserveKw: 2,
+      energyToChargeKwh: 30,
+      chargerKw: 11,
+      priceEurKwh: 0.16,
+    });
+
+    expect(result.singlePhaseKw).toBeCloseTo(5.75, 3);
+    expect(result.threePhaseKw).toBeCloseTo(17.3205, 3);
+    expect(result.availableForEvKw).toBeCloseTo(11.8564, 3);
+    expect(result.chargingTimeHours).toBeCloseTo(30 / 11, 6);
+    expect(result.chargingCost).toBeCloseTo(4.8, 6);
+    expect(result.recommendedChargerKw).toBe(11);
+    expect(result.fits11Kw).toBe(true);
+    expect(result.fits22Kw).toBe(false);
+    expect(result.loadManagementRecommended).toBe(true);
+    expect(result.warning22Kw).toBe(
+      "22 kW laadija eeldab tavaliselt suuremat peakaitset või koormusjuhtimist.",
+    );
   });
 
   it("peak shaving annual savings are computed correctly", () => {
@@ -120,6 +168,49 @@ describe("EV and peak shaving formulas", () => {
     expect(needCut).toBe(30);
     expect(possible).toBe(20);
     expect(annual).toBeCloseTo(1560, 6);
+  });
+
+  it("peak shaving core formulas return required fields", () => {
+    const result = calculatePeakShaving({
+      currentPeakKw: 120,
+      targetPeakKw: 90,
+      batteryKwh: 80,
+      usableSocPercent: 75,
+      efficiencyPercent: 92,
+      batteryPowerKw: 25,
+      peakDurationHours: 2,
+      demandChargeEurKwMonth: 6.5,
+      annualMaintenanceCost: 500,
+      investment: 30000,
+    });
+
+    expect(result.requiredReductionKw).toBe(30);
+    expect(result.usableBatteryEnergyKwh).toBeCloseTo(55.2, 6);
+    expect(result.energyLimitedReductionKw).toBeCloseTo(27.6, 6);
+    expect(result.possibleReductionKw).toBe(25);
+    expect(result.annualSavings).toBeCloseTo(1950, 6);
+    expect(result.netSavings).toBeCloseTo(1450, 6);
+    expect(result.paybackYears).toBeCloseTo(20.6896, 3);
+    expect(result.targetAchievable).toBe(false);
+    expect(result.limitingFactor).toBe("aku võimsus");
+  });
+
+  it("peak shaving payback is null when net savings <= 0", () => {
+    const result = calculatePeakShaving({
+      currentPeakKw: 120,
+      targetPeakKw: 90,
+      batteryKwh: 40,
+      usableSocPercent: 60,
+      efficiencyPercent: 90,
+      batteryPowerKw: 10,
+      peakDurationHours: 2,
+      demandChargeEurKwMonth: 2,
+      annualMaintenanceCost: 1000,
+      investment: 20000,
+    });
+
+    expect(result.netSavings).toBeLessThanOrEqual(0);
+    expect(result.paybackYears).toBeNull();
   });
 
   it("peak shaving identifies limiting factor through min-cut logic", () => {
@@ -132,6 +223,45 @@ describe("EV and peak shaving formulas", () => {
 });
 
 describe("VPP and electricity plan formulas", () => {
+  it("VPP core formulas follow requested equations", () => {
+    const result = calculateVppCore({
+      batteryKwh: 100,
+      batteryKw: 50,
+      investment: 60000,
+      annualRevenuePotential: 12000,
+      roundtripEfficiencyPercent: 92,
+      availabilityPercent: 95,
+      riskDiscountPercent: 10,
+      annualMaintenanceCost: 250,
+      lifetimeYears: 10,
+    });
+
+    expect(result.grossRevenue).toBeCloseTo(12000, 6);
+    expect(result.netRevenue).toBeCloseTo(9189.2, 6);
+    expect(result.paybackYears).toBeCloseTo(6.5295, 3);
+    expect(result.totalProfit).toBeCloseTo(31892, 3);
+    expect(result.conservativeNetRevenue).toBeCloseTo(6432.44, 6);
+    expect(result.baseNetRevenue).toBeCloseTo(9189.2, 6);
+    expect(result.optimisticNetRevenue).toBeCloseTo(11945.96, 6);
+  });
+
+  it("VPP netRevenue <= 0 does not return numeric payback", () => {
+    const result = calculateVppCore({
+      batteryKwh: 100,
+      batteryKw: 50,
+      investment: 60000,
+      annualRevenuePotential: 1000,
+      roundtripEfficiencyPercent: 80,
+      availabilityPercent: 70,
+      riskDiscountPercent: 60,
+      annualMaintenanceCost: 2000,
+      lifetimeYears: 10,
+    });
+
+    expect(result.netRevenue).toBeLessThanOrEqual(0);
+    expect(result.paybackYears).toBeNull();
+  });
+
   it("VPP scenario multipliers produce conservative/base/optimistic", () => {
     const model = calculateVppModel({
       capacityKwh: "100",
@@ -179,5 +309,30 @@ describe("VPP and electricity plan formulas", () => {
     const withoutVatInPrices = calculateElectricityPlan({ ...common, pricesIncludeVat: false });
     const withVatAlreadyInPrices = calculateElectricityPlan({ ...common, pricesIncludeVat: true });
     expect(withoutVatInPrices.spotAnnualCost / withVatAlreadyInPrices.spotAnnualCost).toBeCloseTo(1.24, 2);
+  });
+
+  it("electricity plan includes margin, network, renewable and excise in formulas", () => {
+    const result = calculateElectricityPlan({
+      mode: "quick",
+      monthlyBreakdown: Array.from({ length: 12 }, () => ""),
+      monthlyKwh: "100",
+      daySharePct: "50",
+      nightSharePct: "50",
+      spotEurKwh: "0.10",
+      fixedEurKwh: "0.12",
+      spotMarginEurKwh: "0.01",
+      gridFeeEurKwh: "0.04",
+      renewableFeeEurKwh: "0.001",
+      exciseEurKwh: "0.0015",
+      spotMonthlyFeeEur: "2",
+      fixedMonthlyFeeEur: "3",
+      networkMonthlyFeeEur: "4",
+      pricesIncludeVat: true,
+    });
+
+    const expectedSpot = 1200 * (0.10 + 0.01 + 0.04 + 0.001 + 0.0015) + (2 + 4) * 12;
+    const expectedFixed = 1200 * (0.12 + 0.04 + 0.001 + 0.0015) + (3 + 4) * 12;
+    expect(result.spotAnnualCost).toBeCloseTo(expectedSpot, 6);
+    expect(result.fixedAnnualCost).toBeCloseTo(expectedFixed, 6);
   });
 });

@@ -112,11 +112,54 @@ function volatilityIndex(points: MarketPricePoint[]) {
   return { mean, std, cv };
 }
 
-function priceClass(p: number, mean: number, std: number) {
-  // Cheap/avg/expensive/peak based on z-score.
-  const z = std > 0 ? (p - mean) / std : 0;
-  if (z <= -0.6) return { label: "odav", pill: "bg-emerald-400/15 text-emerald-100 ring-1 ring-emerald-300/20" };
-  if (z >= 0.6) return { label: "kallis", pill: "bg-teal-400/12 text-teal-100 ring-1 ring-teal-300/20" };
+function quantile(sorted: number[], q: number) {
+  if (!sorted.length) return 0;
+  if (sorted.length === 1) return sorted[0];
+  const pos = (sorted.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  const a = sorted[base];
+  const b = sorted[Math.min(base + 1, sorted.length - 1)];
+  return a + rest * (b - a);
+}
+
+function buildPriceThresholds(points: MarketPricePoint[]) {
+  const values = points
+    .map((p) => p.price_eur_per_kwh)
+    .filter((x) => Number.isFinite(x))
+    .sort((a, b) => a - b);
+  if (!values.length) return null;
+
+  const min = values[0];
+  const max = values[values.length - 1];
+  const range = max - min;
+
+  return {
+    q25: quantile(values, 0.25),
+    q75: quantile(values, 0.75),
+    q90: quantile(values, 0.9),
+    range,
+  };
+}
+
+function priceClass(p: number, thresholds: { q25: number; q75: number; q90: number; range: number } | null) {
+  if (!thresholds) {
+    return { label: "keskmine", pill: "bg-white/[0.04] text-zinc-200 ring-1 ring-white/10" };
+  }
+
+  const { q25, q75, q90, range } = thresholds;
+  // Kui päeva hinnavahemik on väga väike, väldi agressiivset "tipp" märgistust.
+  const allowPeak = range >= 0.008; // ~0.8 snt/kWh
+
+  if (p <= q25) {
+    return { label: "odav", pill: "bg-emerald-400/15 text-emerald-100 ring-1 ring-emerald-300/20" };
+  }
+  if (allowPeak && p >= q90) {
+    return { label: "tipp", pill: "bg-rose-400/16 text-rose-100 ring-1 ring-rose-300/25" };
+  }
+  if (p >= q75) {
+    return { label: "kallis", pill: "bg-amber-400/15 text-amber-100 ring-1 ring-amber-300/25" };
+  }
   return { label: "keskmine", pill: "bg-white/[0.04] text-zinc-200 ring-1 ring-white/10" };
 }
 
@@ -617,6 +660,7 @@ export function PriceViewClient({
           <div className="grid grid-cols-1 gap-4 lg:col-span-7">
             <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-4 sm:p-5">
               <div className="mb-3 text-sm font-semibold text-zinc-50">Odavaimad aknad</div>
+              <div className="mb-3 text-xs text-zinc-400">Kvantiilipõhine loogika: odav = alumine 25%.</div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <WindowCard hours={1} pick={windowPicks.cheapest["1"]} vat={vat} variant="cheapest" />
                 <WindowCard hours={2} pick={windowPicks.cheapest["2"]} vat={vat} variant="cheapest" />
@@ -626,6 +670,7 @@ export function PriceViewClient({
             </div>
             <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-4 sm:p-5">
               <div className="mb-3 text-sm font-semibold text-zinc-50">Kalleimad aknad</div>
+              <div className="mb-3 text-xs text-zinc-400">Kvantiilipõhine loogika: kallis/tipp = ülemine 25% (tipp ülemine 10%).</div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <WindowCard hours={1} pick={windowPicks.priciest["1"]} vat={vat} variant="priciest" />
                 <WindowCard hours={2} pick={windowPicks.priciest["2"]} vat={vat} variant="priciest" />
@@ -674,15 +719,12 @@ export function PriceViewClient({
           <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/35">
             <div className="grid gap-2 p-2 sm:hidden">
               {(() => {
-                const dayStats = summarizeDay(visiblePoints);
-                const mean = dayStats?.mean ?? 0;
-                const vi = volatilityIndex(visiblePoints);
-                const std = vi?.std ?? 0;
+                const thresholds = buildPriceThresholds(visiblePoints);
                 return visiblePoints
                   .slice()
                   .sort((a, b) => a.ts - b.ts)
                   .map((p) => {
-                    const cls = priceClass(p.price_eur_per_kwh, mean, std);
+                    const cls = priceClass(p.price_eur_per_kwh, thresholds);
                     const isNow = Math.abs(p.ts - nowTs) <= intervalSec / 2;
                     return (
                       <article
@@ -734,15 +776,12 @@ export function PriceViewClient({
                 </thead>
                 <tbody className="divide-y divide-white/12">
                   {(() => {
-                    const dayStats = summarizeDay(visiblePoints);
-                    const mean = dayStats?.mean ?? 0;
-                    const vi = volatilityIndex(visiblePoints);
-                    const std = vi?.std ?? 0;
+                    const thresholds = buildPriceThresholds(visiblePoints);
                     return visiblePoints
                       .slice()
                       .sort((a, b) => a.ts - b.ts)
                       .map((p) => {
-                        const cls = priceClass(p.price_eur_per_kwh, mean, std);
+                        const cls = priceClass(p.price_eur_per_kwh, thresholds);
                         const isNow = Math.abs(p.ts - nowTs) <= intervalSec / 2;
                         return (
                           <tr key={p.ts} className={isNow ? "bg-teal-400/12" : "bg-transparent hover:bg-white/[0.04]"}>

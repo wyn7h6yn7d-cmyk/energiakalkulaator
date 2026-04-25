@@ -66,7 +66,7 @@ export interface ComparisonResult {
   withBattery: ScenarioResult;
   selected: ScenarioResult;
   totalInvestmentEur: number;
-  paybackYears: number;
+  paybackYears: number | null;
   batteryAddedValuePeriodEur: number;
   interpretationKind: InterpretationKind;
   effectiveEnergyPrice: number;

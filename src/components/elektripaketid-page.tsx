@@ -174,7 +174,7 @@ export function ElektripaketidPageClient() {
           Kiire võrdlus spot vs fikseeritud paketile. Sisesta ligikaudne kuutarbimine ja hinnad, et näha aastakulu vahet.
         </p>
         <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-zinc-300">
-          Elektrimüüjate paketihinnad võivad kiiresti muutuda. Kontrolli lõplik hind alati müüja juures.
+          Elektrimüüjate paketihinnad võivad muutuda. Kontrolli lõplik pakkumine alati müüja juures.
           Börsihinna andmed tulevad Eleringi turuandmetest.
           <div className="mt-2 text-zinc-400">
             Näidispaketid on käsitsi hallatavad (`src/data/electricity-plans.ts`) ja viimati uuendatud:{" "}
@@ -461,8 +461,9 @@ export function ElektripaketidPageClient() {
               <p className="mt-1 text-zinc-300">{result.reco}</p>
             </div>
             <p className="mt-3 text-xs text-zinc-400">
-              Arvutus: spot = tarbimine × (spot + marginaal + võrgutasu) + kuutasud; fixed =
-              tarbimine × (fixed + võrgutasu) + kuutasud. Kui KM pole hinnas, lisatakse 1,24x.
+              Arvutus: spot = tarbimine × (spot + marginaal + võrgutasu + taastuvenergia tasu + aktsiis) + kuutasud;
+              fixed = tarbimine × (fixed + võrgutasu + taastuvenergia tasu + aktsiis) + kuutasud. Kui KM pole hinnas,
+              lisatakse 1,24x.
             </p>
             <UsedAssumptionsBlock {...assumptionsInfo} />
           </article>

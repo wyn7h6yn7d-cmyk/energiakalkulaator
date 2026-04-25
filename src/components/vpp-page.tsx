@@ -153,7 +153,7 @@ export function VppPageClient() {
               {
                 label: "Märkus",
                 value:
-                  "VPP tegelik tulu sõltub turulepääsust, lepingutingimustest, aku kasutusest ja hinnakõikumistest.",
+                  "VPP tulu sõltub turulepääsust, lepingutingimustest, aku kasutusest ja hinnakõikumisest.",
               },
             ],
             formulas: [
@@ -182,7 +182,7 @@ export function VppPageClient() {
               { label: "Baas: netotulu (aasta 1)", value: fmtEur(model.perScenario[1]?.netRevYear1 ?? 0) },
               {
                 label: "Baas: tasuvusaeg",
-                value: model.perScenario[1]?.paybackYears ? `${model.perScenario[1].paybackYears.toFixed(1)} a` : "—",
+                value: model.perScenario[1]?.paybackYears !== null ? `${model.perScenario[1].paybackYears.toFixed(1)} a` : "—",
               },
               { label: "Baas: kogukasum", value: fmtEur(model.perScenario[1]?.totalProfit ?? 0) },
               { label: "Peamine riskitegur", value: model.mainRiskFactor },
@@ -443,7 +443,7 @@ export function VppPageClient() {
         <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-sm text-zinc-200">
           <strong className="block text-zinc-50">Märkus</strong>
           <p className="mt-1 text-zinc-300">
-            VPP tegelik tulu sõltub turulepääsust, lepingutingimustest, aku kasutusest ja hinnakõikumistest.
+            VPP tulu sõltub turulepääsust, lepingutingimustest, aku kasutusest ja hinnakõikumisest.
           </p>
         </div>
       </section>
@@ -488,9 +488,9 @@ export function VppPageClient() {
             <p className="metric-label">Baas: tasuvusaeg</p>
             <div className="metric-main">
               <strong className="metric-value">
-                {model.perScenario[1]?.paybackYears ? model.perScenario[1].paybackYears.toFixed(1) : "—"}
+                {model.perScenario[1]?.paybackYears !== null ? model.perScenario[1].paybackYears.toFixed(1) : "—"}
               </strong>
-              <span className="metric-unit">aastat</span>
+              {model.perScenario[1]?.paybackYears !== null ? <span className="metric-unit">aastat</span> : null}
             </div>
             <p className="metric-help">Mitu aastat kulub investeeringu tagasi teenimiseks.</p>
           </div>
@@ -523,7 +523,7 @@ export function VppPageClient() {
                 <div key={s.key} className="compare-row">
                   <span className="compare-label">{s.label}</span>
                   <strong>
-                    {s.paybackYears ? `${s.paybackYears.toFixed(1)} a` : "—"} · Kogukasum {fmtEur(s.totalProfit)}
+                    {s.paybackYears !== null ? `${s.paybackYears.toFixed(1)} a` : "—"} · Kogukasum {fmtEur(s.totalProfit)}
                   </strong>
                 </div>
               ))}
@@ -546,15 +546,15 @@ export function VppPageClient() {
                 <div className="grid gap-3 text-sm">
                   <div className="compare-row">
                     <span className="compare-label">Konservatiivne (70%)</span>
-                    <strong>{low ? `${low.toFixed(1)} a` : "—"}</strong>
+                    <strong>{low !== null ? `${low.toFixed(1)} a` : "—"}</strong>
                   </div>
                   <div className="compare-row">
                     <span className="compare-label">Baas</span>
-                    <strong>{base ? `${base.toFixed(1)} a` : "—"}</strong>
+                    <strong>{base !== null ? `${base.toFixed(1)} a` : "—"}</strong>
                   </div>
                   <div className="compare-row">
                     <span className="compare-label">Optimistlik (130%)</span>
-                    <strong>{high ? `${high.toFixed(1)} a` : "—"}</strong>
+                    <strong>{high !== null ? `${high.toFixed(1)} a` : "—"}</strong>
                   </div>
                 </div>
               );

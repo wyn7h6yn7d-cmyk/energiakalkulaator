@@ -319,7 +319,7 @@ export function SolarCalculatorPage() {
               { label: "Hinnanguline aastane sääst", value: `${formatNum(result.selected.annualSavingsEur, 0)} €` },
               {
                 label: "Lihtne tasuvusaeg",
-                value: Number.isFinite(result.paybackYears) ? `${result.paybackYears.toFixed(1)} a` : "—",
+                value: result.paybackYears !== null ? `${result.paybackYears.toFixed(1)} a` : "—",
               },
               { label: "Omakasutus", value: `${formatNum(result.selected.selfConsumptionRatePercent, 1)}%` },
               { label: "Võrku müük", value: `${formatNum(result.selected.exportedKwh, 0)} kWh` },
@@ -974,9 +974,11 @@ export function SolarCalculatorPage() {
               <p className="metric-label">Lihtne tasuvusaeg</p>
               <div className="metric-main">
                 <strong className="metric-value">
-                  {Number.isFinite(result.paybackYears) ? result.paybackYears.toFixed(1) : "Tasuvus puudub"}
+                  {result.paybackYears !== null
+                    ? result.paybackYears.toFixed(1)
+                    : "Antud sisenditega tasuvusaega ei saa arvutada."}
                 </strong>
-                <span className="metric-unit">a</span>
+                {result.paybackYears !== null ? <span className="metric-unit">a</span> : null}
               </div>
               <p className="metric-help">Kui netokasu ≤ 0, tasuvusaega numbrina ei kuvata.</p>
             </div>

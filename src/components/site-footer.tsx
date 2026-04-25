@@ -32,6 +32,11 @@ export function SiteFooter() {
             <a className="mt-0.5 inline-flex text-zinc-300 hover:text-emerald-100" href="mailto:kennethalto95@gmail.com">
               kennethalto95@gmail.com
             </a>
+            <div className="mt-3 space-y-1 text-xs leading-relaxed text-zinc-400">
+              <p>Teenust osutab hetkel eraisik Kenneth Alto.</p>
+              <p>Registrikood lisatakse pärast ettevõtlusvormi valikut.</p>
+              <p>KMKR lisatakse vajadusel.</p>
+            </div>
           </div>
         </div>
 

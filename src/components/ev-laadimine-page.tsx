@@ -7,8 +7,7 @@ import { UsedAssumptionsBlock } from "@/components/used-assumptions-block";
 import { AdvancedInputAccordion } from "@/components/advanced-input-accordion";
 import { useMemo, useState } from "react";
 import {
-  chargingCost,
-  chargingTimeHours,
+  calculateEvCharging,
   CHARGER_STEPS_KW,
   mainFusePower1fKw,
   mainFusePower3fKw,
@@ -70,27 +69,27 @@ export function EvLaadiminePageClient() {
     const fuseA = Math.max(toNumber(mainFuseA), 0);
     const reserve = Math.max(toNumber(reserveKw), 0);
 
-    const timeH = chargingTimeHours(gridEnergy, power);
-    const cost = chargingCost(gridEnergy, price);
+    const activeCalc = calculateEvCharging({
+      amps: fuseA,
+      phase,
+      householdReserveKw: reserve,
+      energyToChargeKwh: gridEnergy,
+      chargerKw: power,
+      priceEurKwh: price,
+    });
 
-    // peakaitsme_kW:
-    // 1f_kW = 230 * A / 1000
-    // 3f_kW = sqrt(3) * 400 * A / 1000
-    // kasutatav = peakaitsme_kW * 0.8 - muu_reserv_kW
-    const peak1fKw = mainFusePower1fKw(fuseA);
-    const peak3fKw = mainFusePower3fKw(fuseA);
-    const p1 = usableChargingPowerKw(peak1fKw, reserve);
-    const p3 = usableChargingPowerKw(peak3fKw, reserve);
+    const p1 = usableChargingPowerKw(mainFusePower1fKw(fuseA), reserve);
+    const p3 = usableChargingPowerKw(mainFusePower3fKw(fuseA), reserve);
 
     const rec1 = pickChargerStepKw(p1);
     const rec3 = pickChargerStepKw(p3);
-    const activeMax = phase === "1" ? p1 : p3;
-    const recommended = pickChargerStepKw(activeMax);
+    const activeMax = activeCalc.availableForEvKw;
+    const recommended = activeCalc.recommendedChargerKw;
 
-    const fits11 = activeMax >= 11 - 1e-6;
-    const fits22 = activeMax >= 22 - 1e-6;
+    const fits11 = activeCalc.fits11Kw;
+    const fits22 = activeCalc.fits22Kw;
     const smallFuseWarning = activeMax < 2.3;
-    const needsLoadManagement = power > Math.max(activeMax, 0) || reserve > 3;
+    const needsLoadManagement = activeCalc.loadManagementRecommended || reserve > 3;
 
     const note =
       phase === "1"
@@ -101,14 +100,11 @@ export function EvLaadiminePageClient() {
           ? "Valitud laadija peaks peakaitse mõttes sobima (arvestades reservi)."
           : "Valitud laadija on peakaitse mõttes tõenäoliselt liiga suur (arvestades reservi).";
 
-    const warning22kw =
-      rec3 < 22
-        ? "22 kW ei ole selle peakaitsme ja reserviga realistlik. Enamasti sobib 11 kW või madalam."
-        : null;
+    const warning22kw = activeCalc.warning22Kw;
 
     return {
-      timeH,
-      cost,
+      timeH: activeCalc.chargingTimeHours,
+      cost: activeCalc.chargingCost,
       rec1,
       rec3,
       p1,

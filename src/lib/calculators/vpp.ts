@@ -22,6 +22,52 @@ export type VppInput = {
   availabilityPct: string;
 };
 
+export type VppCoreInput = {
+  batteryKwh: number;
+  batteryKw: number;
+  investment: number;
+  annualRevenuePotential: number;
+  roundtripEfficiencyPercent: number;
+  availabilityPercent: number;
+  riskDiscountPercent: number;
+  annualMaintenanceCost: number;
+  lifetimeYears: number;
+};
+
+export type VppCoreResult = {
+  grossRevenue: number;
+  netRevenue: number;
+  paybackYears: number | null;
+  totalProfit: number;
+  conservativeNetRevenue: number;
+  baseNetRevenue: number;
+  optimisticNetRevenue: number;
+};
+
+export function calculateVppCore(input: VppCoreInput): VppCoreResult {
+  const investment = Math.max(input.investment, 0);
+  const grossRevenue = Math.max(input.annualRevenuePotential, 0);
+  const efficiency = Math.min(Math.max(input.roundtripEfficiencyPercent, 0), 100) / 100;
+  const availability = Math.min(Math.max(input.availabilityPercent, 0), 100) / 100;
+  const riskDiscount = Math.min(Math.max(input.riskDiscountPercent, 0), 100) / 100;
+  const maintenance = Math.max(input.annualMaintenanceCost, 0);
+  const lifetimeYears = Math.max(Math.round(input.lifetimeYears), 1);
+
+  const netRevenue = grossRevenue * efficiency * availability * (1 - riskDiscount) - maintenance;
+  const paybackYears = netRevenue > 0 ? investment / netRevenue : null;
+  const totalProfit = netRevenue * lifetimeYears - investment;
+
+  return {
+    grossRevenue,
+    netRevenue,
+    paybackYears,
+    totalProfit,
+    conservativeNetRevenue: netRevenue * 0.7,
+    baseNetRevenue: netRevenue,
+    optimisticNetRevenue: netRevenue * 1.3,
+  };
+}
+
 export function calculateVppModel(input: VppInput) {
   const cap = Math.max(toNumber(input.capacityKwh), 0);
   const pwr = Math.max(toNumber(input.powerKw), 0);
@@ -36,14 +82,26 @@ export function calculateVppModel(input: VppInput) {
   const residual = Math.min(Math.max(toNumber(input.minimumResidualPct), 0), 100) / 100;
   const spread = Math.max(toNumber(input.arbitrageSpreadEurMwh), 0);
   const perKwYear = Math.max(toNumber(input.revenuePerKwYear), 0);
-  const finance = Math.min(Math.max(toNumber(input.financingCostPct), 0), 100) / 100;
-  const risk = Math.min(Math.max(toNumber(input.riskCoefficientPct), 0), 100) / 100;
-  const availability = Math.min(Math.max(toNumber(input.availabilityPct), 0), 100) / 100;
+  const riskDiscountPct = Math.min(Math.max(100 - toNumber(input.riskCoefficientPct), 0), 100);
+  const availabilityPct = Math.min(Math.max(toNumber(input.availabilityPct), 0), 100);
+  const efficiencyPct = Math.min(Math.max(toNumber(input.efficiencyPct), 0), 100);
 
-  let grossRevenueYear = 0;
-  if (input.revenueType === "annual") grossRevenueYear = userRevenue;
-  else if (input.revenueType === "per_kw_year") grossRevenueYear = pwr * perKwYear;
-  else grossRevenueYear = (cap / 1000) * cycles * spread * eff;
+  let annualRevenuePotential = 0;
+  if (input.revenueType === "annual") annualRevenuePotential = userRevenue;
+  else if (input.revenueType === "per_kw_year") annualRevenuePotential = pwr * perKwYear;
+  else annualRevenuePotential = (cap / 1000) * cycles * spread;
+
+  const core = calculateVppCore({
+    batteryKwh: cap,
+    batteryKw: pwr,
+    investment: inv,
+    annualRevenuePotential,
+    roundtripEfficiencyPercent: efficiencyPct,
+    availabilityPercent: availabilityPct,
+    riskDiscountPercent: riskDiscountPct,
+    annualMaintenanceCost: opex,
+    lifetimeYears: years,
+  });
 
   const scenarios = [
     { key: "konservatiivne", label: "Konservatiivne (70%)", multiplier: 0.7 },
@@ -52,28 +110,26 @@ export function calculateVppModel(input: VppInput) {
   ] as const;
 
   const perScenario = scenarios.map((s) => {
-    const financingCostEurYear = inv * finance;
-    const netRevenueYear = grossRevenueYear * availability * risk * s.multiplier - opex - financingCostEurYear;
+    const netRevenueYear = core.netRevenue * s.multiplier;
     const payback = netRevenueYear > 0 ? inv / netRevenueYear : null;
     const totalProfit = netRevenueYear * years - inv;
     const cashflows = Array.from({ length: calcYears }, (_, idx) => netRevenueYear * (1 - degr) ** idx);
-    const salvageValue = inv * residual;
     return {
       ...s,
       cashflows,
-      salvageValue,
-      grossRevenueYear: grossRevenueYear * s.multiplier,
+      salvageValue: inv * residual,
+      grossRevenueYear: core.grossRevenue,
       netRevYear1: netRevenueYear,
-      totalProfit: totalProfit + salvageValue,
+      totalProfit,
       paybackYears: payback,
     };
   });
 
   const penaltyFactors = [
-    { label: "kättesaadavus", impact: 1 - availability },
-    { label: "riskikoefitsient", impact: 1 - risk },
+    { label: "kättesaadavus", impact: 1 - availabilityPct / 100 },
+    { label: "riskiallahindlus", impact: riskDiscountPct / 100 },
     { label: "degradatsioon", impact: degr },
-    { label: "finantseerimiskulu", impact: finance },
+    { label: "efektiivsus", impact: 1 - efficiencyPct / 100 },
   ];
   const mainRiskFactor = penaltyFactors.sort((a, b) => b.impact - a.impact)[0]?.label ?? "tururisk";
 
@@ -86,6 +142,6 @@ export function calculateVppModel(input: VppInput) {
     revenueType: input.revenueType,
     perScenario,
     mainRiskFactor,
-    grossRevenueYear,
+    grossRevenueYear: core.grossRevenue,
   };
 }

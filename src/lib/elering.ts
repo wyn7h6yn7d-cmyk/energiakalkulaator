@@ -27,11 +27,22 @@ export function eurMWhToSntKWhWithVat(priceEurPerMWh: number) {
 
 export function formatSntKWh(valueSntPerKwh: number) {
   if (!Number.isFinite(valueSntPerKwh)) return "—";
+  if (Object.is(valueSntPerKwh, 0) || valueSntPerKwh === 0) {
+    return new Intl.NumberFormat("et-EE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(0);
+  }
+
   const abs = Math.abs(valueSntPerKwh);
-  const maxFractionDigits = abs < 1 ? 2 : 1;
+  if (abs < 0.01) {
+    return valueSntPerKwh > 0 ? "<0,01" : "-<0,01";
+  }
+
+  const fractionDigits = abs < 1 ? 2 : 2;
   return new Intl.NumberFormat("et-EE", {
-    minimumFractionDigits: abs < 1 ? 2 : 0,
-    maximumFractionDigits: maxFractionDigits,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   }).format(valueSntPerKwh);
 }
 
