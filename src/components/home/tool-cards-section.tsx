@@ -37,7 +37,7 @@ export function ToolCardsSection() {
           <Link
             key={card.title}
             href={card.href}
-            className="group rounded-2xl border border-white/12 bg-white/[0.03] p-5 transition duration-200 hover:border-emerald-300/45 hover:shadow-[0_0_42px_rgba(16,185,129,0.12)]"
+            className="premium-card group rounded-2xl border border-white/12 bg-white/[0.03] p-5 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/45 hover:shadow-[0_0_42px_rgba(16,185,129,0.12)]"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-300/40 bg-emerald-400/10 text-emerald-200 shadow-[0_0_28px_rgba(16,185,129,0.15)]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">

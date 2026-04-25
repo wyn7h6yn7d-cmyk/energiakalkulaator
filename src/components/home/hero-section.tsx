@@ -5,10 +5,11 @@ import { DashboardMockup } from "@/components/home/dashboard-mockup";
 
 export function HeroSection() {
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl border border-emerald-300/20 bg-[#07110f]/80 px-5 py-7 shadow-[0_24px_90px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:px-8 sm:py-9 lg:px-10 lg:py-10">
+    <section className="premium-shell relative isolate overflow-hidden rounded-3xl border border-emerald-300/20 bg-[#07110f]/80 px-5 py-7 shadow-[0_24px_90px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:px-8 sm:py-9 lg:px-10 lg:py-10">
       <div className="hero-reference-bg" />
       <div className="hero-reference-overlay" />
       <div className="hero-reference-glow" />
+      <div className="hero-sheen" />
 
       <div className="relative grid items-center gap-8 lg:grid-cols-[0.98fr_1.12fr] lg:gap-8">
         <div className="hero-content-shield">
@@ -38,7 +39,7 @@ export function HeroSection() {
               ["Reaalajas andmed", "Nord Pool börsihind LIVE"],
               ["Sinu andmed on turvalised", "Privaatsus ja andmekaitse tagatud"],
             ].map(([title, description]) => (
-              <div key={title} className="rounded-xl border border-emerald-300/20 bg-zinc-950/45 px-3 py-2.5">
+              <div key={title} className="premium-card rounded-xl border border-emerald-300/20 bg-zinc-950/45 px-3 py-2.5">
                 <div className="text-xs font-medium text-zinc-100">{title}</div>
                 <div className="mt-1 text-[11px] leading-relaxed text-zinc-400">{description}</div>
               </div>

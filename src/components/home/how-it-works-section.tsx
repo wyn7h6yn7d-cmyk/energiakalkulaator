@@ -15,7 +15,7 @@ export function HowItWorksSection() {
         ].map(([title, desc], index) => (
           <article
             key={title}
-            className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]"
+            className="premium-card relative rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]"
           >
             {index < 2 ? (
               <div className="pointer-events-none absolute -right-3 top-1/2 hidden h-px w-6 bg-emerald-300/45 lg:block" />

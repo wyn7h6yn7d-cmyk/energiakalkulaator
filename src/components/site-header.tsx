@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 const nav = [
@@ -24,6 +24,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navItems = useMemo(() => {
     return nav.map((item) => {
@@ -38,6 +39,32 @@ export function SiteHeader() {
   useEffect(() => {
     setDropdownOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
+  const openDropdown = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setDropdownOpen(true);
+  };
+
+  const scheduleDropdownClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+    closeTimerRef.current = setTimeout(() => {
+      setDropdownOpen(false);
+      closeTimerRef.current = null;
+    }, 170);
+  };
 
   return (
     <header className="sticky top-0 z-50 px-3 pb-2 pt-3 sm:px-5 sm:pb-3 sm:pt-4 lg:px-8">
@@ -81,8 +108,8 @@ export function SiteHeader() {
 
           <div
             className="relative"
-            onMouseEnter={() => setDropdownOpen(true)}
-            onMouseLeave={() => setDropdownOpen(false)}
+            onMouseEnter={openDropdown}
+            onMouseLeave={scheduleDropdownClose}
           >
             <button
               type="button"
@@ -102,7 +129,8 @@ export function SiteHeader() {
             </button>
 
             {dropdownOpen ? (
-              <div className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-white/15 bg-zinc-950/90 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl">
+              <div className="absolute left-0 top-full z-50 w-64 pt-1.5">
+                <div className="rounded-2xl border border-white/15 bg-zinc-950/90 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl">
                 {calculatorLinks.map((link) => (
                   <Link
                     key={link.href}
@@ -112,6 +140,7 @@ export function SiteHeader() {
                     {link.label}
                   </Link>
                 ))}
+                </div>
               </div>
             ) : null}
           </div>
