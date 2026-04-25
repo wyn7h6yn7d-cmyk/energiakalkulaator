@@ -40,8 +40,8 @@ export default function Home() {
       <main className="relative mx-auto w-full max-w-7xl px-3 pb-14 pt-6 sm:px-6 sm:pb-16 sm:pt-10 lg:px-8 lg:pt-12">
         <section className="relative overflow-hidden rounded-[1.7rem] border border-emerald-300/30 bg-[#050d0a] px-4 py-8 shadow-[0_30px_100px_rgba(0,0,0,0.62)] sm:rounded-[2rem] sm:px-8 sm:py-11 lg:px-10 lg:py-12">
           <AnimatedEnergyBackground />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(95deg,rgba(5,13,10,0.96)_0%,rgba(5,13,10,0.9)_40%,rgba(5,13,10,0.5)_72%,rgba(5,13,10,0.22)_100%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_18%,rgba(16,185,129,0.36),transparent_40%),radial-gradient(circle_at_90%_70%,rgba(45,212,191,0.24),transparent_42%),radial-gradient(circle_at_64%_58%,rgba(99,102,241,0.18),transparent_44%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(95deg,rgba(5,13,10,0.82)_0%,rgba(5,13,10,0.72)_40%,rgba(5,13,10,0.3)_72%,rgba(5,13,10,0.12)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_18%,rgba(16,185,129,0.22),transparent_40%),radial-gradient(circle_at_90%_70%,rgba(45,212,191,0.16),transparent_42%),radial-gradient(circle_at_64%_58%,rgba(99,102,241,0.12),transparent_44%)]" />
           <div className="pointer-events-none absolute inset-y-8 right-4 hidden w-[44%] rounded-[1.2rem] border border-emerald-300/24 bg-[linear-gradient(140deg,rgba(45,212,191,0.12)_0%,rgba(59,130,246,0.1)_52%,rgba(16,185,129,0.08)_100%)] sm:block" />
 
           <div className="relative grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
