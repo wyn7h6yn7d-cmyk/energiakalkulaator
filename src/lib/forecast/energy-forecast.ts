@@ -119,7 +119,7 @@ export function buildEnergyForecast({
     const price = findPriceForHour(w.ts, pricePoints);
     const eurPerKwh = price?.price_eur_per_kwh ?? 0.12;
     const priceSntWithVat = addVat(eurPerKwh) * 100;
-    const adjustedRadiation = Math.max(w.radiationWm2 * orientationFactor, 0);
+    const adjustedRadiation = w.isDaylight ? Math.max(w.radiationWm2 * orientationFactor, 0) : 0;
     // V1 prognoos on lihtsustatud ja vajab hiljem kalibreerimist reaalse tootmisandmega.
     const pvPowerEstimateKw = input.systemKw * (adjustedRadiation / 1000) * lossFactor;
     const pvEnergyEstimateKwh = Math.max(pvPowerEstimateKw * intervalHours, 0);
@@ -127,7 +127,7 @@ export function buildEnergyForecast({
       ts: w.ts,
       priceSntWithVat,
       cloudCoverPct: w.cloudCoverPct,
-      radiationWm2: w.radiationWm2,
+      radiationWm2: adjustedRadiation,
       pvPowerEstimateKw,
       pvEnergyEstimateKwh,
       score: 0,
@@ -140,8 +140,15 @@ export function buildEnergyForecast({
   const cloudNorm = normalizePrice(rowsBase.map((r) => r.cloudCoverPct));
 
   const rows: ForecastRow[] = rowsBase.map((r) => {
-    const score = Math.round((priceNorm(r.priceSntWithVat) * 0.5 + pvNorm(r.pvEnergyEstimateKwh) * 0.35 + cloudNorm(r.cloudCoverPct) * 0.15) * 100);
+    const cloudWeight = r.radiationWm2 > 0.01 ? 0.15 : 0.03;
+    const score = Math.round(
+      (priceNorm(r.priceSntWithVat) * 0.5 + pvNorm(r.pvEnergyEstimateKwh) * (0.5 - cloudWeight) + cloudNorm(r.cloudCoverPct) * cloudWeight) *
+        100,
+    );
     let recommendation = classifyRecommendation(score);
+    if (r.radiationWm2 <= 0.01) {
+      recommendation = input.hasEv && score >= 58 ? "Öine tund: hea EV laadimiseks" : "Öine tund: päikese tootlust ei ole";
+    }
     if (r.pvEnergyEstimateKwh > 0.6) {
       recommendation = "Päikeseenergia potentsiaal on parim siin";
     } else if (input.hasEv && score >= 62) {

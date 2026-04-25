@@ -23,17 +23,23 @@ export function AnimatedEnergyBackground({ intensity = "subtle" }: { intensity?:
   }, []);
 
   const lowPerf = reducedMotion || isMobile;
-  const particleCount = lowPerf ? 0 : intensity === "hero" ? 12 : 4;
+  const particleCount = reducedMotion ? 0 : isMobile ? (intensity === "hero" ? 4 : 2) : intensity === "hero" ? 10 : 8;
   const baseOpacity = intensity === "hero" ? 0.86 : 0.3;
   const mobileFactor = isMobile ? 0.52 : 1;
   const motionFactor = reducedMotion ? 0.35 : 1;
   const k = baseOpacity * mobileFactor * motionFactor;
-  const strokeA = intensity === "hero" ? 2 : 1.1;
-  const strokeB = intensity === "hero" ? 1.7 : 0.95;
-  const strokeC = intensity === "hero" ? 1.4 : 0.85;
+  const strokeA = intensity === "hero" ? 1.7 : 1;
+  const strokeB = intensity === "hero" ? 1.35 : 0.9;
+  const strokeC = intensity === "hero" ? 1.1 : 0.75;
+  const showLine2 = !reducedMotion;
+  const showLine3 = intensity === "hero" && !lowPerf;
+  const showLine4 = intensity === "hero" && !lowPerf && !isMobile;
 
   return (
-    <div className={`pointer-events-none absolute inset-0 overflow-hidden ${intensity === "hero" ? "energy-scene-hero" : "energy-scene-subtle"}`}>
+    <div
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${intensity === "hero" ? "energy-scene-hero" : "energy-scene-subtle"} ${reducedMotion ? "energy-scene-reduced" : ""}`}
+      style={{ contain: "layout paint style" }}
+    >
       <div
         className="absolute inset-0"
         style={{
@@ -42,13 +48,17 @@ export function AnimatedEnergyBackground({ intensity = "subtle" }: { intensity?:
           opacity: 0.96,
         }}
       />
-      <div className="absolute inset-0 energy-aurora" style={{ opacity: 0.9 * k }} />
-      <div className="absolute inset-0 energy-aurora energy-aurora-2" style={{ opacity: 0.65 * k }} />
-      <div className="absolute inset-0 energy-grid" style={{ opacity: 0.45 * k }} />
-      <div className={`absolute inset-0 energy-pulse ${intensity === "hero" ? "energy-pulse-hero" : "energy-pulse-subtle"}`} style={{ opacity: 0.55 * k }} />
+      <div className="absolute inset-0 energy-aurora" style={{ opacity: 0.7 * k }} />
+      {!reducedMotion ? (
+        <div className="absolute inset-0 energy-aurora energy-aurora-2" style={{ opacity: 0.45 * k }} />
+      ) : null}
+      <div className="absolute inset-0 energy-grid" style={{ opacity: 0.3 * k }} />
+      {!lowPerf ? (
+        <div className={`absolute inset-0 energy-pulse ${intensity === "hero" ? "energy-pulse-hero" : "energy-pulse-subtle"}`} style={{ opacity: 0.4 * k }} />
+      ) : null}
       <div
         className="absolute inset-0 energy-glow-cloud"
-        style={{ opacity: 0.55 * k }}
+        style={{ opacity: 0.35 * k }}
       />
 
       {particleCount > 0 ? (
@@ -80,12 +90,9 @@ export function AnimatedEnergyBackground({ intensity = "subtle" }: { intensity?:
             <stop offset="0.7" stopColor="rgba(20,184,166,0.28)" />
             <stop offset="1" stopColor="rgba(16,185,129,0.0)" />
           </linearGradient>
-          <filter id={`blur_${seed}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation={1.3 * k} />
-          </filter>
         </defs>
 
-        <g filter={`url(#blur_${seed})`} opacity={0.9 * k}>
+        <g opacity={0.78 * k}>
           <path
             className="energy-line energy-line-1"
             d="M-50,540 C180,430 240,610 420,520 C610,420 680,560 860,470 C1030,385 1100,470 1250,380"
@@ -93,14 +100,16 @@ export function AnimatedEnergyBackground({ intensity = "subtle" }: { intensity?:
             strokeWidth={strokeA}
             fill="none"
           />
-          <path
-            className="energy-line energy-line-2"
-            d="M-60,240 C130,190 260,310 410,250 C600,175 690,295 860,230 C1040,160 1100,260 1260,210"
-            stroke={`url(#g_${seed})`}
-            strokeWidth={strokeB}
-            fill="none"
-          />
-          {intensity === "hero" && !lowPerf ? (
+          {showLine2 ? (
+            <path
+              className="energy-line energy-line-2"
+              d="M-60,240 C130,190 260,310 410,250 C600,175 690,295 860,230 C1040,160 1100,260 1260,210"
+              stroke={`url(#g_${seed})`}
+              strokeWidth={strokeB}
+              fill="none"
+            />
+          ) : null}
+          {showLine3 ? (
             <path
               className="energy-line energy-line-3"
               d="M-80,410 C130,340 220,520 390,430 C560,340 710,450 880,380 C1040,315 1120,390 1270,330"
@@ -109,7 +118,7 @@ export function AnimatedEnergyBackground({ intensity = "subtle" }: { intensity?:
               fill="none"
             />
           ) : null}
-          {intensity === "hero" && !lowPerf ? (
+          {showLine4 ? (
             <path
               className="energy-line energy-line-4"
               d="M-90,120 C100,80 250,220 430,170 C580,130 760,210 900,160 C1030,120 1120,170 1260,130"

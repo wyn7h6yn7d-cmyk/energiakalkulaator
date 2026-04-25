@@ -2,9 +2,12 @@
 
 export function DashboardMockup() {
   return (
-    <div className="dashboard-pulse relative rounded-[1.7rem] border border-emerald-300/35 bg-zinc-950/88 p-3 shadow-[0_34px_105px_rgba(0,0,0,0.68)] backdrop-blur-2xl sm:p-4 lg:min-h-[30rem]">
-      <div className="pointer-events-none absolute -left-10 top-6 h-28 w-28 rounded-full bg-emerald-400/24 blur-3xl" />
-      <div className="pointer-events-none absolute -right-10 bottom-4 h-32 w-32 rounded-full bg-teal-400/22 blur-3xl" />
+    <div
+      className="dashboard-pulse relative rounded-[1.7rem] border border-emerald-300/35 bg-zinc-950/88 p-3 shadow-[0_28px_78px_rgba(0,0,0,0.62)] backdrop-blur-xl sm:p-4 lg:min-h-[30rem]"
+      style={{ contain: "layout paint" }}
+    >
+      <div className="pointer-events-none absolute -left-10 top-6 hidden h-28 w-28 rounded-full bg-emerald-400/20 blur-2xl sm:block" />
+      <div className="pointer-events-none absolute -right-10 bottom-4 hidden h-32 w-32 rounded-full bg-teal-400/18 blur-2xl sm:block" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.1),transparent_28%)] opacity-35" />
       <div className="pointer-events-none absolute inset-0 rounded-[1.7rem] ring-1 ring-emerald-300/20" />
 

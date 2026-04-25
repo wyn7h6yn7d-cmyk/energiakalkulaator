@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { addVat, eurPerKwhToSntPerKwh } from "@/lib/elering";
 
 const nav = [
   { href: "/", label: "Avaleht" },
@@ -50,6 +51,8 @@ const calculatorLinks = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [livePriceSnt, setLivePriceSnt] = useState<string>("—");
+  const [sunTimes, setSunTimes] = useState<{ rise: string; set: string }>({ rise: "—", set: "—" });
 
   const navItems = useMemo(() => {
     return nav.map((item) => {
@@ -62,6 +65,71 @@ export function SiteHeader() {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fmtHm = (iso: string) => {
+      const d = new Date(iso);
+      if (!Number.isFinite(d.getTime())) return "—";
+      return d.toLocaleTimeString("et-EE", { hour: "2-digit", minute: "2-digit" });
+    };
+
+    const loadHeaderData = async () => {
+      try {
+        const now = new Date();
+        const start = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+        const end = new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString();
+
+        const [priceRes, sunRes] = await Promise.all([
+          fetch(`/api/elering/nps?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&area=ee`),
+          fetch("/api/sun"),
+        ]);
+
+        if (priceRes.ok) {
+          const priceData = (await priceRes.json()) as { points?: Array<{ ts: number; price_eur_per_kwh: number }> };
+          const points = priceData.points ?? [];
+          if (points.length > 0) {
+            const nowTs = Math.floor(Date.now() / 1000);
+            const current = points.reduce((best, p) => {
+              if (!best) return p;
+              return Math.abs(p.ts - nowTs) < Math.abs(best.ts - nowTs) ? p : best;
+            }, points[0]);
+            const sntWithVat = eurPerKwhToSntPerKwh(addVat(current.price_eur_per_kwh));
+            if (!cancelled) setLivePriceSnt(new Intl.NumberFormat("et-EE", { maximumFractionDigits: 2 }).format(sntWithVat));
+          }
+        }
+
+        if (sunRes.ok) {
+          const sunData = (await sunRes.json()) as { sunriseIso?: string; sunsetIso?: string };
+          if (!cancelled) {
+            setSunTimes({
+              rise: sunData.sunriseIso ? fmtHm(sunData.sunriseIso) : "—",
+              set: sunData.sunsetIso ? fmtHm(sunData.sunsetIso) : "—",
+            });
+          }
+        }
+      } catch {
+        // keep defaults
+      }
+    };
+
+    void loadHeaderData();
+    const id = window.setInterval(() => void loadHeaderData(), 5 * 60 * 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
+  const todayLabel = useMemo(
+    () =>
+      new Date().toLocaleDateString("et-EE", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
+    [],
+  );
 
   return (
     <header className="sticky top-0 z-50 overflow-x-clip px-3 py-2 sm:px-5 sm:py-3 lg:px-8">
@@ -111,6 +179,17 @@ export function SiteHeader() {
           ))}
         </nav>
 
+        <div className="hidden lg:flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-200">
+          <span className="text-zinc-500">{todayLabel}</span>
+          <span className="text-zinc-500">|</span>
+          <span className="text-zinc-400">Live börs:</span>
+          <strong className="text-emerald-200">{livePriceSnt} snt/kWh</strong>
+          <span className="text-zinc-500">|</span>
+          <span className="text-zinc-400">Päike:</span>
+          <span>↑ {sunTimes.rise}</span>
+          <span>↓ {sunTimes.set}</span>
+        </div>
+
         <div className="flex shrink-0 items-center justify-end gap-2">
           <button
             type="button"
@@ -130,6 +209,16 @@ export function SiteHeader() {
             Proovi tasuta
           </Link>
         </div>
+      </div>
+
+      <div className="mx-auto mt-2 flex w-full max-w-7xl items-center justify-center gap-2 rounded-xl border border-white/10 bg-zinc-950/62 px-3 py-1.5 text-[11px] text-zinc-200 lg:hidden">
+        <span className="text-zinc-500">{todayLabel}</span>
+        <span className="text-zinc-500">|</span>
+        <span className="text-zinc-400">Live:</span>
+        <strong className="text-emerald-200">{livePriceSnt} snt</strong>
+        <span className="text-zinc-500">|</span>
+        <span>↑ {sunTimes.rise}</span>
+        <span>↓ {sunTimes.set}</span>
       </div>
 
       {mobileOpen ? (

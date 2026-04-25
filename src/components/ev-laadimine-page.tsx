@@ -422,18 +422,36 @@ export function EvLaadiminePageClient() {
                       </label>
                       <label className="field-label">
                         <span className="field-label-text">Kasuta börsihinda</span>
-                        <select className="input" value={useSpotPrice ? "jah" : "ei"} onChange={(e) => setUseSpotPrice(e.target.value === "jah")}>
-                          <option value="ei">Ei</option>
-                          <option value="jah">Jah</option>
-                        </select>
+                        <div className="yes-no-row">
+                          <span className="yes-no-text">Ei</span>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={useSpotPrice}
+                            className={`yes-no-switch ${useSpotPrice ? "is-on" : ""}`}
+                            onClick={() => setUseSpotPrice((v) => !v)}
+                          >
+                            <span className="yes-no-knob" />
+                          </button>
+                          <span className="yes-no-text">Jah</span>
+                        </div>
                         <span className="field-hint">Aktiivne: kasutab Eleringi hindu.</span>
                       </label>
                       <label className="field-label">
                         <span className="field-label-text">Öine laadimine</span>
-                        <select className="input" value={nightCharging ? "jah" : "ei"} onChange={(e) => setNightCharging(e.target.value === "jah")}>
-                          <option value="jah">Jah</option>
-                          <option value="ei">Ei</option>
-                        </select>
+                        <div className="yes-no-row">
+                          <span className="yes-no-text">Ei</span>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={nightCharging}
+                            className={`yes-no-switch ${nightCharging ? "is-on" : ""}`}
+                            onClick={() => setNightCharging((v) => !v)}
+                          >
+                            <span className="yes-no-knob" />
+                          </button>
+                          <span className="yes-no-text">Jah</span>
+                        </div>
                         <span className="field-hint">Piirab otsingu valitud ajavahemikku.</span>
                       </label>
                     </div>

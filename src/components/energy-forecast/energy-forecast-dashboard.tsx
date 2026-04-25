@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { ForecastRow, ForecastSummary } from "@/lib/forecast/energy-forecast";
 
 function pad2(n: number) {
@@ -31,6 +32,11 @@ function fmt2(v: number) {
 }
 
 function ForecastChart({ rows }: { rows: ForecastRow[] }) {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [showPrice, setShowPrice] = useState(true);
+  const [showRadiation, setShowRadiation] = useState(true);
+  const [showCloud, setShowCloud] = useState(true);
+  const [showPv, setShowPv] = useState(true);
   const w = 1100;
   const h = 320;
   const left = 52;
@@ -63,10 +69,87 @@ function ForecastChart({ rows }: { rows: ForecastRow[] }) {
   const radPath = makePath(radValues, maxRad);
   const cloudPath = makePath(cloudValues, maxCloud);
   const pvPath = makePath(pvValues, maxPv);
+  const hoverX = hoverIndex !== null ? xs(hoverIndex) : null;
+  const hoverRow = hoverIndex !== null ? rows[hoverIndex] : null;
+
+  const legendItems = useMemo(
+    () => [
+      {
+        id: "price",
+        active: showPrice,
+        color: "rgba(45,212,191,0.95)",
+        label: "Teal: Börsihind (snt/kWh KM-ga)",
+        onToggle: () => setShowPrice((v) => !v),
+      },
+      {
+        id: "radiation",
+        active: showRadiation,
+        color: "rgba(250,204,21,0.95)",
+        label: "Kollane: Päikesekiirgus (W/m2)",
+        onToggle: () => setShowRadiation((v) => !v),
+      },
+      {
+        id: "cloud",
+        active: showCloud,
+        color: "rgba(147,197,253,0.95)",
+        label: "Sinine: Pilvisus (%)",
+        onToggle: () => setShowCloud((v) => !v),
+      },
+      {
+        id: "pv",
+        active: showPv,
+        color: "rgba(34,197,94,0.95)",
+        label: "Roheline: PV tootlus (kWh)",
+        onToggle: () => setShowPv((v) => !v),
+      },
+    ],
+    [showCloud, showPrice, showPv, showRadiation],
+  );
+
+  const handlePointerMove = (clientX: number, rect: DOMRect) => {
+    const x = ((clientX - rect.left) / rect.width) * w;
+    const idx = Math.round(((x - left) / chartW) * idxMax);
+    const clamped = Math.max(0, Math.min(idx, idxMax));
+    setHoverIndex(clamped);
+  };
 
   return (
     <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-zinc-950/40">
-      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-[320px] min-w-[760px] w-full">
+      <div className="relative">
+        {hoverRow ? (
+          <div
+            className="pointer-events-none absolute z-10 rounded-xl border border-white/15 bg-zinc-950/90 px-3 py-2 text-xs text-zinc-100 shadow-[0_12px_26px_rgba(0,0,0,0.45)] backdrop-blur"
+            style={{
+              left: `${Math.min(90, Math.max(10, ((hoverX ?? left) / w) * 100))}%`,
+              top: 8,
+              transform: "translateX(-50%)",
+            }}
+          >
+            <div className="text-zinc-300">{fmtHour(hoverRow.ts)}</div>
+            <div>Hind: {fmt1(hoverRow.priceSntWithVat)} snt/kWh</div>
+            <div>Kiirgus: {fmt1(hoverRow.radiationWm2)} W/m2</div>
+            <div>Pilvisus: {fmt1(hoverRow.cloudCoverPct)}%</div>
+            <div>PV: {fmt2(hoverRow.pvEnergyEstimateKwh)} kWh</div>
+          </div>
+        ) : null}
+        <svg
+          viewBox={`0 0 ${w} ${h}`}
+          preserveAspectRatio="none"
+          className="h-[320px] min-w-[760px] w-full"
+          onMouseMove={(e) => handlePointerMove(e.clientX, e.currentTarget.getBoundingClientRect())}
+          onMouseLeave={() => setHoverIndex(null)}
+          onTouchStart={(e) => {
+            const t = e.touches[0];
+            if (!t) return;
+            handlePointerMove(t.clientX, e.currentTarget.getBoundingClientRect());
+          }}
+          onTouchMove={(e) => {
+            const t = e.touches[0];
+            if (!t) return;
+            handlePointerMove(t.clientX, e.currentTarget.getBoundingClientRect());
+          }}
+          onTouchEnd={() => setHoverIndex(null)}
+        >
         {[0, 0.25, 0.5, 0.75, 1].map((g) => {
           const gy = top + g * chartH;
           return <line key={g} x1={left} x2={w - right} y1={gy} y2={gy} stroke="rgba(255,255,255,0.08)" />;
@@ -74,10 +157,21 @@ function ForecastChart({ rows }: { rows: ForecastRow[] }) {
         <line x1={left} x2={left} y1={top} y2={h - bottom} stroke="rgba(255,255,255,0.15)" />
         <line x1={left} x2={w - right} y1={h - bottom} y2={h - bottom} stroke="rgba(255,255,255,0.15)" />
 
-        <path d={pricePath} stroke="rgba(45,212,191,0.95)" strokeWidth="2.3" fill="none" />
-        <path d={radPath} stroke="rgba(250,204,21,0.95)" strokeWidth="2" fill="none" />
-        <path d={cloudPath} stroke="rgba(147,197,253,0.95)" strokeWidth="1.8" fill="none" />
-        <path d={pvPath} stroke="rgba(34,197,94,0.95)" strokeWidth="2.3" fill="none" />
+        {showPrice ? <path d={pricePath} stroke="rgba(45,212,191,0.95)" strokeWidth="2.3" fill="none" /> : null}
+        {showRadiation ? <path d={radPath} stroke="rgba(250,204,21,0.95)" strokeWidth="2" fill="none" /> : null}
+        {showCloud ? <path d={cloudPath} stroke="rgba(147,197,253,0.95)" strokeWidth="1.8" fill="none" /> : null}
+        {showPv ? <path d={pvPath} stroke="rgba(34,197,94,0.95)" strokeWidth="2.3" fill="none" /> : null}
+
+        {hoverX !== null ? (
+          <line
+            x1={hoverX}
+            x2={hoverX}
+            y1={top}
+            y2={h - bottom}
+            stroke="rgba(255,255,255,0.35)"
+            strokeDasharray="4 4"
+          />
+        ) : null}
 
         {[0, Math.floor(idxMax / 2), idxMax].map((i, idx) => (
           <text
@@ -91,12 +185,27 @@ function ForecastChart({ rows }: { rows: ForecastRow[] }) {
             {fmtHour(rows[i]?.ts ?? 0)}
           </text>
         ))}
-      </svg>
+        </svg>
+      </div>
       <div className="grid gap-2 px-4 pb-4 pt-2 text-xs text-zinc-300 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1">Teal: Börsihind (snt/kWh KM-ga)</div>
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1">Kollane: Päikesekiirgus (W/m2)</div>
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1">Sinine: Pilvisus (%)</div>
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1">Roheline: PV tootlus (kWh)</div>
+        {legendItems.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={item.onToggle}
+            className={`rounded-lg border px-2 py-1 text-left transition ${
+              item.active
+                ? "border-white/15 bg-white/[0.06] text-zinc-100"
+                : "border-white/10 bg-white/[0.02] text-zinc-500"
+            }`}
+          >
+            <span
+              className="mr-2 inline-block h-2 w-2 rounded-full align-middle"
+              style={{ backgroundColor: item.active ? item.color : "rgba(161,161,170,0.5)" }}
+            />
+            {item.label}
+          </button>
+        ))}
       </div>
     </div>
   );

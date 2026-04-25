@@ -77,6 +77,7 @@ function demoRows(hours: number): { weather: WeatherForecastPoint[]; prices: Mar
       windSpeedMs: 3.2,
       precipitationMm: 0,
       radiationWm2: radiation,
+      isDaylight: daylight > 0.02,
     });
     prices.push({ ts, price_eur_per_kwh: priceEur });
   }
@@ -187,9 +188,6 @@ export default async function EnergiaprognoosPage({
         <header className="glass-panel rounded-2xl p-4 sm:rounded-3xl sm:p-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-xs tracking-wide text-emerald-200">
-                Open-Meteo + Elering
-              </p>
               <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-50 sm:text-5xl">Energiaprognoos</h1>
               <p className="mt-3 max-w-2xl text-sm text-zinc-300 sm:text-base">
                 Ühenda ilm, päikesekiirgus ja börsihind, et näha millal on parim aeg tarbimiseks, EV laadimiseks ja päikeseenergia kasutuseks.
@@ -257,13 +255,27 @@ export default async function EnergiaprognoosPage({
               <span className="field-hint">Serveri cache kasutatakse raskete päringute vähendamiseks.</span>
             </label>
             <div className="grid gap-2 sm:grid-cols-2 lg:col-span-1">
-              <label className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200">
-                <input type="checkbox" name="hasEv" defaultChecked={input.hasEv} className="h-4 w-4" />
-                Kas kasutajal on EV
+              <label className="relative flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200">
+                <span>Kas kasutajal on EV</span>
+                <div className="yes-no-row">
+                  <span className="yes-no-text">Ei</span>
+                  <input type="checkbox" name="hasEv" defaultChecked={input.hasEv} className="yes-no-input" />
+                  <span className="yes-no-switch">
+                    <span className="yes-no-knob" />
+                  </span>
+                  <span className="yes-no-text">Jah</span>
+                </div>
               </label>
-              <label className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200">
-                <input type="checkbox" name="hasBattery" defaultChecked={input.hasBattery} className="h-4 w-4" />
-                Kas kasutajal on aku
+              <label className="relative flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200">
+                <span>Kas kasutajal on aku</span>
+                <div className="yes-no-row">
+                  <span className="yes-no-text">Ei</span>
+                  <input type="checkbox" name="hasBattery" defaultChecked={input.hasBattery} className="yes-no-input" />
+                  <span className="yes-no-switch">
+                    <span className="yes-no-knob" />
+                  </span>
+                  <span className="yes-no-text">Jah</span>
+                </div>
               </label>
             </div>
 

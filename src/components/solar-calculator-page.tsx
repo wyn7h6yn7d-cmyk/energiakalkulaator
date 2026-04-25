@@ -837,10 +837,19 @@ export function SolarCalculatorPage() {
                     />
                   </Field>
                   <Field label="Aku olemasolu">
-                    <select className="input" value={input.hasBattery ? "jah" : "ei"} onChange={(e) => setInput({ ...input, hasBattery: e.target.value === "jah" })}>
-                      <option value="jah">Jah</option>
-                      <option value="ei">Ei</option>
-                    </select>
+                    <div className="yes-no-row">
+                      <span className="yes-no-text">Ei</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={input.hasBattery}
+                        className={`yes-no-switch ${input.hasBattery ? "is-on" : ""}`}
+                        onClick={() => setInput({ ...input, hasBattery: !input.hasBattery })}
+                      >
+                        <span className="yes-no-knob" />
+                      </button>
+                      <span className="yes-no-text">Jah</span>
+                    </div>
                   </Field>
                   <Field label="Aku maht (kWh)">
                     <input

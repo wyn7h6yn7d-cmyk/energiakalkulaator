@@ -6,6 +6,7 @@ import { PaywallCard } from "@/components/paywall-card";
 import { UsedAssumptionsBlock } from "@/components/used-assumptions-block";
 import { useMemo, useState } from "react";
 import { calculateElectricityPlan } from "@/lib/calculators/electricity-plan";
+import { ELECTRICITY_PLANS_UPDATED_AT, ELECTRICITY_PLAN_TEMPLATES } from "@/data/electricity-plans";
 
 function toNumber(value: string) {
   if (!value.trim()) return 0;
@@ -43,6 +44,11 @@ export function ElektripaketidPageClient() {
   const [fixedMonthlyFeeEur, setFixedMonthlyFeeEur] = useState("");
   const [networkMonthlyFeeEur, setNetworkMonthlyFeeEur] = useState("");
   const [pricesIncludeVat, setPricesIncludeVat] = useState(true);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [spotFetchState, setSpotFetchState] = useState<{ loading: boolean; note: string }>({
+    loading: false,
+    note: "",
+  });
 
   const hasValue = (v: string) => v.trim().length > 0;
 
@@ -96,7 +102,7 @@ export function ElektripaketidPageClient() {
     return {
       userInputs,
       defaultAssumptions,
-      apiValues: [],
+      apiValues: spotFetchState.note ? [spotFetchState.note] : [],
       mostInfluentialInputs: [
         "Spot vs fixed energiahinna vahe",
         "Kuutarbimise maht",
@@ -104,7 +110,45 @@ export function ElektripaketidPageClient() {
         "Paketipõhised kuutasud",
       ],
     };
-  }, [monthlyKwh, spotEurKwh, fixedEurKwh, gridFeeEurKwh, mode, monthlyBreakdown]);
+  }, [monthlyKwh, spotEurKwh, fixedEurKwh, gridFeeEurKwh, mode, monthlyBreakdown, spotFetchState.note]);
+
+  const applyTemplate = (id: string) => {
+    const tpl = ELECTRICITY_PLAN_TEMPLATES.find((item) => item.id === id);
+    if (!tpl) return;
+    setFixedEurKwh(String(tpl.fixedEurKwh));
+    setSpotMarginEurKwh(String(tpl.spotMarginEurKwh));
+    setSpotMonthlyFeeEur(String(tpl.monthlyFeeEur));
+    setFixedMonthlyFeeEur(String(tpl.monthlyFeeEur));
+    setGridFeeEurKwh(String(tpl.gridFeeEurKwh));
+    setPricesIncludeVat(tpl.pricesIncludeVat);
+  };
+
+  const fetchSpotFromElering = async () => {
+    setSpotFetchState({ loading: true, note: "Laen Eleringi börsihinda..." });
+    try {
+      const now = new Date();
+      const start = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
+      const end = new Date(now.getTime() + 22 * 60 * 60 * 1000).toISOString();
+      const res = await fetch(
+        `/api/elering/nps?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&area=ee`,
+      );
+      if (!res.ok) throw new Error("Eleringi päring ebaõnnestus");
+      const data = (await res.json()) as { points?: Array<{ ts: number; price_eur_per_kwh: number }> };
+      const points = data.points ?? [];
+      if (!points.length) throw new Error("Hinnapunkte ei leitud");
+      const avg = points.reduce((s, p) => s + p.price_eur_per_kwh, 0) / points.length;
+      setSpotEurKwh(avg.toFixed(4));
+      setSpotFetchState({
+        loading: false,
+        note: `Elering spot keskmine uuendatud: ${avg.toFixed(4).replace(".", ",")} €/kWh`,
+      });
+    } catch {
+      setSpotFetchState({
+        loading: false,
+        note: "Eleringi spot-hinna laadimine ebaõnnestus. Kasuta käsitsi sisestust.",
+      });
+    }
+  };
 
   return (
     <div className="grid gap-6">
@@ -129,6 +173,14 @@ export function ElektripaketidPageClient() {
         <p className="mt-2 text-sm text-zinc-400">
           Kiire võrdlus spot vs fikseeritud paketile. Sisesta ligikaudne kuutarbimine ja hinnad, et näha aastakulu vahet.
         </p>
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-zinc-300">
+          Elektrimüüjate paketihinnad võivad kiiresti muutuda. Kontrolli lõplik hind alati müüja juures.
+          Börsihinna andmed tulevad Eleringi turuandmetest.
+          <div className="mt-2 text-zinc-400">
+            Näidispaketid on käsitsi hallatavad (`src/data/electricity-plans.ts`) ja viimati uuendatud:{" "}
+            <span className="text-zinc-200">{ELECTRICITY_PLANS_UPDATED_AT}</span>.
+          </div>
+        </div>
         <div className="mt-4 inline-flex rounded-xl border border-white/10 bg-white/[0.03] p-1">
           <button
             type="button"
@@ -153,6 +205,35 @@ export function ElektripaketidPageClient() {
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <article className="card">
             <h3 className="section-title">Sisendid</h3>
+            <div className="mb-4 grid gap-3 sm:grid-cols-2">
+              <label className="field-label">
+                <span className="field-label-text">Näidispakett configist</span>
+                <select
+                  className="input"
+                  value={selectedTemplateId}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSelectedTemplateId(value);
+                    applyTemplate(value);
+                  }}
+                >
+                  <option value="">Vali näidispakett...</option>
+                  {ELECTRICITY_PLAN_TEMPLATES.map((tpl) => (
+                    <option key={tpl.id} value={tpl.id}>
+                      {tpl.provider} - {tpl.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="field-hint">Need hinnad ei uuendu automaatsest müüja API-st.</span>
+              </label>
+              <div className="field-label">
+                <span className="field-label-text">Börsihind Eleringist</span>
+                <button type="button" className="btn-ghost" onClick={fetchSpotFromElering}>
+                  {spotFetchState.loading ? "Laen..." : "Uuenda spot hind Eleringist"}
+                </button>
+                <span className="field-hint">{spotFetchState.note || "Toob lähitundide keskmise spot-hinna Eesti turult."}</span>
+              </div>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="field-label">
                 <span className="field-label-text">Kuutarbimine (kWh)</span>
@@ -211,28 +292,6 @@ export function ElektripaketidPageClient() {
               </label>
               {mode === "advanced" ? (
                 <>
-                  <label className="field-label">
-                    <span className="field-label-text">Taastuvenergia tasu (€/kWh)</span>
-                    <input
-                      className="input"
-                      value={renewableFeeEurKwh}
-                      inputMode="decimal"
-                      onChange={(e) => setRenewableFeeEurKwh(e.target.value)}
-                      placeholder="nt 0,001"
-                    />
-                    <span className="field-hint">Lisatasu iga tarbitud kWh kohta.</span>
-                  </label>
-                  <label className="field-label">
-                    <span className="field-label-text">Elektriaktsiis (€/kWh)</span>
-                    <input
-                      className="input"
-                      value={exciseEurKwh}
-                      inputMode="decimal"
-                      onChange={(e) => setExciseEurKwh(e.target.value)}
-                      placeholder="nt 0,0015"
-                    />
-                    <span className="field-hint">Aktsiisi osa kWh hinnas.</span>
-                  </label>
                   <label className="field-label">
                     <span className="field-label-text">Spot kuutasu (€)</span>
                     <input
@@ -312,13 +371,20 @@ export function ElektripaketidPageClient() {
               </div>
             ) : null}
             <label className="mt-4 flex items-center gap-3 text-sm text-zinc-200">
-              <input
-                type="checkbox"
-                checked={pricesIncludeVat}
-                onChange={(e) => setPricesIncludeVat(e.target.checked)}
-                className="h-4 w-4 rounded border-white/20 bg-transparent"
-              />
-              Hinnad on juba KM-ga (ära lisa KM uuesti)
+              <span>Hinnad on juba KM-ga</span>
+              <div className="yes-no-row">
+                <span className="yes-no-text">Ei</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={pricesIncludeVat}
+                  className={`yes-no-switch ${pricesIncludeVat ? "is-on" : ""}`}
+                  onClick={() => setPricesIncludeVat((v) => !v)}
+                >
+                  <span className="yes-no-knob" />
+                </button>
+                <span className="yes-no-text">Jah</span>
+              </div>
             </label>
             {result.mwhWarning ? (
               <p className="mt-3 rounded-xl border border-amber-300/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
@@ -395,8 +461,8 @@ export function ElektripaketidPageClient() {
               <p className="mt-1 text-zinc-300">{result.reco}</p>
             </div>
             <p className="mt-3 text-xs text-zinc-400">
-              Arvutus: spot = tarbimine × (spot + marginaal + võrgutasu + taastuv + aktsiis) + kuutasud; fixed =
-              tarbimine × (fixed + võrgutasu + taastuv + aktsiis) + kuutasud. Kui KM pole hinnas, lisatakse 1,24x.
+              Arvutus: spot = tarbimine × (spot + marginaal + võrgutasu) + kuutasud; fixed =
+              tarbimine × (fixed + võrgutasu) + kuutasud. Kui KM pole hinnas, lisatakse 1,24x.
             </p>
             <UsedAssumptionsBlock {...assumptionsInfo} />
           </article>
@@ -429,14 +495,12 @@ export function ElektripaketidPageClient() {
               const baseSpot = Math.max(toNumber(spotEurKwh), 0);
               const margin = Math.max(toNumber(spotMarginEurKwh), 0);
               const gridFee = Math.max(toNumber(gridFeeEurKwh), 0);
-              const renewable = Math.max(toNumber(renewableFeeEurKwh), 0);
-              const excise = Math.max(toNumber(exciseEurKwh), 0);
               const vatMultiplier = pricesIncludeVat ? 1 : 1.24;
               const kwh = Math.max(toNumber(monthlyKwh), 0) * 12;
               const fixed = Math.max(toNumber(fixedEurKwh), 0);
-              const fixedCost = kwh * (fixed + gridFee + renewable + excise) * vatMultiplier;
-              const low = kwh * (baseSpot * 0.8 + margin + gridFee + renewable + excise) * vatMultiplier;
-              const high = kwh * (baseSpot * 1.2 + margin + gridFee + renewable + excise) * vatMultiplier;
+              const fixedCost = kwh * (fixed + gridFee) * vatMultiplier;
+              const low = kwh * (baseSpot * 0.8 + margin + gridFee) * vatMultiplier;
+              const high = kwh * (baseSpot * 1.2 + margin + gridFee) * vatMultiplier;
               return (
                 <div className="grid gap-3 text-sm">
                   <div className="compare-row">

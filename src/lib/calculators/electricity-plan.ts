@@ -38,18 +38,14 @@ export function calculateElectricityPlan(input: ElectricityPlanInput) {
   const fixed = normalizeEurPerKwh(rawFixed);
   const gridFee = Math.max(toNumber(input.gridFeeEurKwh), 0);
   const spotMargin = normalizeEurPerKwh(rawSpotMargin);
-  const renewable = normalizeEurPerKwh(rawRenewable);
-  const excise = normalizeEurPerKwh(rawExcise);
   const vatMultiplier = input.pricesIncludeVat ? 1 : 1.24;
 
   const spotMonthlyFee = Math.max(toNumber(input.spotMonthlyFeeEur), 0);
   const fixedMonthlyFee = Math.max(toNumber(input.fixedMonthlyFeeEur), 0);
   const networkMonthlyFee = Math.max(toNumber(input.networkMonthlyFeeEur), 0);
 
-  const spotMonthlyBeforeVat =
-    kwhMonth * (spot + spotMargin + gridFee + renewable + excise) + (spotMonthlyFee + networkMonthlyFee);
-  const fixedMonthlyBeforeVat =
-    kwhMonth * (fixed + gridFee + renewable + excise) + (fixedMonthlyFee + networkMonthlyFee);
+  const spotMonthlyBeforeVat = kwhMonth * (spot + spotMargin + gridFee) + (spotMonthlyFee + networkMonthlyFee);
+  const fixedMonthlyBeforeVat = kwhMonth * (fixed + gridFee) + (fixedMonthlyFee + networkMonthlyFee);
 
   const spotMonthlyCost = spotMonthlyBeforeVat * vatMultiplier;
   const fixedMonthlyCost = fixedMonthlyBeforeVat * vatMultiplier;

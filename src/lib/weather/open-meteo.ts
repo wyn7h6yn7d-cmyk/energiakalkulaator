@@ -13,6 +13,7 @@ export type WeatherForecastPoint = {
   windSpeedMs: number;
   precipitationMm: number;
   radiationWm2: number;
+  isDaylight: boolean;
 };
 
 const TALLINN: GeoPoint = {
@@ -118,7 +119,7 @@ export async function fetchOpenMeteoForecast({
   ].join(",");
   const url =
     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
-    `&hourly=${hourlyFields}&forecast_days=3&timezone=auto`;
+    `&hourly=${hourlyFields}&daily=sunrise,sunset&forecast_days=3&timezone=auto`;
   const res = await fetch(url, { next: { revalidate: 900 } });
   if (!res.ok) throw new Error(`Open-Meteo päring ebaõnnestus (${res.status})`);
   const json = (await res.json()) as {
@@ -130,16 +131,36 @@ export async function fetchOpenMeteoForecast({
       precipitation?: number[];
       shortwave_radiation?: number[];
     };
+    daily?: {
+      time?: string[];
+      sunrise?: string[];
+      sunset?: string[];
+    };
   };
   const h = json.hourly;
   if (!h?.time?.length) return [];
 
   const nowTs = Math.floor(Date.now() / 1000);
+  const dayMap = new Map<string, { sunriseTs: number; sunsetTs: number }>();
+  const dailyTime = json.daily?.time ?? [];
+  const sunrise = json.daily?.sunrise ?? [];
+  const sunset = json.daily?.sunset ?? [];
+  for (let i = 0; i < dailyTime.length; i += 1) {
+    const key = dailyTime[i];
+    const sunriseTs = Math.floor(new Date(sunrise[i]).getTime() / 1000);
+    const sunsetTs = Math.floor(new Date(sunset[i]).getTime() / 1000);
+    if (Number.isFinite(sunriseTs) && Number.isFinite(sunsetTs)) {
+      dayMap.set(key, { sunriseTs, sunsetTs });
+    }
+  }
   const out: WeatherForecastPoint[] = [];
 
   for (let i = 0; i < h.time.length; i += 1) {
     const ts = Math.floor(new Date(h.time[i]).getTime() / 1000);
     if (!Number.isFinite(ts) || ts < nowTs - 3600) continue;
+    const dayKey = new Date(ts * 1000).toISOString().slice(0, 10);
+    const daylight = dayMap.get(dayKey);
+    const isDaylight = daylight ? ts >= daylight.sunriseTs && ts <= daylight.sunsetTs : true;
     out.push({
       ts,
       temperatureC: toNum(h.temperature_2m?.[i]),
@@ -147,6 +168,7 @@ export async function fetchOpenMeteoForecast({
       windSpeedMs: Math.max(toNum(h.wind_speed_10m?.[i]), 0),
       precipitationMm: Math.max(toNum(h.precipitation?.[i]), 0),
       radiationWm2: Math.max(toNum(h.shortwave_radiation?.[i]), 0),
+      isDaylight,
     });
   }
 
