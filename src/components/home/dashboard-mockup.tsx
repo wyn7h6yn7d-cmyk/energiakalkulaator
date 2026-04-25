@@ -2,7 +2,7 @@
 
 export function DashboardMockup() {
   return (
-    <div className="dashboard-pulse relative rounded-[1.65rem] border border-white/12 bg-zinc-950/70 p-3 shadow-[0_22px_70px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-4 lg:min-h-[28.5rem]">
+    <div className="dashboard-pulse relative rounded-[1.65rem] border border-emerald-300/25 bg-zinc-950/78 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl sm:p-4 lg:min-h-[28.5rem]">
       <div className="pointer-events-none absolute -left-10 top-6 h-24 w-24 rounded-full bg-emerald-400/20 blur-3xl" />
       <div className="pointer-events-none absolute -right-6 bottom-4 h-24 w-24 rounded-full bg-teal-400/20 blur-3xl" />
 
@@ -20,11 +20,12 @@ export function DashboardMockup() {
         </aside>
 
         <div className="space-y-3 lg:space-y-3.5">
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-4">
             {[
-              ["ROI", "18.4%"],
-              ["Aastane sääst", "4 870 EUR"],
-              ["Payback", "6.2 a"],
+              ["Kogutulu", "124 560 €"],
+              ["IRR", "18,7%"],
+              ["Tasuvusaeg", "4,2 aastat"],
+              ["CO₂", "42,8 t"],
             ].map(([label, value]) => (
               <div key={label} className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
                 <div className="text-[11px] uppercase tracking-wide text-zinc-400">{label}</div>
@@ -33,10 +34,10 @@ export function DashboardMockup() {
             ))}
           </div>
 
-          <div className="grid gap-3 md:grid-cols-[1.35fr_1fr]">
+          <div className="grid gap-3 md:grid-cols-[1.35fr_0.7fr]">
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3">
               <div className="flex items-center justify-between">
-                <div className="text-xs text-zinc-300">Kumulatiivne rahavoog</div>
+                <div className="text-xs text-zinc-300">Elektri tarbimine ja tootmine</div>
                 <div className="text-[10px] text-zinc-500">12 kuud</div>
               </div>
               <div className="mt-3 h-28">
@@ -48,7 +49,7 @@ export function DashboardMockup() {
                     </linearGradient>
                   </defs>
                   <path
-                    d="M8 98 C35 82, 64 80, 88 70 C110 62, 138 56, 162 42 C184 30, 214 28, 242 18 C260 12, 278 8, 292 10"
+                    d="M8 98 C35 78, 64 90, 88 70 C110 52, 138 76, 162 44 C184 22, 214 40, 242 18 C260 11, 278 22, 292 10"
                     fill="none"
                     stroke="url(#dashboardLine)"
                     strokeWidth="3"
@@ -63,7 +64,7 @@ export function DashboardMockup() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3">
-              <div className="text-xs text-zinc-300">Tootmise jaotus</div>
+              <div className="text-xs text-zinc-300">Oma tarbimine</div>
               <div className="mt-2 flex items-center justify-center">
                 <div className="relative h-24 w-24 rounded-full border-[10px] border-emerald-300/30">
                   <div className="absolute inset-0 rounded-full border-[10px] border-transparent border-t-emerald-300 border-r-teal-300" />
@@ -72,12 +73,12 @@ export function DashboardMockup() {
               </div>
               <div className="mt-2 grid gap-1 text-[11px] text-zinc-400">
                 <div className="flex items-center justify-between">
-                  <span>Omakasutus</span>
-                  <span className="text-zinc-200">52%</span>
+                  <span>Osakaal</span>
+                  <span className="text-zinc-200">68%</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Võrku müük</span>
-                  <span className="text-zinc-200">48%</span>
+                  <span>Allikas</span>
+                  <span className="text-zinc-200">72%</span>
                 </div>
               </div>
             </div>

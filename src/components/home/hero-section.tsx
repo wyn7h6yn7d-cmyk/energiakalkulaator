@@ -7,15 +7,12 @@ import { RenewableEnergyScene } from "@/components/home/renewable-energy-scene";
 
 export function HeroSection() {
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-5 py-7 shadow-[0_20px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:px-8 sm:py-9 lg:px-10 lg:py-10">
+    <section className="relative isolate overflow-hidden rounded-3xl border border-emerald-300/20 bg-[#07110f]/80 px-5 py-7 shadow-[0_24px_90px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:px-8 sm:py-9 lg:px-10 lg:py-10">
       <RenewableEnergyScene />
       <AnimatedEnergyBackground intensity="hero" />
 
-      <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_1.08fr] lg:gap-10">
+      <div className="relative grid items-center gap-8 lg:grid-cols-[0.98fr_1.12fr] lg:gap-8">
         <div className="hero-content-shield">
-          <p className="inline-flex rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-1 text-xs tracking-wide text-emerald-100">
-            Energiakalkulaator
-          </p>
           <h1 className="mt-4 text-balance text-[2.25rem] font-semibold leading-[1.04] tracking-tight text-zinc-50 sm:text-[3.45rem]">
             Arvuta energiaotsuste <span className="text-emerald-300">tasuvus targemalt</span>
           </h1>
@@ -42,7 +39,7 @@ export function HeroSection() {
               ["Reaalajas andmed", "Nord Pool börsihind LIVE"],
               ["Sinu andmed on turvalised", "Privaatsus ja andmekaitse tagatud"],
             ].map(([title, description]) => (
-              <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
+              <div key={title} className="rounded-xl border border-emerald-300/20 bg-zinc-950/45 px-3 py-2.5">
                 <div className="text-xs font-medium text-zinc-100">{title}</div>
                 <div className="mt-1 text-[11px] leading-relaxed text-zinc-400">{description}</div>
               </div>

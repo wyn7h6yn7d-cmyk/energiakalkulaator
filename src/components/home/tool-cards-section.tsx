@@ -29,7 +29,7 @@ export function ToolCardsSection() {
   return (
     <section className="section">
       <header className="section-head">
-        <h2 className="section-h2">Vali menüüst sobiv tööriist</h2>
+        <h2 className="section-h2 text-center">Vali menüüst sobiv tööriist</h2>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-4">
@@ -39,7 +39,7 @@ export function ToolCardsSection() {
             href={card.href}
             className="group rounded-2xl border border-white/12 bg-white/[0.03] p-5 transition duration-200 hover:border-emerald-300/45 hover:shadow-[0_0_42px_rgba(16,185,129,0.12)]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-300/40 bg-emerald-400/10 text-emerald-200">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-300/40 bg-emerald-400/10 text-emerald-200 shadow-[0_0_28px_rgba(16,185,129,0.15)]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M4 12h16M12 4l8 8-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
