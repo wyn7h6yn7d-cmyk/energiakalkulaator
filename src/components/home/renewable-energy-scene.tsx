@@ -4,6 +4,9 @@ export function RenewableEnergyScene() {
   return (
     <div className="renewable-scene" aria-hidden="true">
       <div className="scene-atmosphere" />
+      <div className="scene-ring scene-ring-main" />
+      <div className="scene-ring scene-ring-soft" />
+      <div className="scene-stars" />
       <div className="scene-horizon" />
 
       <svg className="scene-svg" viewBox="0 0 1200 700" preserveAspectRatio="none">
@@ -46,21 +49,21 @@ export function RenewableEnergyScene() {
       </svg>
 
       <div className="scene-turbines">
-        <div className="turbine turbine-lg" style={{ right: "12%", bottom: "30%" }}>
+        <div className="turbine turbine-lg" style={{ right: "16%", bottom: "30%" }}>
           <span className="mast" />
           <span className="hub" />
           <span className="blades">
             <span className="blade-third" />
           </span>
         </div>
-        <div className="turbine turbine-md" style={{ right: "30%", bottom: "34%" }}>
+        <div className="turbine turbine-md" style={{ right: "34%", bottom: "34%" }}>
           <span className="mast" />
           <span className="hub" />
           <span className="blades">
             <span className="blade-third" />
           </span>
         </div>
-        <div className="turbine turbine-sm" style={{ right: "42%", bottom: "36%" }}>
+        <div className="turbine turbine-sm" style={{ right: "46%", bottom: "36%" }}>
           <span className="mast" />
           <span className="hub" />
           <span className="blades">
