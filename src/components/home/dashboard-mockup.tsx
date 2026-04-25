@@ -2,9 +2,10 @@
 
 export function DashboardMockup() {
   return (
-    <div className="dashboard-pulse relative rounded-[1.65rem] border border-emerald-300/25 bg-zinc-950/78 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl sm:p-4 lg:min-h-[28.5rem]">
-      <div className="pointer-events-none absolute -left-10 top-6 h-24 w-24 rounded-full bg-emerald-400/20 blur-3xl" />
-      <div className="pointer-events-none absolute -right-6 bottom-4 h-24 w-24 rounded-full bg-teal-400/20 blur-3xl" />
+    <div className="dashboard-pulse relative rounded-[1.7rem] border border-emerald-300/30 bg-zinc-950/86 p-3 shadow-[0_30px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl sm:p-4 lg:min-h-[29rem]">
+      <div className="pointer-events-none absolute -left-8 top-8 h-24 w-24 rounded-full bg-emerald-400/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-8 bottom-8 h-28 w-28 rounded-full bg-teal-400/20 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.11),transparent_28%)] opacity-35" />
 
       <div className="relative grid gap-3 lg:grid-cols-[74px_1fr]">
         <aside className="hidden rounded-2xl border border-white/8 bg-white/[0.03] p-2 lg:block">
@@ -27,7 +28,7 @@ export function DashboardMockup() {
               ["Tasuvusaeg", "4,2 aastat"],
               ["CO₂", "42,8 t"],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
+              <div key={label} className="rounded-xl border border-emerald-300/20 bg-white/[0.03] px-3 py-2.5">
                 <div className="text-[11px] uppercase tracking-wide text-zinc-400">{label}</div>
                 <div className="mt-1 text-sm font-semibold text-zinc-100">{value}</div>
               </div>
@@ -35,7 +36,7 @@ export function DashboardMockup() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-[1.35fr_0.7fr]">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-2xl border border-emerald-300/20 bg-white/[0.02] p-3">
               <div className="flex items-center justify-between">
                 <div className="text-xs text-zinc-300">Elektri tarbimine ja tootmine</div>
                 <div className="text-[10px] text-zinc-500">12 kuud</div>
@@ -48,6 +49,7 @@ export function DashboardMockup() {
                       <stop offset="1" stopColor="rgba(45,212,191,0.8)" />
                     </linearGradient>
                   </defs>
+                  <path d="M10 95 L290 95" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
                   <path
                     d="M8 98 C35 78, 64 90, 88 70 C110 52, 138 76, 162 44 C184 22, 214 40, 242 18 C260 11, 278 22, 292 10"
                     fill="none"
@@ -63,7 +65,7 @@ export function DashboardMockup() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-2xl border border-emerald-300/20 bg-white/[0.02] p-3">
               <div className="text-xs text-zinc-300">Oma tarbimine</div>
               <div className="mt-2 flex items-center justify-center">
                 <div className="relative h-24 w-24 rounded-full border-[10px] border-emerald-300/30">

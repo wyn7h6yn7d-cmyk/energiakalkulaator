@@ -68,7 +68,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 px-3 pb-2 pt-3 sm:px-5 sm:pb-3 sm:pt-4 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 rounded-2xl border border-emerald-300/20 bg-zinc-950/78 px-3 py-2 shadow-[0_12px_50px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:px-4">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 rounded-2xl border border-emerald-300/30 bg-zinc-950/82 px-3 py-2 shadow-[0_16px_65px_rgba(0,0,0,0.55)] backdrop-blur-2xl sm:px-4">
         <Link
           href="/"
           className="flex min-w-0 items-center gap-2.5 sm:gap-3"
@@ -88,7 +88,9 @@ export function SiteHeader() {
               priority
             />
           </div>
-          <div className="truncate text-sm font-medium tracking-tight text-zinc-100 sm:text-[1.05rem]">Energiakalkulaator</div>
+          <div className="truncate text-sm font-medium tracking-tight text-zinc-100 sm:text-[1.05rem]">
+            Energiakalkulaator
+          </div>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Peamenüü">
