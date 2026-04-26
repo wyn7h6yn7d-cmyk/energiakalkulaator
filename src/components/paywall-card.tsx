@@ -38,6 +38,9 @@ export function PaywallCard({
             <p className="text-sm text-zinc-200">
               <strong>{title}</strong> — {description}
             </p>
+            <p className="mt-2 text-sm text-zinc-300">
+              PDF raportid ja lisagraafikud. Ühekordne ligipääs või tulevane pakett.
+            </p>
             <p className="mt-2 text-xs text-zinc-400">
               Hetkel ajutiselt tasuta testimiseks.
             </p>

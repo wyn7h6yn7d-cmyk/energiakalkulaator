@@ -18,6 +18,16 @@ Ava brauseris `http://localhost:3000`.
 - `npm run start` - käivita tootmisbuild
 - `npm run lint` - koodikvaliteedi kontroll
 
+## Stripe / paywall foundation
+
+- Paywall on feature flagi taga.
+- Vaikimisi on `NEXT_PUBLIC_PAYWALL_ENABLED=false`.
+- Tasuta beetaversioonis on kõik tööriistad avatud.
+- Stripe võtmed tuleb lisada Verceli env muutujatesse.
+- Checkout route on valmis, aga UI ei näita ostu, kui flag=false.
+- Webhook route on tulevikuks ette valmistatud.
+- Testid mockivad Stripe'i.
+
 ## Beta v0.1 status
 
 - build läbib
@@ -71,6 +81,8 @@ Projekt sobib otse Vercelisse:
 1. impordi repo Vercelisse
 2. build command: `npm run build`
 3. output: Next.js vaikimisi
+
+Stripe ja paywalli päris võtmed tuleb lisada Verceli Environment Variables kaudu (mitte commit'ida repasse).
 
 Soovi korral saab hiljem lisada ka staatilise ekspordi eraldi vajadustele.
 # wattwise

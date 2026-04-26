@@ -25,7 +25,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npm run dev -- -p ${port}`,
+    command: `NEXT_PUBLIC_PAYWALL_ENABLED=false npm run dev -- -p ${port}`,
     url: baseURL,
     reuseExistingServer: true,
     timeout: 120_000,

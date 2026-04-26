@@ -1,13 +1,8 @@
 "use client";
 
-import { FEATURES } from "@/lib/features";
+import { PaywallGate } from "@/components/paywall/PaywallGate";
 import type { CalculatorReturnSlug } from "@/lib/calculator-slugs";
-import {
-  canDownloadPdf,
-  canViewFullAnalysis,
-  type PurchaseType,
-  type UnlockState,
-} from "@/lib/unlock";
+import { type PurchaseType, type UnlockState } from "@/lib/unlock";
 
 type Props = {
   projectId: string;
@@ -31,55 +26,18 @@ export function CalculatorPdfActions({
   returnSlug,
   className = "mt-6",
 }: Props) {
-  if (!FEATURES.paywallEnabled) {
-    return (
-      <div className={`${className} rounded-2xl border border-white/10 bg-white/[0.02] p-4`}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-zinc-300">Laadi alla kokkuvõtte PDF.</p>
-          <button type="button" className="btn-glow" onClick={() => void onDownload()}>
-            Laadi PDF alla
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Future-ready: access checks can be implemented in PaywallGate without changing calculator pages.
+  // Beta mode remains free because PaywallGate allows children when paywall is disabled.
+  void unlock;
+  void purchaseBusy;
+  void startCheckout;
+  void checkPaymentStatus;
+  void returnSlug;
 
-  if (!canViewFullAnalysis(unlock)) {
-    return null;
-  }
-
-  if (!canDownloadPdf(unlock)) {
-    return (
-      <div className={`${className} rounded-2xl border border-amber-300/25 bg-amber-400/10 p-4`}>
-        <p className="text-sm text-zinc-200">
-          Täisanalüüs on selle projekti jaoks avatud. PDF-i allalaadimiseks on vaja PDF raporti kinnitust.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="btn-glow"
-            onClick={() => startCheckout("pdf_report", { returnSlug })}
-            disabled={purchaseBusy === "pdf_report"}
-          >
-            {purchaseBusy === "pdf_report" ? "Laen..." : "Osta PDF raport"}
-          </button>
-          <button type="button" className="btn-ghost" onClick={checkPaymentStatus}>
-            Kontrolli ligipääsu staatust
-          </button>
-        </div>
-        {projectId ? (
-          <p className="mt-2 text-xs text-zinc-400">
-            Projekt: <span className="font-medium text-zinc-200">{projectId}</span>
-          </p>
-        ) : null}
-      </div>
-    );
-  }
-
-  return (
-    <div className={`${className} rounded-2xl border border-emerald-400/25 bg-emerald-400/10 p-4`}>
-      <p className="text-sm text-zinc-100">PDF kokkuvõte on selle projekti jaoks allalaaditav.</p>
-      <div className="mt-3 flex flex-wrap gap-2">
+  const freePdfContent = (
+    <div className={`${className} rounded-2xl border border-white/10 bg-white/[0.02] p-4`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-zinc-300">Laadi alla kokkuvõtte PDF.</p>
         <button type="button" className="btn-glow" onClick={() => void onDownload()}>
           Laadi PDF alla
         </button>
@@ -90,5 +48,19 @@ export function CalculatorPdfActions({
         </p>
       ) : null}
     </div>
+  );
+
+  const paywallFallback = (
+    <div className={`${className} rounded-2xl border border-amber-300/25 bg-amber-400/10 p-4`}>
+      <p className="text-sm text-zinc-200">
+        PDF allalaadimine on selle funktsiooni jaoks ajutiselt piiratud.
+      </p>
+    </div>
+  );
+
+  return (
+    <PaywallGate featureName="pdf_reports_download" fallback={paywallFallback}>
+      {freePdfContent}
+    </PaywallGate>
   );
 }

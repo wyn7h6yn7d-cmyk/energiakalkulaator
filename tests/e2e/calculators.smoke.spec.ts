@@ -63,5 +63,24 @@ test.describe("Kalkulaatorite smoke testid", () => {
     await expect(netIncomeCard).not.toContainText("0EUR/a");
     await expect(netIncomeCard).toContainText(/8 ?721/);
   });
+
+  test("Tasuta reziim: hinnad + kalkulaator ei ole lukus", async ({ page }) => {
+    await page.goto("/hinnad");
+    await expect(page.getByText("Energiakalkulaator on hetkel tasuta beetaversioonis.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ava lisavõimalused" })).toHaveCount(0);
+
+    await page.goto("/kalkulaatorid/ev-laadimine");
+    await page.getByLabel("Laaditav energia (kWh)").fill("30");
+    await page.getByLabel("Laadija võimsus (kW)").fill("11");
+    await page.getByLabel("Elektrihind (€/kWh)").fill("0,16");
+    await page.getByLabel("Peakaitse (A)").fill("32");
+    await page.getByLabel("Muud koormused majas (reserv, kW)").fill("2");
+    await page.getByLabel("Süsteem").selectOption("3");
+    await page.getByRole("button", { name: "Arvuta tulemus" }).click();
+
+    await expect(page.getByText("Peamine tulemus").first()).toBeVisible();
+    await expect(page.getByText("Laadi alla kokkuvõtte PDF.")).toBeVisible();
+    await expect(page.getByText("Osta PDF raport")).toHaveCount(0);
+  });
 });
 
