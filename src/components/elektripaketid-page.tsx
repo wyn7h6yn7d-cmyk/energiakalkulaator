@@ -28,15 +28,15 @@ export function ElektripaketidPageClient() {
     useProjectUnlock();
 
   const [mode, setMode] = useState<Mode>("quick");
-  const [monthlyKwh, setMonthlyKwh] = useState("");
+  const [monthlyKwh, setMonthlyKwh] = useState("400");
   const [monthlyBreakdown, setMonthlyBreakdown] = useState(Array.from({ length: 12 }, () => ""));
   const [daySharePct, setDaySharePct] = useState("55");
   const [nightSharePct, setNightSharePct] = useState("45");
 
-  const [spotEurKwh, setSpotEurKwh] = useState("");
-  const [fixedEurKwh, setFixedEurKwh] = useState("");
-  const [spotMarginEurKwh, setSpotMarginEurKwh] = useState("");
-  const [gridFeeEurKwh, setGridFeeEurKwh] = useState("");
+  const [spotEurKwh, setSpotEurKwh] = useState("0.12");
+  const [fixedEurKwh, setFixedEurKwh] = useState("0.16");
+  const [spotMarginEurKwh, setSpotMarginEurKwh] = useState("0.01");
+  const [gridFeeEurKwh, setGridFeeEurKwh] = useState("0.04");
   const [renewableFeeEurKwh, setRenewableFeeEurKwh] = useState("");
   const [exciseEurKwh, setExciseEurKwh] = useState("");
 
@@ -107,10 +107,26 @@ export function ElektripaketidPageClient() {
         "Spot vs fixed energiahinna vahe",
         "Kuutarbimise maht",
         "Võrgutasu ja muud kWh tasud",
-        "Paketipõhised kuutasud",
       ],
     };
   }, [monthlyKwh, spotEurKwh, fixedEurKwh, gridFeeEurKwh, mode, monthlyBreakdown, spotFetchState.note]);
+
+  const sanityWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    const spot = toNumber(spotEurKwh);
+    const fixed = toNumber(fixedEurKwh);
+    const consumption = toNumber(monthlyKwh);
+    if ((spot > 0 && (spot < 0.03 || spot > 0.6)) || (fixed > 0 && (fixed < 0.03 || fixed > 0.6))) {
+      warnings.push("Elektrihind tundub ebatavaline. Kontrolli, et ühik on €/kWh, mitte €/MWh.");
+    }
+    if (consumption > 0 && (consumption < 50 || consumption > 10000)) {
+      warnings.push("Kuutarbimine tundub ebarealistlik. Kontrolli sisestatud kWh väärtust.");
+    }
+    if (consumption <= 0) {
+      warnings.push("Aastakulu võrdluseks sisesta vähemalt kuutarbimine üle 0 kWh.");
+    }
+    return warnings;
+  }, [spotEurKwh, fixedEurKwh, monthlyKwh]);
 
   const applyTemplate = (id: string) => {
     const tpl = ELECTRICITY_PLAN_TEMPLATES.find((item) => item.id === id);
@@ -396,6 +412,31 @@ export function ElektripaketidPageClient() {
 
           <article className="card">
             <h3 className="section-title">Tulemused</h3>
+            <p className="mb-4 text-sm text-zinc-300">
+              Mida see tähendab? Võrdle aastakulu vahet ja murdepunkti - nii näed, millise hinna juures valik muutub.
+            </p>
+            {sanityWarnings.length > 0 ? (
+              <div className="mb-4 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-4 text-sm text-amber-100">
+                <p className="font-medium">Kontrolli sisendeid enne otsust</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {sanityWarnings.map((warning) => (
+                    <li key={warning}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <div className="mb-5 rounded-2xl border border-teal-300/30 bg-teal-400/15 p-5 shadow-[0_0_30px_rgba(20,184,166,0.12)]">
+              <p className="text-xs uppercase tracking-wide text-teal-100/80">Peamine tulemus</p>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                <strong className="text-4xl font-semibold text-teal-100 sm:text-5xl">
+                  {result.annualDiff.toFixed(2).replace(".", ",")}
+                </strong>
+                <span className="pb-1 text-base text-teal-50/90 sm:text-lg">EUR/a</span>
+              </div>
+              <p className="mt-2 text-sm text-teal-50/90">
+                Negatiivne vahe tähendab, et spot on odavam; positiivne tähendab, et fikseeritud on odavam.
+              </p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="metric-card metric-card-accent-teal">
                 <p className="metric-label">Spot kuukulu</p>
@@ -465,6 +506,11 @@ export function ElektripaketidPageClient() {
               fixed = tarbimine × (fixed + võrgutasu + taastuvenergia tasu + aktsiis) + kuutasud. Kui KM pole hinnas,
               lisatakse 1,24x.
             </p>
+            {toNumber(monthlyKwh) <= 0 ? (
+              <p className="mt-2 text-sm text-amber-200">
+                Tulemust ei saa usaldusväärselt arvutada, sest kuutarbimine on puudu või 0.
+              </p>
+            ) : null}
             <UsedAssumptionsBlock {...assumptionsInfo} />
           </article>
         </div>

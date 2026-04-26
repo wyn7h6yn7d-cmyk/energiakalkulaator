@@ -49,7 +49,7 @@ export function DashboardMockup() {
                 <div className="text-xs text-zinc-300">Elektri tarbimine ja tootmine</div>
                 <div className="text-[10px] text-zinc-500">LIVE / 12 kuud</div>
               </div>
-              <div className="mt-3 h-28">
+              <div className="mt-3 h-[240px] sm:h-[260px] lg:h-[320px]">
                 <svg viewBox="0 0 300 110" className="h-full w-full" aria-hidden="true">
                   <defs>
                     <linearGradient id="dashboardLine" x1="0" y1="0" x2="1" y2="1">
@@ -76,7 +76,7 @@ export function DashboardMockup() {
             <div className="rounded-2xl border border-emerald-300/24 bg-white/[0.02] p-3">
               <div className="text-xs text-zinc-300">Oma tarbimine</div>
               <div className="mt-2 flex items-center justify-center">
-                <div className="relative h-24 w-24 rounded-full border-[10px] border-emerald-300/30">
+                <div className="relative h-28 w-28 rounded-full border-[10px] border-emerald-300/30 sm:h-32 sm:w-32">
                   <div className="absolute inset-0 rounded-full border-[10px] border-transparent border-t-emerald-300 border-r-teal-300" />
                   <div className="absolute inset-0 grid place-items-center text-[11px] font-semibold text-zinc-200">74%</div>
                 </div>
@@ -103,7 +103,7 @@ export function DashboardMockup() {
                 key={index}
                 className="rounded-lg border border-white/10 bg-white/[0.02] px-2 py-2"
               >
-                <div className="h-12 w-full rounded-md bg-zinc-900/60 p-1">
+                <div className="h-16 w-full rounded-md bg-zinc-900/60 p-1 sm:h-20">
                   <div
                     className="h-full rounded-sm bg-gradient-to-t from-emerald-400/70 to-teal-300/75"
                     style={{ width: `${value}%` }}

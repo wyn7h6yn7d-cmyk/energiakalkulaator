@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ForecastRow, ForecastSummary } from "@/lib/forecast/energy-forecast";
+import { ChartCard } from "@/components/charts/ChartCard";
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -114,11 +115,11 @@ function ForecastChart({ rows }: { rows: ForecastRow[] }) {
   };
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-zinc-950/40">
+    <div className="w-full">
       <div className="relative">
         {hoverRow ? (
           <div
-            className="pointer-events-none absolute z-10 rounded-xl border border-white/15 bg-zinc-950/90 px-3 py-2 text-xs text-zinc-100 shadow-[0_12px_26px_rgba(0,0,0,0.45)] backdrop-blur"
+            className="chart-tooltip pointer-events-none absolute z-10 rounded-xl px-3 py-2 text-xs"
             style={{
               left: `${Math.min(90, Math.max(10, ((hoverX ?? left) / w) * 100))}%`,
               top: 8,
@@ -135,7 +136,7 @@ function ForecastChart({ rows }: { rows: ForecastRow[] }) {
         <svg
           viewBox={`0 0 ${w} ${h}`}
           preserveAspectRatio="none"
-          className="h-[320px] min-w-[760px] w-full"
+          className="h-[240px] w-full sm:h-[280px] md:h-[320px] lg:h-[340px]"
           onMouseMove={(e) => handlePointerMove(e.clientX, e.currentTarget.getBoundingClientRect())}
           onMouseLeave={() => setHoverIndex(null)}
           onTouchStart={(e) => {
@@ -187,7 +188,7 @@ function ForecastChart({ rows }: { rows: ForecastRow[] }) {
         ))}
         </svg>
       </div>
-      <div className="grid gap-2 px-4 pb-4 pt-2 text-xs text-zinc-300 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-2 px-1 pb-2 pt-2 text-xs text-zinc-300 sm:grid-cols-2 lg:grid-cols-4">
         {legendItems.map((item) => (
           <button
             key={item.id}
@@ -270,7 +271,15 @@ export function EnergyForecastDashboard({
           </div>
         </div>
 
-        <ForecastChart rows={rows} />
+        <div className="mt-6">
+          <ChartCard
+            title="Hinna, ilma ja tootluse graafik"
+            description="Teal = hind, kollane = kiirgus, sinine = pilvisus, roheline = PV tootlus."
+            chartClassName="min-h-[280px] md:min-h-[360px]"
+          >
+            <ForecastChart rows={rows} />
+          </ChartCard>
+        </div>
       </div>
 
       <div className="glass-panel rounded-3xl p-5 sm:p-8">
@@ -289,8 +298,8 @@ export function EnergyForecastDashboard({
             </button>
           </div>
         </div>
-        <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/35">
-          <div className="max-h-[560px] overflow-auto">
+        <div className="mt-4 w-full max-w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/35">
+          <div className="max-h-[560px] w-full max-w-full overflow-auto">
             <table className="min-w-[860px] w-full text-sm">
               <thead className="sticky top-0 z-10 bg-zinc-950 text-zinc-200">
                 <tr>

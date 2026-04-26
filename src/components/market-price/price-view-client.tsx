@@ -11,6 +11,7 @@ import {
   MarketPricePoint,
 } from "@/lib/elering";
 import { pickBestWindows, pickTopSlots, summarizeDay } from "@/lib/market-recommendations";
+import { ChartCard } from "@/components/charts/ChartCard";
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -244,17 +245,14 @@ function AreaChart({
   })();
 
   return (
-    <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/40">
-      <div className="flex items-center justify-between px-4 pt-4 text-xs text-zinc-400 sm:px-5">
-        <span>Hinnagraafik</span>
-        <span>
-          min {fmtSnt(min, vat)} · max {fmtSnt(max, vat)} snt/kWh
-        </span>
+    <div className="w-full">
+      <div className="mb-2 text-xs text-zinc-400">
+        min {fmtSnt(min, vat)} · max {fmtSnt(max, vat)} snt/kWh
       </div>
-      <div className="relative mt-2">
+      <div className="relative min-h-[240px] md:min-h-[320px]">
         {hover ? (
           <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 rounded-xl border border-white/10 bg-zinc-950/85 px-3 py-2 text-xs text-zinc-200 shadow-[0_0_30px_rgba(0,0,0,0.45)] backdrop-blur-2xl"
+            className="chart-tooltip pointer-events-none absolute z-10 -translate-x-1/2 rounded-xl px-3 py-2 text-xs"
             style={{
               // hoia tooltip alati vaate sees (mobiilis tekitas "üle ääre" layouti)
               left: `${Math.min(90, Math.max(10, (hover.x / w) * 100))}%`,
@@ -270,7 +268,7 @@ function AreaChart({
         <svg
           viewBox={`0 0 ${w} ${h}`}
           preserveAspectRatio="none"
-          className="h-[250px] w-full sm:h-[260px]"
+          className="h-[240px] w-full sm:h-[280px] md:h-[320px] lg:h-[340px]"
           onMouseLeave={() => setHover(null)}
           onMouseMove={(e) => {
             const rect = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
@@ -560,15 +558,15 @@ export function PriceViewClient({
               Eesti (EE) turuhind Eleringi andmetel. Vaikimisi näitame hinna käibemaksuga (24%).
             </p>
           </div>
-          <div className="flex min-w-0 flex-wrap gap-2">
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-zinc-950/45 px-2 py-1">
+          <div className="flex min-w-0 w-full flex-wrap gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/45 px-2 py-1">
               <FilterChip active={area === "ee"} onClick={() => setArea("ee")}>Eesti</FilterChip>
               <FilterChip active={area === "lv"} onClick={() => setArea("lv")}>Läti</FilterChip>
               <FilterChip active={area === "lt"} onClick={() => setArea("lt")}>Leedu</FilterChip>
               <FilterChip active={area === "fi"} onClick={() => setArea("fi")}>Soome</FilterChip>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-zinc-950/45 px-2 py-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/45 px-2 py-1">
               <FilterChip active={!vat} onClick={() => setVat(false)}>
                 Ilma KM-ta
               </FilterChip>
@@ -577,7 +575,7 @@ export function PriceViewClient({
               </FilterChip>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-zinc-950/45 px-2 py-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/45 px-2 py-1">
               <FilterChip
                 active={effectiveInterval === 15}
                 onClick={() => setViewInterval(15)}
@@ -591,7 +589,7 @@ export function PriceViewClient({
               </FilterChip>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-zinc-950/45 px-2 py-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/45 px-2 py-1">
               <FilterChip active={period === "today"} onClick={() => setPeriod("today")}>
                 Täna
               </FilterChip>
@@ -654,22 +652,20 @@ export function PriceViewClient({
         </div>
 
         {/* B) Main chart */}
-        <div className="mt-5 rounded-3xl border border-white/10 bg-zinc-950/45 p-4 sm:p-6 lg:rounded-[28px]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <div className="text-sm font-semibold text-zinc-50">Hinnagraafik</div>
-              <div className="mt-1 text-xs text-zinc-400">
-                Hover: näed täpset hinda. Marker näitab “praegu” lähimat punkti.
+        <div className="mt-5">
+          <ChartCard
+            title="Hinnagraafik"
+            description="Hover: näed täpset hinda. Marker näitab praegu lähimat punkti."
+            controls={
+              <div className="text-xs text-zinc-400">
+                Vaade: {effectiveInterval === 15 ? "15 min" : "1h"} · Periood:{" "}
+                {period === "today" ? "täna" : period === "tomorrow" ? "homme" : "täna + homme"}
               </div>
-            </div>
-          <div className="text-xs text-zinc-400">
-              Vaade: {effectiveInterval === 15 ? "15 min" : "1h"} · Periood:{" "}
-              {period === "today" ? "täna" : period === "tomorrow" ? "homme" : "täna + homme"}
-            </div>
-          </div>
-          <div className="-mx-1 sm:mx-0">
+            }
+            chartClassName="min-h-[280px] md:min-h-[360px]"
+          >
             <AreaChart points={visiblePoints} vat={vat} nowTs={nowTs} />
-          </div>
+          </ChartCard>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-12">
@@ -747,7 +743,7 @@ export function PriceViewClient({
             Andmeid ei ole saadaval.
           </div>
         ) : (
-          <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/35">
+          <div className="mt-6 w-full max-w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/35">
             <div className={`grid gap-2 p-2 sm:hidden ${showFullDayTable ? "max-h-[26rem] overflow-y-auto" : ""}`}>
               {(() => {
                 const thresholds = buildPriceThresholds(visiblePoints);
@@ -792,7 +788,7 @@ export function PriceViewClient({
               })()}
             </div>
 
-            <div className={`hidden sm:block ${showFullDayTable ? "max-h-[34rem] overflow-auto" : "overflow-x-auto"}`}>
+            <div className={`hidden sm:block w-full max-w-full ${showFullDayTable ? "max-h-[34rem] overflow-auto" : "overflow-x-auto"}`}>
               <table className="min-w-[680px] w-full text-sm">
                 <thead className="bg-white/[0.05] text-zinc-200">
                   <tr>

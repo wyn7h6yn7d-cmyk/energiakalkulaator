@@ -25,12 +25,12 @@ export function PeakShavingPageClient() {
     useProjectUnlock();
 
   const [mode, setMode] = useState<"quick" | "advanced">("quick");
-  const [currentPeakKw, setCurrentPeakKw] = useState("");
-  const [targetLimitKw, setTargetLimitKw] = useState("");
-  const [batteryKwh, setBatteryKwh] = useState("");
-  const [batteryKw, setBatteryKw] = useState("");
-  const [peakHours, setPeakHours] = useState("");
-  const [demandFeeEurPerKwMonth, setDemandFeeEurPerKwMonth] = useState("");
+  const [currentPeakKw, setCurrentPeakKw] = useState("120");
+  const [targetLimitKw, setTargetLimitKw] = useState("90");
+  const [batteryKwh, setBatteryKwh] = useState("150");
+  const [batteryKw, setBatteryKw] = useState("60");
+  const [peakHours, setPeakHours] = useState("1");
+  const [demandFeeEurPerKwMonth, setDemandFeeEurPerKwMonth] = useState("6.5");
   const [peaksPerMonth, setPeaksPerMonth] = useState("4");
   const [avgPeakDurationHours, setAvgPeakDurationHours] = useState("1");
   const [minSocPct, setMinSocPct] = useState("15");
@@ -173,7 +173,6 @@ export function PeakShavingPageClient() {
         "Praeguse tipu ja sihtpiiri vahe",
         "Aku võimsus (kW)",
         "Aku kasutatav energia (kWh)",
-        "Võimsustasu €/kW/kuu",
       ],
     };
   }, [
@@ -187,6 +186,21 @@ export function PeakShavingPageClient() {
     maxUsableSocPct,
     batteryEfficiencyPct,
   ]);
+
+  const sanityWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    const fee = toNumber(demandFeeEurPerKwMonth);
+    if (fee > 0 && (fee < 1 || fee > 40)) {
+      warnings.push("Võimsustasu tundub ebatavaline. Kontrolli, et ühik oleks €/kW/kuu.");
+    }
+    if (result.needCut > 0 && !result.targetRealistic) {
+      warnings.push("Aku ei kata soovitud lõiget täielikult. Vajad suuremat kW, suuremat kWh või leebemat sihtpiiri.");
+    }
+    if (result.netSavings <= 0) {
+      warnings.push("Netosääst on null või negatiivne - selle sisendi korral ei pruugi investeering ära tasuda.");
+    }
+    return warnings;
+  }, [demandFeeEurPerKwMonth, result.needCut, result.targetRealistic, result.netSavings]);
 
   return (
     <div className="grid gap-6">
@@ -404,6 +418,32 @@ export function PeakShavingPageClient() {
 
           <article className="card">
             <h3 className="section-title">Tulemused</h3>
+            <p className="mb-4 text-sm text-zinc-300">
+              Mida see tähendab? Kontrolli esmalt, kas soovitud lõige on realistlik, ja seejärel vaata hinnangulist
+              aastast säästu.
+            </p>
+            {sanityWarnings.length > 0 ? (
+              <div className="mb-4 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-4 text-sm text-amber-100">
+                <p className="font-medium">Kontrolli sisendeid enne otsust</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {sanityWarnings.map((warning) => (
+                    <li key={warning}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <div className="mb-5 rounded-2xl border border-emerald-300/30 bg-emerald-400/15 p-5 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
+              <p className="text-xs uppercase tracking-wide text-emerald-100/80">Peamine tulemus</p>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                <strong className="text-4xl font-semibold text-emerald-100 sm:text-5xl">
+                  {Math.round(result.annualSavings).toLocaleString("et-EE")}
+                </strong>
+                <span className="pb-1 text-base text-emerald-50/90 sm:text-lg">EUR/a</span>
+              </div>
+              <p className="mt-2 text-sm text-emerald-50/90">
+                Selle sisendi põhjal võiks aastane võimsustasu kokkuhoid olla sellises suurusjärgus.
+              </p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="metric-card metric-card-accent-teal">
                 <p className="metric-label">Vajalik lõige</p>
@@ -480,6 +520,11 @@ export function PeakShavingPageClient() {
                 <strong>{result.recommendedBatteryKwh.toFixed(1).replace(".", ",")} kWh</strong>
               </div>
             </div>
+            {result.paybackYears === null ? (
+              <p className="mt-3 text-sm text-amber-200">
+                Tasuvusaega ei saa arvutada, sest netosääst on null või negatiivne.
+              </p>
+            ) : null}
             <UsedAssumptionsBlock {...assumptionsInfo} />
           </article>
         </div>

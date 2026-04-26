@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 export function MiniCashflowChart({
   cashflows,
-  height = 120,
+  height = 320,
 }: {
   cashflows: number[];
   height?: number;
@@ -19,20 +19,20 @@ export function MiniCashflowChart({
   const axisTicks = useMemo(() => [max, min + span * 0.5, min], [max, min, span]);
 
   return (
-    <div className="mt-3 rounded-2xl border border-white/10 bg-zinc-950/40 p-4">
+    <div className="w-full">
       <div className="flex items-center justify-between text-xs text-zinc-400">
         <span>Rahavoog (aastad)</span>
         <span>{values.length} a</span>
       </div>
       <div className="mt-3 grid grid-cols-[auto,1fr] gap-3">
-        <div className="grid h-full min-h-[120px] w-10 content-between text-[10px] text-zinc-500">
+        <div className="grid h-full min-h-[240px] w-12 content-between text-[10px] text-zinc-500 md:min-h-[320px]">
           {axisTicks.map((tick, idx) => (
             <span key={`${tick}-${idx}`}>{Math.round(tick).toLocaleString("et-EE")}€</span>
           ))}
         </div>
         <div className="relative">
           {hover !== null ? (
-            <div className="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 rounded-lg border border-emerald-300/30 bg-zinc-950/95 px-2 py-1 text-[11px] text-emerald-100 shadow-[0_0_18px_rgba(16,185,129,0.18)]">
+            <div className="chart-tooltip pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 rounded-lg px-2 py-1 text-[11px]">
               Aasta {hover + 1}: {Math.round(values[hover]).toLocaleString("et-EE")} €
             </div>
           ) : null}
@@ -41,7 +41,7 @@ export function MiniCashflowChart({
             <div className="border-b border-white/10" />
             <div />
           </div>
-          <div className="relative mt-0.5 flex items-end gap-1" style={{ height }}>
+          <div className="relative mt-0.5 flex items-end gap-1.5" style={{ height }}>
             {values.map((v, i) => {
               const t = isFlatSeries ? 0.68 : (v - min) / span;
               const h = Math.max(8, Math.round(t * (height - 8)));

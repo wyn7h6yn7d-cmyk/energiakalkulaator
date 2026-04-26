@@ -30,13 +30,13 @@ export function EvLaadiminePageClient() {
     useProjectUnlock();
 
   const [mode, setMode] = useState<"quick" | "advanced">("quick");
-  const [batteryKwh, setBatteryKwh] = useState("");
-  const [energyToChargeKwh, setEnergyToChargeKwh] = useState("");
-  const [chargerKw, setChargerKw] = useState("");
-  const [priceEurKwh, setPriceEurKwh] = useState("");
+  const [batteryKwh, setBatteryKwh] = useState("60");
+  const [energyToChargeKwh, setEnergyToChargeKwh] = useState("30");
+  const [chargerKw, setChargerKw] = useState("11");
+  const [priceEurKwh, setPriceEurKwh] = useState("0.16");
   const [phase, setPhase] = useState<"1" | "3">("3");
-  const [mainFuseA, setMainFuseA] = useState("");
-  const [reserveKw, setReserveKw] = useState(""); // muu koormus majas
+  const [mainFuseA, setMainFuseA] = useState("25");
+  const [reserveKw, setReserveKw] = useState("2"); // muu koormus majas
   const [startSocPct, setStartSocPct] = useState("");
   const [targetSocPct, setTargetSocPct] = useState("");
   const [chargingLossPct, setChargingLossPct] = useState("8");
@@ -212,7 +212,6 @@ export function EvLaadiminePageClient() {
       mostInfluentialInputs: [
         "Laadija võimsus",
         "Elektrihind",
-        "Laaditava energia kogus",
         "Peakaitse ja muu tarbimise reserv",
       ],
     };
@@ -229,6 +228,22 @@ export function EvLaadiminePageClient() {
     useSpotPrice,
     spotState.note,
   ]);
+
+  const sanityWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    const price = toNumber(priceEurKwh);
+    const fuse = toNumber(mainFuseA);
+    if (price > 0 && (price < 0.03 || price > 0.6)) {
+      warnings.push("Elektrihind tundub ebatavaline. Kontrolli, et ühik on €/kWh, mitte €/MWh.");
+    }
+    if (fuse > 0 && fuse < 16) {
+      warnings.push("Peakaitse on EV laadimiseks pigem väike - arvesta aeglasema laadimisega või koormusjuhtimisega.");
+    }
+    if (result.timeH <= 0 || !Number.isFinite(result.timeH)) {
+      warnings.push("Laadimisaega ei saa arvutada. Kontrolli laaditavat energiat ja laadija võimsust.");
+    }
+    return warnings;
+  }, [priceEurKwh, mainFuseA, result.timeH]);
 
   return (
     <div className="grid gap-6">
@@ -467,6 +482,33 @@ export function EvLaadiminePageClient() {
 
           <article className="card">
             <h3 className="section-title">Tulemused</h3>
+            <p className="mb-4 text-sm text-zinc-300">
+              Mida see tähendab? Esmalt vaata laadimise aega, seejärel kontrolli, kas valitud laadija sobib sinu
+              peakaitsmega.
+            </p>
+            {sanityWarnings.length > 0 ? (
+              <div className="mb-4 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-4 text-sm text-amber-100">
+                <p className="font-medium">Kontrolli sisendeid enne otsust</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {sanityWarnings.map((warning) => (
+                    <li key={warning}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <div className="mb-5 rounded-2xl border border-emerald-300/30 bg-emerald-400/15 p-5 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
+              <p className="text-xs uppercase tracking-wide text-emerald-100/80">Peamine tulemus</p>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                <strong className="text-4xl font-semibold text-emerald-100 sm:text-5xl">
+                  {Number.isFinite(result.timeH)
+                    ? `${Math.floor(result.timeH)}h ${Math.round((result.timeH % 1) * 60)}m`
+                    : "—"}
+                </strong>
+              </div>
+              <p className="mt-2 text-sm text-emerald-50/90">
+                Selle sisendi põhjal kulub laadimise lõpetamiseks ligikaudu nii palju aega.
+              </p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="metric-card metric-card-primary metric-card-accent-emerald">
                 <p className="metric-label">Olulisim: laadimise aeg</p>
@@ -547,6 +589,11 @@ export function EvLaadiminePageClient() {
                 </p>
               ) : null}
             </div>
+            {!Number.isFinite(result.timeH) || result.timeH <= 0 ? (
+              <p className="mt-3 text-sm text-amber-200">
+                Tulemust ei saa arvutada, sest laaditav energia või laadija võimsus on puudu.
+              </p>
+            ) : null}
             <UsedAssumptionsBlock {...assumptionsInfo} />
           </article>
         </div>

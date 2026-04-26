@@ -9,6 +9,7 @@ import { MiniCashflowChart } from "@/components/charts/mini-cashflow-chart";
 import { UsedAssumptionsBlock } from "@/components/used-assumptions-block";
 import { AdvancedInputAccordion } from "@/components/advanced-input-accordion";
 import { calculateVppModel } from "@/lib/calculators/vpp";
+import { ChartCard } from "@/components/charts/ChartCard";
 
 function num(v: string): number {
   const n = Number(v.replace(",", "."));
@@ -24,10 +25,10 @@ export function VppPageClient() {
   const { projectId, unlock, purchaseBusy, startCheckout, checkPaymentStatus, message, setMessage } =
     useProjectUnlock();
   const [mode, setMode] = useState<"quick" | "advanced">("quick");
-  const [capacityKwh, setCapacityKwh] = useState("");
-  const [powerKw, setPowerKw] = useState("");
-  const [investmentEur, setInvestmentEur] = useState("");
-  const [annualRevenueEur, setAnnualRevenueEur] = useState("");
+  const [capacityKwh, setCapacityKwh] = useState("100");
+  const [powerKw, setPowerKw] = useState("50");
+  const [investmentEur, setInvestmentEur] = useState("60000");
+  const [annualRevenueEur, setAnnualRevenueEur] = useState("12000");
   const [lifetimeYears, setLifetimeYears] = useState("10");
   const [efficiencyPct, setEfficiencyPct] = useState("92");
   const [cyclesPerYear, setCyclesPerYear] = useState("220");
@@ -101,10 +102,29 @@ export function VppPageClient() {
         "Aastane brutotulu / tulu tüüp",
         "Riskikoefitsient ja kättesaadavus",
         "Investeeringu suurus",
-        "Finantseerimiskulu",
       ],
     };
   }, [capacityKwh, powerKw, investmentEur, annualRevenueEur, revenueType, mode, efficiencyPct, availabilityPct]);
+
+  const sanityWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    const cap = num(capacityKwh);
+    const pwr = num(powerKw);
+    const annual = model.grossRevenueYear;
+    if (cap > 0 && (cap < 10 || cap > 1000)) {
+      warnings.push("Aku maht tundub ebarealistlik. Kontrolli, et sisestasid väärtuse kWh ühikus.");
+    }
+    if (pwr > 0 && (pwr < 3 || pwr > 500)) {
+      warnings.push("Aku võimsus tundub ebarealistlik. Kontrolli, et sisestasid väärtuse kW ühikus.");
+    }
+    if (cap > 0 && annual / cap > 250) {
+      warnings.push("Aastane tulueeldus on väga optimistlik võrreldes aku mahuga. Kontrolli konservatiivset stsenaariumi.");
+    }
+    if ((model.perScenario[1]?.netRevYear1 ?? 0) <= 0) {
+      warnings.push("Baasstsenaariumis on netotulu null või negatiivne - tasuvusaega ei saa usaldusväärselt hinnata.");
+    }
+    return warnings;
+  }, [capacityKwh, powerKw, model.grossRevenueYear, model.perScenario]);
 
   const downloadPdf = async () => {
     if (!projectId) return;
@@ -463,6 +483,30 @@ export function VppPageClient() {
         }
       >
         <h2 className="text-2xl font-semibold text-zinc-50">Tulemused</h2>
+        <p className="mt-2 text-sm text-zinc-300">
+          Mida see tähendab? Vaata esmalt baastsenaariumi netotulu ja tasuvusaega, seejärel võrdle konservatiivset
+          ning optimistlikku vaadet.
+        </p>
+        {sanityWarnings.length > 0 ? (
+          <div className="mt-4 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-4 text-sm text-amber-100">
+            <p className="font-medium">Kontrolli sisendeid enne otsust</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              {sanityWarnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        <div className="mt-5 rounded-2xl border border-emerald-300/30 bg-emerald-400/15 p-5 shadow-[0_0_30px_rgba(20,184,166,0.12)]">
+          <p className="text-xs uppercase tracking-wide text-emerald-100/80">Peamine tulemus</p>
+          <div className="mt-2 flex flex-wrap items-end gap-3">
+            <strong className="text-4xl font-semibold text-emerald-100 sm:text-5xl">
+              {Math.round(model.perScenario[1]?.netRevYear1 ?? 0).toLocaleString("et-EE")}
+            </strong>
+            <span className="pb-1 text-base text-emerald-50/90 sm:text-lg">EUR/a</span>
+          </div>
+          <p className="mt-2 text-sm text-emerald-50/90">Selle sisendi põhjal on baastsenaariumi netotulu selles suurusjärgus.</p>
+        </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="metric-card metric-card-primary metric-card-accent-emerald">
             <p className="metric-label">Olulisim: aastane netotulu (baas)</p>
@@ -505,6 +549,11 @@ export function VppPageClient() {
             <p className="metric-help">Kogukasum kogu valitud eluaja jooksul.</p>
           </div>
         </div>
+        {model.perScenario[1]?.paybackYears === null ? (
+          <p className="mt-3 text-sm text-amber-200">
+            Tasuvusaega ei saa arvutada, sest baastsenaariumi netotulu on null või negatiivne.
+          </p>
+        ) : null}
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300">
           <p className="font-medium text-zinc-100">Märkused</p>
@@ -529,10 +578,13 @@ export function VppPageClient() {
               ))}
             </div>
           </article>
-          <article className="card">
-            <h3 className="section-title">Rahavoog (baas)</h3>
+          <ChartCard
+            title="Rahavoog (baas)"
+            description="Aastapõhine rahavoog valitud perioodil."
+            chartClassName="min-h-[280px] md:min-h-[360px]"
+          >
             <MiniCashflowChart cashflows={model.perScenario[1]?.cashflows ?? []} />
-          </article>
+          </ChartCard>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { calculateComparison } from "@/lib/calculator";
+import { calculateSolarComparison } from "@/lib/calculators/solar";
 import { CalculatorInput } from "@/types/calculator";
 import { canViewFullAnalysis } from "@/lib/unlock";
 import { useProjectUnlock } from "@/lib/useProjectUnlock";
@@ -9,10 +9,11 @@ import { PaywallCard } from "@/components/paywall-card";
 import { FEATURES } from "@/lib/features";
 import { UsedAssumptionsBlock } from "@/components/used-assumptions-block";
 import { AdvancedInputAccordion } from "@/components/advanced-input-accordion";
+import { ChartCard } from "@/components/charts/ChartCard";
 
 /** Igakuuva alguses: nullid / tühjad — ei salvestata brauserisse, iga refresh sama puhas lähtepunkt. */
 const defaults: CalculatorInput = {
-  pvPowerKw: 0,
+  pvPowerKw: 12,
   annualProductionKwh: 0,
   inverterPowerKw: 0,
   panelDirection: "louna",
@@ -26,23 +27,23 @@ const defaults: CalculatorInput = {
   batteryRoundTripPercent: 92,
   batteryInvestmentEur: 0,
   batteryCostEur: 0,
-  annualConsumptionKwh: 0,
-  dailyConsumptionKwh: 0,
+  annualConsumptionKwh: 9000,
+  dailyConsumptionKwh: 24.66,
   consumptionProfile: "tool-ohtul",
   seasonalMultiplierPercent: 100,
   priceSource: "manual",
-  manualSpotPrice: 0,
-  nordPoolAveragePrice: 0,
-  gridFeePrice: 0,
-  sellBackPrice: 0,
-  marginPrice: 0,
+  manualSpotPrice: 0.12,
+  nordPoolAveragePrice: 0.1,
+  gridFeePrice: 0.05,
+  sellBackPrice: 0.06,
+  marginPrice: 0.01,
   annualPriceGrowthPercent: 3,
   discountRatePercent: 4,
-  pvCostEur: 0,
+  pvCostEur: 12000,
   extraInstallCostEur: 0,
   supportEur: 0,
   annualMaintenanceEur: 0,
-  selfConsumptionWithoutBatteryPercent: 40,
+  selfConsumptionWithoutBatteryPercent: 55,
   selfConsumptionBoostWithBatteryPercent: 15,
   degradationPercent: 0.6,
   periodYears: 20,
@@ -117,7 +118,7 @@ export function SolarCalculatorPage() {
     message: "",
     source: "none",
   });
-  const [result, setResult] = useState(() => calculateComparison(defaults));
+  const [result, setResult] = useState(() => calculateSolarComparison(defaults));
 
   const { projectId, unlock, message, setMessage, purchaseBusy, startCheckout, checkPaymentStatus } =
     useProjectUnlock();
@@ -131,7 +132,7 @@ export function SolarCalculatorPage() {
     }
   }, []);
 
-  const draftResult = useMemo(() => calculateComparison(input), [input]);
+  const draftResult = useMemo(() => calculateSolarComparison(input), [input]);
 
   const setPriceField = (key: keyof typeof priceText, raw: string) => {
     setPriceText((prev) => ({ ...prev, [key]: raw }));
@@ -352,7 +353,7 @@ export function SolarCalculatorPage() {
     }
   };
 
-  const chartTrackPx = 176; // ~h-44 — fikseeritud kõrgus, et tulba pikslikõrgus oleks alati arvutatav
+  const chartTrackPx = 300; // suurem tulpdiagramm, et desktopis loetavus ei kaoks
   const bestYear = result.selected.cashflowByYear.reduce(
     (max, value) => Math.max(max, Math.abs(value)),
     1,
@@ -389,10 +390,26 @@ export function SolarCalculatorPage() {
         "Elektri ostuhind ja selle kasv",
         "Süsteemi võimsus ja tootlikkus",
         "Omatarbe osakaal",
-        "Investeeringu suurus",
       ],
     };
   }, [input, mode]);
+
+  const sanityWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    const effectivePrice = draftResult.effectiveEnergyPrice;
+    if (effectivePrice > 0 && (effectivePrice < 0.03 || effectivePrice > 0.6)) {
+      warnings.push(
+        `Elektri hind (${formatNum(effectivePrice, 3)} €/kWh) tundub ebatavaline. Kontrolli, et ühik oleks €/kWh, mitte €/MWh.`,
+      );
+    }
+    if (input.pvPowerKw > 0 && (input.pvPowerKw < 1 || input.pvPowerKw > 500)) {
+      warnings.push("Süsteemi võimsus tundub ebarealistlik. Kontrolli, et sisestasid kW, mitte W või MW.");
+    }
+    if (result.selected.annualNetBenefitEur <= 0) {
+      warnings.push("Netokasu on null või negatiivne - selle sisendi korral ei ole investeering praegu tasuv.");
+    }
+    return warnings;
+  }, [draftResult.effectiveEnergyPrice, input.pvPowerKw, result.selected.annualNetBenefitEur]);
 
   return (
     <div className="glass-panel rounded-3xl p-6 sm:p-8">
@@ -917,15 +934,41 @@ export function SolarCalculatorPage() {
 
         <section className="mt-6 rounded-3xl border border-white/10 bg-white/[0.02] p-6 sm:p-8 lg:mt-0">
           <h3 className="text-2xl font-semibold text-zinc-50">Tulemused</h3>
+          <p className="mt-2 text-sm text-zinc-300">
+            Mida see tähendab? Allolevad näitajad annavad kiire pildi, kui suur võiks olla aastane rahaline võit ja
+            kui kiiresti investeering võiks tagasi tulla.
+          </p>
           <p className="mt-2 text-zinc-300">
             Efektiivne elektri hind arvutuses:{" "}
             <strong>{formatNum(result.effectiveEnergyPrice, 3)} €/kWh</strong>
           </p>
+          {sanityWarnings.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-4 text-sm text-amber-100">
+              <p className="font-medium">Kontrolli sisendeid enne otsust</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {sanityWarnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {result.usedPriceUnit === "eur_per_mwh_converted" ? (
             <p className="mt-2 text-sm text-amber-200">
               Tuvastati sisend €/MWh kujul ja teisendati automaatselt €/kWh väärtuseks.
             </p>
           ) : null}
+          <div className="mt-5 rounded-2xl border border-emerald-300/30 bg-emerald-400/15 p-5 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
+            <p className="text-xs uppercase tracking-wide text-emerald-100/80">Peamine tulemus</p>
+            <div className="mt-2 flex flex-wrap items-end gap-3">
+              <strong className="text-4xl font-semibold text-emerald-100 sm:text-5xl">
+                {Math.round(result.selected.annualNetBenefitEur).toLocaleString("et-EE")}
+              </strong>
+              <span className="pb-1 text-base text-emerald-50/90 sm:text-lg">EUR/a</span>
+            </div>
+            <p className="mt-2 text-sm text-emerald-50/90">
+              Selle sisendi põhjal on hinnanguline aastane netokasu sellises suurusjärgus.
+            </p>
+          </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="metric-card metric-card-primary metric-card-accent-emerald">
@@ -1153,16 +1196,19 @@ export function SolarCalculatorPage() {
                 </div>
               </article>
 
-              <article className="card">
-                <h4 className="section-title">Rahavoo prognoos aastate lõikes</h4>
+              <ChartCard
+                title="Rahavoo prognoos aastate lõikes"
+                description="Tulpdiagramm näitab rahavoo muutust aasta lõikes."
+                chartClassName="min-h-[280px] md:min-h-[360px]"
+              >
                 {result.selected.cashflowByYear.length === 0 ? (
                   <p className="mt-3 text-sm text-zinc-400">
                     Rahavoogu ei saanud arvutada. Kontrolli sisestatud andmeid.
                   </p>
                 ) : (
                   <>
-                    <p className="mt-2 px-0 text-xs text-zinc-500 md:hidden">
-                      Mobiilis: libista horisontaalselt, et näha kõiki aastaid.
+                    <p className="px-0 text-xs text-zinc-500">
+                      Graafik on täislaiuses. Kui aastaid on palju, saab mobiilis vajadusel graafiku sees horisontaalselt liikuda.
                     </p>
                     <div className="relative mt-3 w-full">
                       {(() => {
@@ -1170,52 +1216,52 @@ export function SolarCalculatorPage() {
                         const tickStep =
                           totalYears > 24 ? 4 : totalYears > 16 ? 3 : totalYears > 10 ? 2 : 1;
                         return (
-                      <div className="-mx-1 overflow-x-auto overflow-y-visible px-1 pb-2 [-webkit-overflow-scrolling:touch] sm:mx-0 sm:px-0 md:overflow-visible">
-                        <div className="flex min-h-[13.5rem] min-w-max items-end gap-1.5 pb-1 sm:gap-2 md:min-h-0 md:min-w-0 md:w-full md:justify-between md:gap-2">
-                          {result.selected.cashflowByYear.map((value, index) => {
-                            const abs = Math.abs(value);
-                            const barPx = Math.max(Math.round((abs / bestYear) * chartTrackPx), 6);
-                            const showTick =
-                              index === 0 ||
-                              index === totalYears - 1 ||
-                              index % tickStep === 0;
-                            return (
-                              <div
-                                key={`${value}-${index}`}
-                                className="group relative flex w-7 shrink-0 flex-col items-stretch gap-1 md:min-w-0 md:flex-1"
-                              >
-                                <div className="pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-emerald-300/30 bg-zinc-950/95 px-2 py-1 text-[11px] font-medium text-emerald-200 opacity-0 shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-opacity duration-150 group-hover:opacity-100 sm:block">
-                                  {formatNum(value, 0)} €
-                                </div>
-                                <div
-                                  className="box-border flex w-full flex-col justify-end rounded-md bg-white/[0.06] px-0.5 pt-1"
-                                  style={{ height: chartTrackPx }}
-                                >
+                          <div className="-mx-1 overflow-x-auto overflow-y-visible px-1 pb-2 [-webkit-overflow-scrolling:touch] sm:mx-0 sm:px-0 md:overflow-visible">
+                            <div className="flex min-h-[280px] min-w-max items-end gap-1.5 pb-1 sm:gap-2 md:min-h-[360px] md:min-w-0 md:w-full md:justify-between md:gap-2">
+                              {result.selected.cashflowByYear.map((value, index) => {
+                                const abs = Math.abs(value);
+                                const barPx = Math.max(Math.round((abs / bestYear) * chartTrackPx), 6);
+                                const showTick =
+                                  index === 0 ||
+                                  index === totalYears - 1 ||
+                                  index % tickStep === 0;
+                                return (
                                   <div
-                                    className="w-full shrink-0 rounded bg-gradient-to-t from-emerald-500/80 to-teal-400/90"
-                                    style={{ height: barPx }}
-                                    aria-label={`Aasta ${index + 1}`}
-                                    title={`${formatNum(value, 0)} €`}
-                                  />
-                                </div>
-                                <span
-                                  className={`text-center text-[10px] leading-none sm:text-[11px] ${
-                                    showTick ? "text-zinc-400" : "text-transparent"
-                                  }`}
-                                >
-                                  {showTick ? index + 1 : "."}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                                    key={`${value}-${index}`}
+                                    className="group relative flex w-7 shrink-0 flex-col items-stretch gap-1 md:min-w-0 md:flex-1"
+                                  >
+                                    <div className="chart-tooltip pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium opacity-0 transition-opacity duration-150 group-hover:opacity-100 sm:block">
+                                      {formatNum(value, 0)} €
+                                    </div>
+                                    <div
+                                      className="box-border flex w-full flex-col justify-end rounded-md bg-white/[0.06] px-0.5 pt-1"
+                                      style={{ height: chartTrackPx }}
+                                    >
+                                      <div
+                                        className="w-full shrink-0 rounded bg-gradient-to-t from-emerald-500/80 to-teal-400/90"
+                                        style={{ height: barPx }}
+                                        aria-label={`Aasta ${index + 1}`}
+                                        title={`${formatNum(value, 0)} €`}
+                                      />
+                                    </div>
+                                    <span
+                                      className={`text-center text-[10px] leading-none sm:text-[11px] ${
+                                        showTick ? "text-zinc-400" : "text-transparent"
+                                      }`}
+                                    >
+                                      {showTick ? index + 1 : "."}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
                         );
                       })()}
                     </div>
                   </>
                 )}
-              </article>
+              </ChartCard>
             </div>
 
             <article className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300">

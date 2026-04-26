@@ -1089,6 +1089,13 @@ canvas {
   color: rgb(153 170 163);
 }
 
+.chart-tooltip {
+  border: 1px solid rgba(52, 211, 153, 0.34);
+  background: rgba(9, 14, 12, 0.96);
+  color: rgb(244 244 245);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38), 0 0 20px rgba(16, 185, 129, 0.14);
+}
+
 .compare-row {
   border-radius: 0.75rem;
   border: 1px solid rgba(167, 243, 208, 0.16);
