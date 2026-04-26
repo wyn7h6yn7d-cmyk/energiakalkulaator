@@ -575,7 +575,7 @@ export function VppPageClient() {
 
         {FEATURES.paywallEnabled ? (
           <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-            <p className="text-sm text-zinc-200">PDF raport on tasuta beetaversioonis allalaaditav.</p>
+            <p className="text-sm text-zinc-200">PDF raport on ajutiselt tasuta testimiseks allalaaditav.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" className="btn-glow" onClick={downloadPdf}>
                 Laadi PDF alla

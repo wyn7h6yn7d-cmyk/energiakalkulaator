@@ -5,7 +5,7 @@ export default function KkkPage() {
     <LegalLayout title="Korduma kippuvad küsimused" updatedAt="25.04.2026">
       <h2 className="mt-2 text-lg font-semibold text-zinc-50">Kas kalkulaatorid on tasuta?</h2>
       <p className="mt-2">
-        Jah. Hetkel on kogu teenus tasuta beetaversioonina kasutamiseks.
+        Jah. Hetkel on kogu teenus ajutiselt tasuta testimiseks.
       </p>
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">Kas tulemused on siduvad?</h2>

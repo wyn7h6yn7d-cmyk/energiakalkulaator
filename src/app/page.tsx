@@ -46,7 +46,7 @@ export default function Home() {
           <div className="relative z-10 grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="min-w-0">
               <p className="inline-flex items-center rounded-full border border-emerald-300/35 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-emerald-200">
-                Tasuta beetaversioon
+                Ajutiselt tasuta testimiseks
               </p>
               <h1 className="mt-4 text-balance text-[2rem] font-semibold leading-[1.04] tracking-tight text-zinc-50 min-[390px]:text-[2.2rem] sm:text-[3.8rem]">
                 Arvuta energiaotsuste{" "}

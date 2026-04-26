@@ -163,7 +163,7 @@ export function useProjectUnlock() {
 
   const checkPaymentStatus = async () => {
     if (!FEATURES.paywallEnabled) {
-      setMessage("Hetkel tasuta beetaversioon: maksekontrolli pole vaja.");
+      setMessage("Hetkel ajutiselt tasuta testimiseks: maksekontrolli pole vaja.");
       return;
     }
     const sid = unlock.pdfSessionId ?? unlock.fullAnalysisSessionId;

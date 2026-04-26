@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Raporti sisu puudub." }, { status: 400 });
   }
 
-  // Free beta mode: allow PDF generation without Stripe sessions.
+  // Temporary free testing mode: allow PDF generation without Stripe sessions.
   if (FEATURES.paywallEnabled) {
     if (!projectId || !fullId || !pdfId) {
       return NextResponse.json({ error: "Puuduvad vajalikud parameetrid." }, { status: 400 });

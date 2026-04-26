@@ -10,7 +10,7 @@ export default function RefundsPage() {
 
       <h2 className="mt-8 text-lg font-semibold text-zinc-50">1. Digiteenused ja hinnad</h2>
       <p className="mt-2">
-        Hetkel on teenus saadaval tasuta beetaversioonina.
+        Hetkel on teenus ajutiselt tasuta testimiseks saadaval.
       </p>
       <ul className="mt-2 list-disc space-y-1 pl-5">
         <li>

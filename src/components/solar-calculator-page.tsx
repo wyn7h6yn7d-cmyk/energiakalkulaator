@@ -1013,7 +1013,8 @@ export function SolarCalculatorPage() {
               {FEATURES.paywallEnabled && !canViewFullAnalysis(unlock) ? (
                 <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                   <p className="text-sm text-zinc-300">
-                    Hetkel tasuta beetaversioon: detailne rahavoog, tundlikkus, lisagraafikud ja võrdlused.
+                    Hetkel ajutiselt tasuta testimiseks: detailne rahavoog, tundlikkus, lisagraafikud ja
+                    võrdlused.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button

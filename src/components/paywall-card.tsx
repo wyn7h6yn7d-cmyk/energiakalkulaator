@@ -39,7 +39,7 @@ export function PaywallCard({
               <strong>{title}</strong> — {description}
             </p>
             <p className="mt-2 text-xs text-zinc-400">
-              Hetkel tasuta beetaversioon.
+              Hetkel ajutiselt tasuta testimiseks.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <button type="button" className="btn-glow" onClick={onCta}>

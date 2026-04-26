@@ -49,7 +49,7 @@ export default function KalkulaatoridHubPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">Kalkulaatorid</h1>
           <p className="mt-2 text-sm text-zinc-400">
-            Vali tööriist ja alusta. Hetkel on kõik kalkulaatorid beetaversioonina tasuta kasutamiseks.
+            Vali tööriist ja alusta. Hetkel on kõik kalkulaatorid ajutiselt tasuta testimiseks.
           </p>
         </div>
         {FEATURES.paywallEnabled ? (
