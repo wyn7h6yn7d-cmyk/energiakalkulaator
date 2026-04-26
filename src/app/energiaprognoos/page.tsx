@@ -104,7 +104,18 @@ export default async function EnergiaprognoosPage({
     hasBattery: toBool(toSingle(params.hasBattery), false),
   };
 
-  const geo = await resolveGeoPoint({ location, latitude: latitudeRaw, longitude: longitudeRaw });
+  const defaultGeo = {
+    latitude: 59.437,
+    longitude: 24.7536,
+    name: "Tallinn",
+    usedDefaultLocation: true,
+  };
+  let geo = defaultGeo;
+  try {
+    geo = await resolveGeoPoint({ location, latitude: latitudeRaw, longitude: longitudeRaw });
+  } catch {
+    geo = { ...defaultGeo, name: "Tallinn (varuasukoht)" };
+  }
   let weatherPoints: WeatherForecastPoint[] = [];
   let pricePoints: MarketPricePoint[] = [];
   let errorText: string | null = null;
@@ -132,8 +143,8 @@ export default async function EnergiaprognoosPage({
     if (!weatherPoints.length || !pricePoints.length) {
       throw new Error("Prognoosiandmeid ei õnnestunud laadida.");
     }
-  } catch (error) {
-    errorText = error instanceof Error ? error.message : "Andmete laadimine ebaõnnestus.";
+  } catch {
+    errorText = "Prognoosi andmeid ei saanud hetkel laadida. Proovi hiljem uuesti.";
     usingDemo = true;
     const demo = demoRows(hours);
     weatherPoints = demo.weather;
@@ -164,16 +175,20 @@ export default async function EnergiaprognoosPage({
     } catch (error) {
       historicalError = error instanceof Error ? error.message : "Ajaloolist analüüsi ei saanud laadida.";
       historicalFallback = true;
-      return await buildHistoricalSolarAnalysis({
-        latitude: 59.437,
-        longitude: 24.7536,
-        locationName: "Tallinn (varuandmed)",
-        years: historyYears,
-        systemKw: input.systemKw,
-        panelDirection: input.panelDirection,
-        panelTiltDeg: input.panelTiltDeg,
-        lossesPercent: input.systemLossesPercent,
-      });
+      try {
+        return await buildHistoricalSolarAnalysis({
+          latitude: 59.437,
+          longitude: 24.7536,
+          locationName: "Tallinn (varuandmed)",
+          years: historyYears,
+          systemKw: input.systemKw,
+          panelDirection: input.panelDirection,
+          panelTiltDeg: input.panelTiltDeg,
+          lossesPercent: input.systemLossesPercent,
+        });
+      } catch {
+        return null;
+      }
     }
   })();
 
@@ -297,12 +312,12 @@ export default async function EnergiaprognoosPage({
 
         {errorText ? (
           <section className="mt-6 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-4 text-sm text-amber-100">
-            API viga: {errorText}. Leht kasutab hetkel demo-vaadet käsitsi eeldustega.
+            {errorText}
           </section>
         ) : null}
         {usingDemo ? (
           <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-zinc-300">
-            Demo-vaade aktiveeritud: prognoos näitab simulatsiooniandmeid kuni API taastumiseni.
+            Demo-vaade aktiveeritud: prognoos naitab simulatsiooniandmeid kuni API taastumiseni.
           </section>
         ) : null}
         {historicalError ? (
@@ -324,12 +339,18 @@ export default async function EnergiaprognoosPage({
           V1 loogika: PV hinnang põhineb kiirgusel, süsteemi võimsusel, kadudel ja lihtsatel suuna/kalde koefitsientidel.
           Soovitused põhinevad hinnal, pilvisusel ja PV tootlusel (lihtsustatud energyScore mudel).
         </section>
-        <HistoricalSolarAnalysisPanel
-          analysis={historicalAnalysis}
-          loadingFallback={historicalFallback}
-          systemKw={input.systemKw}
-          lossesPercent={input.systemLossesPercent}
-        />
+        {historicalAnalysis ? (
+          <HistoricalSolarAnalysisPanel
+            analysis={historicalAnalysis}
+            loadingFallback={historicalFallback}
+            systemKw={input.systemKw}
+            lossesPercent={input.systemLossesPercent}
+          />
+        ) : (
+          <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-zinc-300">
+            Ajaloolise analuusi andmeid ei saanud hetkel laadida.
+          </section>
+        )}
       </main>
     </div>
   );

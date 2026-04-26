@@ -725,6 +725,9 @@ export function PriceViewClient({
               {showFullDayTable ? "Näita lühemat tabelit" : "Näita kogu päeva tabelit"}
             </button>
           </div>
+          <p className="w-full text-xs text-zinc-400">
+            Tipp tähendab selle paeva suhteliselt kallimat perioodi, mitte tingimata vaga korge absoluutset hinda.
+          </p>
           {marketOverview ? (
             <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-4 text-sm text-zinc-200">
               <div className="text-xs text-zinc-400">Turu ülevaade</div>
@@ -745,7 +748,7 @@ export function PriceViewClient({
           </div>
         ) : (
           <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/35">
-            <div className="grid max-h-[26rem] gap-2 overflow-y-auto p-2 sm:hidden">
+            <div className={`grid gap-2 p-2 sm:hidden ${showFullDayTable ? "max-h-[26rem] overflow-y-auto" : ""}`}>
               {(() => {
                 const thresholds = buildPriceThresholds(visiblePoints);
                 return tableRows.map((p) => {
@@ -789,7 +792,7 @@ export function PriceViewClient({
               })()}
             </div>
 
-            <div className="hidden max-w-full overflow-x-auto sm:block">
+            <div className={`hidden sm:block ${showFullDayTable ? "max-h-[34rem] overflow-auto" : "overflow-x-auto"}`}>
               <table className="min-w-[680px] w-full text-sm">
                 <thead className="bg-white/[0.05] text-zinc-200">
                   <tr>

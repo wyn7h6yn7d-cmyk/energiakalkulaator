@@ -23,19 +23,16 @@ export function SiteFooter() {
               <div className="text-sm font-semibold text-zinc-50">Energiakalkulaator</div>
             </div>
           </div>
-          <p className="mt-3 max-w-sm text-sm leading-relaxed text-zinc-400">
-            Targemad energiaotsused andmepõhiselt ja lihtsalt.
-          </p>
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-sm text-zinc-300">
-            <p className="font-medium text-zinc-100">Kontakt</p>
+            <p className="font-medium text-zinc-100">Energiakalkulaator</p>
             <p className="mt-1">Kenneth Alto</p>
             <a className="mt-0.5 inline-flex text-zinc-300 hover:text-emerald-100" href="mailto:kennethalto95@gmail.com">
               kennethalto95@gmail.com
             </a>
             <div className="mt-3 space-y-1 text-xs leading-relaxed text-zinc-400">
-              <p>Teenust osutab hetkel eraisik Kenneth Alto.</p>
-              <p>Registrikood lisatakse pärast ettevõtlusvormi valikut.</p>
-              <p>KMKR lisatakse vajadusel.</p>
+              <p>Teenust osutab hetkel eraisik Kenneth Alto</p>
+              <p>Registrikood lisatakse pärast ettevõtlusvormi valikut</p>
+              <p>KMKR lisatakse vajadusel</p>
             </div>
           </div>
         </div>

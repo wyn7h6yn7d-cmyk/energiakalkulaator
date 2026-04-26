@@ -81,10 +81,14 @@ export default function Home() {
                     <span className="h-2 w-2 rounded-full bg-emerald-300" />
                     LIVE
                   </div>
-                  <div className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-2 py-1 text-[11px] text-zinc-400">
-                    Näidisvaade
+                  <div
+                    className="inline-flex items-center rounded-full border border-amber-300/30 bg-amber-400/10 px-2 py-1 text-[11px] text-amber-100"
+                    title="Need numbrid on illustratiivsed"
+                  >
+                    Näidisandmed
                   </div>
                 </div>
+                <p className="text-[11px] text-amber-100/90">Need numbrid on illustratiivsed, mitte sinu päris tulemused.</p>
 
                 <div className="min-w-0 rounded-xl border border-emerald-300/26 bg-white/[0.03] px-3 py-3.5">
                   <p className="text-[11px] uppercase tracking-wide text-zinc-400">Praegune hind</p>
@@ -151,9 +155,7 @@ export default function Home() {
                     <p className="mt-1 truncate text-base font-semibold text-zinc-100">34.2 kWh</p>
                   </div>
                 </div>
-                <p className="text-[11px] text-zinc-400">
-                  Kõik selle ploki numbrid on näidisandmed ega kujuta sinu isiklikke tulemusi.
-                </p>
+                <p className="text-[11px] text-zinc-400">Kõik selle ploki numbrid on näidisandmed ega kujuta sinu isiklikke tulemusi.</p>
               </div>
             </div>
           </div>

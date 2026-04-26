@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { addVat, eurPerKwhToSntPerKwh } from "@/lib/elering";
+import { addVat, eurPerKwhToSntPerKwh, formatSntKwh } from "@/lib/elering";
 
 const nav = [
   { href: "/", label: "Avaleht" },
@@ -15,44 +15,13 @@ const nav = [
   { href: "/kontakt", label: "Kontakt" },
 ];
 
-const calculatorLinks = [
-  {
-    href: "/energiaprognoos",
-    label: "Energiaprognoos",
-    description: "Ilm + kiirgus + börsihind ühes vaates.",
-  },
-  {
-    href: "/kalkulaatorid/paikesejaam",
-    label: "Päikesejaam",
-    description: "Tasuvus, sääst, omatarve ja tasuvusaeg.",
-  },
-  {
-    href: "/kalkulaatorid/vpp",
-    label: "VPP",
-    description: "Aku paindlikkuse tulu ja investeeringu tasuvus.",
-  },
-  {
-    href: "/kalkulaatorid/ev-laadimine",
-    label: "EV laadimine",
-    description: "Laadimise aeg, kulu ja sobiv laadija võimsus.",
-  },
-  {
-    href: "/kalkulaatorid/elektripaketid",
-    label: "Elektripaketid",
-    description: "Spot vs fikseeritud kulu võrdlus.",
-  },
-  {
-    href: "/kalkulaatorid/peak-shaving",
-    label: "Peak shaving",
-    description: "Tipukoormuse lõikamine ja võimsustasu sääst.",
-  },
-];
-
 export function SiteHeader() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [livePriceSnt, setLivePriceSnt] = useState<string>("—");
-  const [sunTimes, setSunTimes] = useState<{ rise: string; set: string }>({ rise: "—", set: "—" });
+  const [livePriceSnt, setLivePriceSnt] = useState<number | null>(null);
+  const [priceStatus, setPriceStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [sunTimes, setSunTimes] = useState<{ rise: string; set: string } | null>(null);
+  const [sunStatus, setSunStatus] = useState<"loading" | "ready" | "unavailable">("loading");
 
   const navItems = useMemo(() => {
     return nav.map((item) => {
@@ -76,6 +45,10 @@ export function SiteHeader() {
     };
 
     const loadHeaderData = async () => {
+      if (!cancelled) {
+        setPriceStatus("loading");
+        setSunStatus("loading");
+      }
       try {
         const now = new Date();
         const start = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
@@ -96,21 +69,42 @@ export function SiteHeader() {
               return Math.abs(p.ts - nowTs) < Math.abs(best.ts - nowTs) ? p : best;
             }, points[0]);
             const sntWithVat = eurPerKwhToSntPerKwh(addVat(current.price_eur_per_kwh));
-            if (!cancelled) setLivePriceSnt(new Intl.NumberFormat("et-EE", { maximumFractionDigits: 2 }).format(sntWithVat));
+            if (!cancelled) {
+              setLivePriceSnt(sntWithVat);
+              setPriceStatus("ready");
+            }
+          } else if (!cancelled) {
+            setLivePriceSnt(null);
+            setPriceStatus("unavailable");
           }
+        } else if (!cancelled) {
+          setLivePriceSnt(null);
+          setPriceStatus("unavailable");
         }
 
         if (sunRes.ok) {
           const sunData = (await sunRes.json()) as { sunriseIso?: string; sunsetIso?: string };
-          if (!cancelled) {
+          if (!cancelled && sunData.sunriseIso && sunData.sunsetIso) {
             setSunTimes({
-              rise: sunData.sunriseIso ? fmtHm(sunData.sunriseIso) : "—",
-              set: sunData.sunsetIso ? fmtHm(sunData.sunsetIso) : "—",
+              rise: fmtHm(sunData.sunriseIso),
+              set: fmtHm(sunData.sunsetIso),
             });
+            setSunStatus("ready");
+          } else if (!cancelled) {
+            setSunTimes(null);
+            setSunStatus("unavailable");
           }
+        } else if (!cancelled) {
+          setSunTimes(null);
+          setSunStatus("unavailable");
         }
       } catch {
-        // keep defaults
+        if (!cancelled) {
+          setLivePriceSnt(null);
+          setPriceStatus("unavailable");
+          setSunTimes(null);
+          setSunStatus("unavailable");
+        }
       }
     };
 
@@ -130,6 +124,26 @@ export function SiteHeader() {
       }),
     [],
   );
+  const priceLabel =
+    priceStatus === "ready"
+      ? `${formatSntKwh(livePriceSnt ?? 0)} snt/kWh`
+      : priceStatus === "loading"
+        ? "Börsihind laeb..."
+        : "Börsihind hetkel puudub";
+  const sunLabel =
+    sunStatus === "ready"
+      ? `↑ ${sunTimes?.rise} · ↓ ${sunTimes?.set}`
+      : sunStatus === "loading"
+        ? "Päikeseinfo laeb..."
+        : "Päikeseinfo hetkel puudub";
+  const mobilePriceLabel =
+    priceStatus === "ready" ? `${formatSntKwh(livePriceSnt ?? 0)} snt` : priceStatus === "loading" ? "Laeb..." : "Puudub";
+  const mobileSunLabel =
+    sunStatus === "ready"
+      ? `↑ ${sunTimes?.rise} ↓ ${sunTimes?.set}`
+      : sunStatus === "loading"
+        ? "Päikeseinfo laeb..."
+        : "Päikeseinfo puudub";
 
   return (
     <header className="sticky top-0 z-50 overflow-x-clip px-3 py-2 sm:px-5 sm:py-3 lg:px-8">
@@ -202,20 +216,18 @@ export function SiteHeader() {
         <span className="rounded-md bg-white/[0.03] px-2 py-0.5 text-zinc-400">{todayLabel}</span>
         <span className="text-zinc-600">|</span>
         <span className="text-zinc-400">Live börs</span>
-        <strong className="rounded-md bg-emerald-400/10 px-2 py-0.5 text-emerald-200">{livePriceSnt} snt/kWh</strong>
+        <strong className="rounded-md bg-emerald-400/10 px-2 py-0.5 text-emerald-200">{priceLabel}</strong>
         <span className="text-zinc-600">|</span>
         <span className="text-zinc-400">Päike</span>
-        <span className="rounded-md bg-white/[0.03] px-1.5 py-0.5">↑ {sunTimes.rise}</span>
-        <span className="rounded-md bg-white/[0.03] px-1.5 py-0.5">↓ {sunTimes.set}</span>
+        <span className="rounded-md bg-white/[0.03] px-1.5 py-0.5">{sunLabel}</span>
       </div>
 
       <div className="mx-auto mt-2 flex w-full max-w-7xl items-center justify-center gap-1.5 rounded-xl border border-emerald-300/20 bg-[linear-gradient(180deg,rgba(9,20,17,0.82),rgba(7,16,13,0.76))] px-3 py-2 text-[11px] text-zinc-200 shadow-[0_8px_24px_rgba(0,0,0,0.28)] md:hidden">
         <span className="rounded-md bg-white/[0.03] px-1.5 py-0.5 text-zinc-400">{todayLabel}</span>
         <span className="text-zinc-600">|</span>
-        <strong className="rounded-md bg-emerald-400/10 px-1.5 py-0.5 text-emerald-200">{livePriceSnt} snt</strong>
+        <strong className="rounded-md bg-emerald-400/10 px-1.5 py-0.5 text-emerald-200">{mobilePriceLabel}</strong>
         <span className="text-zinc-600">|</span>
-        <span className="rounded-md bg-white/[0.03] px-1.5 py-0.5">↑ {sunTimes.rise}</span>
-        <span className="rounded-md bg-white/[0.03] px-1.5 py-0.5">↓ {sunTimes.set}</span>
+        <span className="rounded-md bg-white/[0.03] px-1.5 py-0.5">{mobileSunLabel}</span>
       </div>
 
       {mobileOpen ? (
@@ -274,7 +286,7 @@ function MobileMenu({
           </div>
 
           <div className="grid gap-1 p-2">
-            {navItems.filter((item) => item.href !== "/kalkulaatorid").map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -288,22 +300,6 @@ function MobileMenu({
                 {item.label}
               </Link>
             ))}
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-2">
-              <div className="px-2 pb-2 text-xs font-medium uppercase tracking-wide text-zinc-400">Kalkulaatorid</div>
-              <div className="grid gap-1">
-                {calculatorLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className="block rounded-lg px-3 py-3 transition hover:bg-emerald-400/12 hover:text-emerald-100"
-                  >
-                    <div className="text-sm font-medium text-zinc-100">{item.label}</div>
-                    <div className="mt-0.5 text-xs leading-relaxed text-zinc-400">{item.description}</div>
-                  </Link>
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="mt-2 border-t border-white/10 p-2">
