@@ -1,11 +1,14 @@
 import { SolarCalculatorPage } from "@/components/solar-calculator-page";
-import { Suspense } from "react";
+import { CalculatorRouteShell } from "@/components/calculator-route-shell";
 
 export default function PaikesejaamPage() {
   return (
-    <Suspense fallback={<div className="card text-sm text-zinc-300">Kalkulaator avaneb...</div>}>
+    <CalculatorRouteShell
+      title="Päikesejaama tasuvuse kalkulaator"
+      description="Hinda päikesejaama tasuvust, rahavoogu ja omatarbimise mõju Eesti tingimustes."
+    >
       <SolarCalculatorPage />
-    </Suspense>
+    </CalculatorRouteShell>
   );
 }
 

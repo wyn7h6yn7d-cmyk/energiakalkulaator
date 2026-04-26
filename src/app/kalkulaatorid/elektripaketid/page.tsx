@@ -1,11 +1,14 @@
 import { ElektripaketidPageClient } from "@/components/elektripaketid-page";
-import { Suspense } from "react";
+import { CalculatorRouteShell } from "@/components/calculator-route-shell";
 
 export default function ElektripaketidPage() {
   return (
-    <Suspense fallback={<div className="card text-sm text-zinc-300">Kalkulaator avaneb...</div>}>
+    <CalculatorRouteShell
+      title="Elektripaketi võrdluse kalkulaator"
+      description="Võrdle spot- ja fikseeritud paketi hinnangulist kulu sinu tarbimise põhjal."
+    >
       <ElektripaketidPageClient />
-    </Suspense>
+    </CalculatorRouteShell>
   );
 }
 

@@ -1,11 +1,14 @@
 import { PeakShavingPageClient } from "@/components/peak-shaving-page";
-import { Suspense } from "react";
+import { CalculatorRouteShell } from "@/components/calculator-route-shell";
 
 export default function PeakShavingPage() {
   return (
-    <Suspense fallback={<div className="card text-sm text-zinc-300">Kalkulaator avaneb...</div>}>
+    <CalculatorRouteShell
+      title="Peak shaving kalkulaator"
+      description="Hinda tipukoormuse lõikamise võimekust, piiravat tegurit ja võimalikku aastast säästu."
+    >
       <PeakShavingPageClient />
-    </Suspense>
+    </CalculatorRouteShell>
   );
 }
 

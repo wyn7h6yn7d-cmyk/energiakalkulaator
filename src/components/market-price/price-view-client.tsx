@@ -726,7 +726,7 @@ export function PriceViewClient({
             </button>
           </div>
           <p className="w-full text-xs text-zinc-400">
-            Tipp tähendab selle paeva suhteliselt kallimat perioodi, mitte tingimata vaga korge absoluutset hinda.
+            Tipp tähendab selle päeva suhteliselt kallimat perioodi, mitte tingimata väga kõrget absoluutset hinda.
           </p>
           {marketOverview ? (
             <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-4 text-sm text-zinc-200">

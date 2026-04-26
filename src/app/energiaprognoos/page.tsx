@@ -12,6 +12,21 @@ export const metadata = {
 };
 export const dynamic = "force-dynamic";
 
+function EnergiaprognoosFallback() {
+  return (
+    <div className="relative page-bg">
+      <main className="relative mx-auto w-full max-w-7xl px-3 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8">
+        <section className="glass-panel rounded-3xl p-6 sm:p-8">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">Energiaprognoos</h1>
+          <p className="mt-3 text-sm text-zinc-300">
+            Prognoosi andmeid ei saanud hetkel laadida. Proovi hiljem uuesti.
+          </p>
+        </section>
+      </main>
+    </div>
+  );
+}
+
 function toSingle(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -90,6 +105,7 @@ export default async function EnergiaprognoosPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  try {
   const params = await searchParams;
   const location = toSingle(params.location) ?? "";
   const latitudeRaw = toSingle(params.latitude);
@@ -286,4 +302,7 @@ export default async function EnergiaprognoosPage({
       </main>
     </div>
   );
+  } catch {
+    return <EnergiaprognoosFallback />;
+  }
 }

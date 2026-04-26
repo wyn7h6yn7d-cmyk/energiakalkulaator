@@ -1,11 +1,14 @@
 import { EvLaadiminePageClient } from "@/components/ev-laadimine-page";
-import { Suspense } from "react";
+import { CalculatorRouteShell } from "@/components/calculator-route-shell";
 
 export default function EvLaadiminePage() {
   return (
-    <Suspense fallback={<div className="card text-sm text-zinc-300">Kalkulaator avaneb...</div>}>
+    <CalculatorRouteShell
+      title="EV laadimise kalkulaator"
+      description="Arvuta EV laadimise aeg, maksumus ja sobiv laadija võimsus peakaitsme järgi."
+    >
       <EvLaadiminePageClient />
-    </Suspense>
+    </CalculatorRouteShell>
   );
 }
 

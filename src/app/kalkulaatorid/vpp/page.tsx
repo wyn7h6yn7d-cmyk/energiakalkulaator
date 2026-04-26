@@ -1,11 +1,14 @@
 import { VppPageClient } from "@/components/vpp-page";
-import { Suspense } from "react";
+import { CalculatorRouteShell } from "@/components/calculator-route-shell";
 
 export default function VppPage() {
   return (
-    <Suspense fallback={<div className="card text-sm text-zinc-300">Kalkulaator avaneb...</div>}>
+    <CalculatorRouteShell
+      title="VPP tasuvusmudel"
+      description="Arvuta aku osalemise potentsiaalne tulu, tasuvusaeg ja stsenaariumite mõju."
+    >
       <VppPageClient />
-    </Suspense>
+    </CalculatorRouteShell>
   );
 }
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalLayout } from "@/app/(legal)/legal-layout";
-import { OpenCookieSettingsButton } from "@/components/legal/OpenCookieSettingsButton";
+import CookieSettingsCta from "@/components/legal/cookie-settings-cta";
 
 export const metadata: Metadata = {
   title: "Küpsised | Energiakalkulaator",
@@ -79,7 +79,7 @@ export default function CookiesPage() {
         Saad oma valikuid igal ajal muuta, avades küpsiste seaded.
       </p>
       <div className="mt-3">
-        <OpenCookieSettingsButton className="btn-glow">Ava küpsiste seaded</OpenCookieSettingsButton>
+        <CookieSettingsCta />
       </div>
     </LegalLayout>
   );

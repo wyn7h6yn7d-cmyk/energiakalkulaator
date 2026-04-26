@@ -1,16 +1,8 @@
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Hinnad | Energiakalkulaator",
-};
-
-function PricingFallback() {
+export default function HinnadError() {
   return (
     <div className="relative page-bg">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="aurora" />
-        <div className="grid-glow" />
-      </div>
       <main className="relative mx-auto w-full max-w-4xl px-5 pb-16 pt-12 sm:px-8 lg:px-10">
         <section className="glass-panel rounded-3xl p-8 sm:p-12">
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-50 sm:text-5xl">Hinnad</h1>
@@ -23,12 +15,3 @@ function PricingFallback() {
   );
 }
 
-export default async function HinnadPage() {
-  try {
-    const mod = await import("../pricing/page");
-    const PricingPage = mod.default;
-    return <PricingPage />;
-  } catch {
-    return <PricingFallback />;
-  }
-}
