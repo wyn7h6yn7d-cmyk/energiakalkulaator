@@ -5,7 +5,6 @@ import { canViewFullAnalysis } from "@/lib/unlock";
 import { useProjectUnlock } from "@/lib/useProjectUnlock";
 import { PaywallCard } from "@/components/paywall-card";
 import { FEATURES } from "@/lib/features";
-import { MiniCashflowChart } from "@/components/charts/mini-cashflow-chart";
 import { clientDownloadPdf } from "@/lib/pdf/client-download";
 import { CalculatorPdfActions } from "@/components/calculator-pdf-actions";
 import { UsedAssumptionsBlock } from "@/components/used-assumptions-block";
@@ -16,6 +15,10 @@ import { toNumber as num } from "@/lib/units";
 
 const fmtEur = (value: number) =>
   new Intl.NumberFormat("et-EE", { maximumFractionDigits: 0 }).format(value) + " €";
+
+function formatYearLabel(index: number) {
+  return `A${index + 1}`;
+}
 
 type RevenueType = "annual" | "arbitrage" | "per_kw_year";
 
@@ -616,13 +619,26 @@ export function VppPageClient() {
               ))}
             </div>
           </article>
-          <ChartCard
-            title="Rahavoog (baas)"
-            description="Aastapõhine rahavoog valitud perioodil."
-            chartClassName="min-h-[280px] md:min-h-[360px]"
-          >
-            <MiniCashflowChart cashflows={model.perScenario[1]?.cashflows ?? []} />
-          </ChartCard>
+          <article className="card">
+            <h3 className="section-title">Baasstsenaariumi kokkuvõte</h3>
+            <div className="grid gap-2 text-sm">
+              <div className="compare-row">
+                <span className="compare-label">Keskmine aastane rahavoog</span>
+                <strong>{fmtEur(model.perScenario[1]?.avgNetAnnual ?? 0)}</strong>
+              </div>
+              <div className="compare-row">
+                <span className="compare-label">Tasuvusaeg</span>
+                <strong>{model.perScenario[1]?.paybackYears !== null ? `${model.perScenario[1].paybackYears.toFixed(1)} a` : "—"}</strong>
+              </div>
+              <div className="compare-row">
+                <span className="compare-label">Kogukasum (eluiga)</span>
+                <strong>{fmtEur(model.perScenario[1]?.totalProfit ?? 0)}</strong>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-zinc-400">
+              Kompaktne vaade peamiste otsusenäitajatega ilma mini-graafikuta.
+            </p>
+          </article>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -661,6 +677,33 @@ export function VppPageClient() {
             </ul>
           </article>
         </div>
+        <ChartCard
+          title="Rahavoog (baas)"
+          description="Aastapõhine rahavoog valitud perioodil (tekstilise loendina)."
+          chartClassName="min-h-[220px]"
+        >
+          {(() => {
+            const cashflows = model.perScenario[1]?.cashflows ?? [];
+            if (!cashflows.length) {
+              return <p className="text-sm text-zinc-400">Rahavoogude andmed puuduvad.</p>;
+            }
+            const marks = [0, Math.floor((cashflows.length - 1) / 2), cashflows.length - 1]
+              .filter((idx, pos, arr) => arr.indexOf(idx) === pos);
+            return (
+              <div className="grid gap-2 text-sm">
+                {marks.map((idx) => (
+                  <div key={idx} className="compare-row">
+                    <span className="compare-label">{formatYearLabel(idx)}</span>
+                    <strong>{fmtEur(cashflows[idx] ?? 0)}</strong>
+                  </div>
+                ))}
+                <p className="mt-2 text-xs text-zinc-400">
+                  Näitame esimest, keskmist ja viimast aastat, et trend oleks loetav ka mobiilis.
+                </p>
+              </div>
+            );
+          })()}
+        </ChartCard>
         <UsedAssumptionsBlock {...assumptionsInfo} />
 
         <CalculatorPdfActions

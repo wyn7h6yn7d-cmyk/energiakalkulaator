@@ -325,12 +325,6 @@ export function SolarCalculatorPage() {
     if (!out.ok) setMessage(out.error);
   };
 
-  const chartTrackPx = 300; // suurem tulpdiagramm, et desktopis loetavus ei kaoks
-  const bestYear = result.selected.cashflowByYear.reduce(
-    (max, value) => Math.max(max, Math.abs(value)),
-    1,
-  );
-
   const fmtEur = (value: number) => `${formatNum(value, 0)} €`;
   const fmtKwh = (value: number) => `${formatNum(value, 0)} kWh`;
   const isEmptyInputs =
@@ -1167,86 +1161,33 @@ export function SolarCalculatorPage() {
 
               <ChartCard
                 title="Rahavoo prognoos aastate lõikes"
-                description="Tulpdiagramm näitab rahavoo muutust aasta lõikes."
-                chartClassName="min-h-[280px] md:min-h-[360px]"
+                description="Aastapõhine rahavoo kokkuvõte valitud perioodil."
+                chartClassName="min-h-[220px]"
               >
                 {result.selected.cashflowByYear.length === 0 ? (
                   <p className="mt-3 text-sm text-zinc-400">
                     Rahavoogu ei saanud arvutada. Kontrolli sisestatud andmeid.
                   </p>
                 ) : (
-                  <>
-                    <p className="px-0 text-xs text-zinc-500">
-                      Kui aastaid on palju, liiguta graafikut horisontaalselt (ka tahvlil); tulbad hoiavad lugemiseks ühtlase laiuse.
-                    </p>
-                    <div className="relative mt-3 w-full min-w-0">
-                      {(() => {
-                        const totalYears = result.selected.cashflowByYear.length;
-                        const tickStep =
-                          totalYears > 24 ? 4 : totalYears > 16 ? 3 : totalYears > 10 ? 2 : 1;
-                        const manyYears = totalYears > 10;
-                        const penultimateWouldCrowd =
-                          totalYears > 8 &&
-                          (totalYears - 2) % tickStep === 0 &&
-                          totalYears - 2 >= 0;
-                        return (
-                          <div className="-mx-1 overflow-x-auto overflow-y-visible px-1 pb-2 [-webkit-overflow-scrolling:touch] sm:mx-0 sm:px-0">
-                            <div
-                              className={`flex min-h-[280px] items-end gap-2 pb-1 md:min-h-[360px] ${
-                                manyYears
-                                  ? "min-w-max"
-                                  : "min-w-max md:w-full md:min-w-0 md:justify-between"
-                              }`}
-                            >
-                              {result.selected.cashflowByYear.map((value, index) => {
-                                const abs = Math.abs(value);
-                                const barPx = Math.max(Math.round((abs / bestYear) * chartTrackPx), 8);
-                                const isFirst = index === 0;
-                                const isLast = index === totalYears - 1;
-                                const isStep = index % tickStep === 0;
-                                const skipPenultimateTick =
-                                  penultimateWouldCrowd && index === totalYears - 2;
-                                const showTick =
-                                  isFirst || isLast || (isStep && !skipPenultimateTick);
-                                return (
-                                  <div
-                                    key={`${value}-${index}`}
-                                    className={`group relative flex flex-col items-stretch gap-1 ${
-                                      manyYears
-                                        ? "w-10 min-w-[2.5rem] shrink-0 sm:w-11 sm:min-w-[2.75rem]"
-                                        : "w-10 min-w-[2.5rem] shrink-0 md:min-w-0 md:flex-1 md:px-0.5"
-                                    }`}
-                                  >
-                                    <div className="chart-tooltip pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-white/10 bg-zinc-900/95 px-2 py-1 text-[11px] font-medium text-zinc-100 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:block">
-                                      {formatNum(value, 0)} €
-                                    </div>
-                                    <div
-                                      className="box-border flex w-full min-w-[10px] flex-col justify-end rounded-md bg-white/[0.06] px-1 pt-1"
-                                      style={{ height: chartTrackPx }}
-                                    >
-                                      <div
-                                        className="w-full min-w-[10px] shrink-0 rounded-sm bg-gradient-to-t from-emerald-500/80 to-teal-400/90"
-                                        style={{ height: barPx }}
-                                        aria-label={`Aasta ${index + 1}`}
-                                        title={`${formatNum(value, 0)} €`}
-                                      />
-                                    </div>
-                                    <span
-                                      className={`block min-h-[1em] whitespace-nowrap text-center text-[10px] tabular-nums leading-none sm:text-[11px] ${
-                                        showTick ? "text-zinc-400" : "text-transparent"
-                                      }`}
-                                    >
-                                      {showTick ? index + 1 : "\u00A0"}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                  (() => {
+                    const cashflows = result.selected.cashflowByYear;
+                    const marks = [0, Math.floor((cashflows.length - 1) / 2), cashflows.length - 1].filter(
+                      (idx, pos, arr) => arr.indexOf(idx) === pos,
+                    );
+                    return (
+                      <div className="mt-2 grid gap-2 text-sm">
+                        {marks.map((idx) => (
+                          <div key={idx} className="compare-row">
+                            <span className="compare-label">A{idx + 1}</span>
+                            <strong>{formatNum(cashflows[idx] ?? 0, 0)} €</strong>
                           </div>
-                        );
-                      })()}
-                    </div>
-                  </>
+                        ))}
+                        <p className="mt-2 text-xs text-zinc-400">
+                          Kuvame võtmeaastad (algus, keskkoht, lõpp), et vaade oleks loetav ka väiksemal ekraanil.
+                        </p>
+                      </div>
+                    );
+                  })()
                 )}
               </ChartCard>
             </div>
