@@ -18,6 +18,26 @@ Ava brauseris `http://localhost:3000`.
 - `npm run start` - käivita tootmisbuild
 - `npm run lint` - koodikvaliteedi kontroll
 
+## Beta v0.1 status
+
+- build läbib
+- unit testid läbivad
+- e2e testid läbivad
+- kalkulaatorite põhivoog töötab
+- mobile 390px kontrollitud
+- legal lehed ja küpsiste nõusolek olemas
+- börsihinna moodul töötab
+- teadaolevad kriitilised blockerid puuduvad
+
+### Võimalikud arendussuunad
+
+- PVGIS integratsioon päikesejaama tootluse täpsustamiseks
+- Open-Meteo / energiagprognoosi edasiarendus
+- PDF raportite parandamine ja eksport
+- CSV tarbimisandmete import
+- Stripe makselahendus tulevikus
+- kasutajakonto ja salvestatud arvutused
+
 ## Struktuur
 
 - `src/app/page.tsx` - avaleht

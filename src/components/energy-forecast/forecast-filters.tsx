@@ -63,7 +63,7 @@ export function ForecastFilters({ location, latitude, longitude, hours, historyY
       <label className="field-label">
         <span className="field-label-text">Asukoht</span>
         <input name="location" defaultValue={location} className="input" placeholder="Tallinn, Tartu..." />
-        <span className="field-hint">Voi kasuta koordinaate allpool.</span>
+        <span className="field-hint">Või kasuta koordinaate allpool.</span>
       </label>
       <label className="field-label">
         <span className="field-label-text">Latitude</span>
@@ -76,25 +76,25 @@ export function ForecastFilters({ location, latitude, longitude, hours, historyY
         <span className="field-hint">Valikuline.</span>
       </label>
       <label className="field-label">
-        <span className="field-label-text">Paikesejaama voimsus (kW)</span>
+        <span className="field-label-text">Päikesejaama võimsus (kW)</span>
         <input
           name="systemKw"
           defaultValue={input.systemKw > 0 ? String(input.systemKw) : ""}
           className="input"
           placeholder="nt 12"
         />
-        <span className="field-hint">Inverteri voi susteemi nimivoimsus.</span>
+        <span className="field-hint">Inverteri või süsteemi nimivõimsus.</span>
       </label>
       <label className="field-label">
         <span className="field-label-text">Paneelide suund</span>
         <select name="panelDirection" defaultValue={input.panelDirection} className="input">
-          <option value="louna">Louna</option>
+          <option value="louna">Lõuna</option>
           <option value="ida-laas">Ida-laas</option>
           <option value="ida">Ida</option>
-          <option value="laas">Laas</option>
+          <option value="laas">Lääs</option>
           <option value="muu">Muu</option>
         </select>
-        <span className="field-hint">Mojutab tootluse koefitsienti.</span>
+        <span className="field-hint">Mõjutab tootluse koefitsienti.</span>
       </label>
       <label className="field-label">
         <span className="field-label-text">Paneelide kalle (kraadid)</span>
@@ -104,17 +104,17 @@ export function ForecastFilters({ location, latitude, longitude, hours, historyY
           className="input"
           placeholder="nt 35"
         />
-        <span className="field-hint">Eestis tootab sageli 30-40 kraadi.</span>
+        <span className="field-hint">Eestis töötab sageli 30-40 kraadi.</span>
       </label>
       <label className="field-label">
-        <span className="field-label-text">Susteemikaod (%)</span>
+        <span className="field-label-text">Süsteemikaod (%)</span>
         <input
           name="systemLossesPercent"
           defaultValue={input.systemLossesPercent > 0 ? String(input.systemLossesPercent) : ""}
           className="input"
           placeholder="nt 14"
         />
-        <span className="field-hint">Sisaldab inverteri, juhtmete ja muu susteemi kaod.</span>
+        <span className="field-hint">Sisaldab inverteri, juhtmete ja muu süsteemi kaod.</span>
       </label>
       <label className="field-label">
         <span className="field-label-text">Prognoosi ulatus</span>
@@ -124,12 +124,12 @@ export function ForecastFilters({ location, latitude, longitude, hours, historyY
         </select>
       </label>
       <label className="field-label">
-        <span className="field-label-text">Ajalooline analuus</span>
+        <span className="field-label-text">Ajalooline analüüs</span>
         <select name="historyYears" defaultValue={String(historyYears)} className="input">
           <option value="5">Viimased 5 aastat</option>
           <option value="10">Viimased 10 aastat</option>
         </select>
-        <span className="field-hint">Serveri cache kasutatakse raskete paringute vahendamiseks.</span>
+        <span className="field-hint">Serveri cache'i kasutatakse raskete päringute vahendamiseks.</span>
       </label>
       <div className="grid gap-2 sm:grid-cols-2 lg:col-span-1">
         <label className="field-label rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
@@ -142,7 +142,7 @@ export function ForecastFilters({ location, latitude, longitude, hours, historyY
             </span>
             <span className="yes-no-text">Jah</span>
           </div>
-          <span className="field-hint">Mojutab laadimisakna soovitusi.</span>
+          <span className="field-hint">Mõjutab laadimisakna soovitusi.</span>
         </label>
         <label className="field-label rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
           <span className="field-label-text">Kas kasutajal on aku</span>
@@ -154,7 +154,7 @@ export function ForecastFilters({ location, latitude, longitude, hours, historyY
             </span>
             <span className="yes-no-text">Jah</span>
           </div>
-          <span className="field-hint">Mojutab aku kasutuse soovitusi.</span>
+          <span className="field-hint">Mõjutab aku kasutuse soovitusi.</span>
         </label>
       </div>
 

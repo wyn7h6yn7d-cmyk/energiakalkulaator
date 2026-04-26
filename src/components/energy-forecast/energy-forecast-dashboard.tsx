@@ -287,14 +287,14 @@ export function EnergyForecastDashboard({
           <h3 className="section-title">Tunnipõhine tabel</h3>
           <div className="flex items-center gap-3">
             <p className="text-xs text-zinc-400">
-              Naitan {visibleRows.length} / {rows.length} rida
+              Näitan {visibleRows.length} / {rows.length} rida
             </p>
             <button
               type="button"
               className="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:bg-white/[0.08]"
               onClick={() => setShowFullTable((v) => !v)}
             >
-              {showFullTable ? "Naita lyhemat tabelit" : "Naita koik read"}
+              {showFullTable ? "Näita lühemat tabelit" : "Näita kõiki ridu"}
             </button>
           </div>
         </div>

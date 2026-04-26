@@ -612,7 +612,7 @@ export function ElektripaketidPageClient() {
               </>
             ) : (
               <p className="text-sm text-zinc-400">
-                Näidisväärtused on toodud placeholderina, mitte arvutuses kasutatava väärtusena.
+                Sisesta vajalikud andmed ja vajuta "Arvuta tulemus", et näha tulemusi.
               </p>
             )}
           </article>

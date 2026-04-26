@@ -306,6 +306,7 @@ export function VppPageClient() {
           </button>
         </div>
 
+        <h3 className="mt-6 text-xl font-semibold text-zinc-50">Sisendid</h3>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <label className="field-label">
             <span className="field-label-text">Aku maht (kWh)</span>
@@ -724,7 +725,7 @@ export function VppPageClient() {
           </>
         ) : (
           <p className="mt-3 text-sm text-zinc-400">
-            Näidisväärtused on toodud placeholderina, mitte arvutuses kasutatava väärtusena.
+            Sisesta vajalikud andmed ja vajuta "Arvuta tulemus", et näha tulemusi.
           </p>
         )}
       </PaywallCard>

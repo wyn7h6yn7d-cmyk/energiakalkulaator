@@ -1,5 +1,7 @@
 "use client";
 
+import CookieSettingsCta from "@/components/legal/cookie-settings-cta";
+
 export default function KupsisedError() {
   return (
     <div className="relative page-bg">
@@ -13,6 +15,9 @@ export default function KupsisedError() {
             Küpsised on väikesed tekstifailid, mis aitavad veebilehel töötada, salvestada valikuid
             ning parandada kasutuskogemust.
           </p>
+          <div className="mt-4">
+            <CookieSettingsCta />
+          </div>
         </section>
       </main>
     </div>

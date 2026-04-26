@@ -18,6 +18,10 @@ function EnergiaprognoosFallback() {
       <main className="relative mx-auto w-full max-w-7xl px-3 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8">
         <section className="glass-panel rounded-3xl p-6 sm:p-8">
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">Energiaprognoos</h1>
+          <p className="mt-3 max-w-2xl text-sm text-zinc-300">
+            Tööriist ühendab ilma, päikesekiirguse ja börsihinna, et aidata ajastada tarbimist ning hinnata
+            tootmispotentsiaali.
+          </p>
           <p className="mt-3 text-sm text-zinc-300">
             Prognoosi andmeid ei saanud hetkel laadida. Proovi hiljem uuesti.
           </p>
@@ -265,7 +269,7 @@ export default async function EnergiaprognoosPage({
         ) : null}
         {usingDemo ? (
           <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-zinc-300">
-            Demo-vaade aktiveeritud: prognoos naitab simulatsiooniandmeid kuni API taastumiseni.
+            Demo-vaade aktiveeritud: prognoos näitab simulatsiooniandmeid kuni API taastumiseni.
           </section>
         ) : null}
         {historicalError ? (
@@ -303,14 +307,14 @@ export default async function EnergiaprognoosPage({
             } catch {
               return (
                 <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-zinc-300">
-                  Ajaloolise analuusi andmeid ei saanud hetkel laadida.
+                  Ajaloolise analüüsi andmeid ei saanud hetkel laadida.
                 </section>
               );
             }
           })()
         ) : (
           <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-zinc-300">
-            Ajaloolise analuusi andmeid ei saanud hetkel laadida.
+            Ajaloolise analüüsi andmeid ei saanud hetkel laadida.
           </section>
         )}
       </main>

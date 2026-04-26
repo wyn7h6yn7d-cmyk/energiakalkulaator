@@ -161,7 +161,10 @@ export function SiteHeader() {
           </div>
         </Link>
 
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-1" aria-label="Peamenüü">
+        <nav
+          className="max-lg:hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-1"
+          aria-label="Peamenüü"
+        >
           {navItems.map((item) => (
             <Link
               key={item.href}

@@ -5,7 +5,7 @@ export default function VppPage() {
   return (
     <CalculatorRouteShell
       title="VPP tasuvusmudel"
-      description="Arvuta aku osalemise potentsiaalne tulu, tasuvusaeg ja stsenaariumite mõju."
+      description="Sisendid ja arvutus: hinda aku osalemise potentsiaalset tulu, tasuvusaega ja stsenaariumite mõju."
     >
       <VppPageClient />
     </CalculatorRouteShell>

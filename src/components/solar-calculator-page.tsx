@@ -76,14 +76,16 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="field-label">
-      <span className="field-label-text">{label}</span>
+    <label className="field-label" data-form-group="true">
+      <span className="field-label-text block">{label}</span>
       {children}
       {hint ? (
-        <span className="field-hint">{hint}</span>
+        <span className="field-hint block">{hint}</span>
       ) : (
-        // Hoia väljade kõrgus ühtlane (mobiil/desktop joondus)
-        <span className="field-hint opacity-0">.</span>
+        // Hoia valjade korgus uhtlane ilma teksti kokkujooksmiseta HTML valjavottes.
+        <span className="field-hint block" aria-hidden="true">
+          &nbsp;
+        </span>
       )}
     </label>
   );
@@ -234,6 +236,26 @@ export function SolarCalculatorPage() {
       setHasCalculated(true);
       setIsCalculating(false);
     }, 700);
+  };
+
+  const handleReset = () => {
+    setInput(defaults);
+    setPriceText({
+      manualSpotPrice: "",
+      nordPoolAveragePrice: "",
+      gridFeePrice: "",
+      sellBackPrice: "",
+      marginPrice: "",
+    });
+    setErrors([]);
+    setIsCalculating(false);
+    setHasCalculated(false);
+    setNordPoolState({
+      loading: false,
+      message: "",
+      source: "none",
+    });
+    setResult(calculateSolarComparison(defaults));
   };
 
   const scrollToCalculator = () => {
@@ -883,9 +905,14 @@ export function SolarCalculatorPage() {
                 ))}
               </div>
             ) : null}
-            <button type="submit" className="btn-glow w-fit">
-              {isCalculating ? "Arvutan..." : "Arvuta tulemus"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button type="submit" className="btn-glow w-fit">
+                {isCalculating ? "Arvutan..." : "Arvuta tulemus"}
+              </button>
+              <button type="button" className="btn-ghost w-fit" onClick={handleReset}>
+                Lähtesta
+              </button>
+            </div>
             {isCalculating ? (
               <div
                 className="h-1.5 w-full max-w-md overflow-hidden rounded-full bg-white/10"
@@ -1205,7 +1232,7 @@ export function SolarCalculatorPage() {
             </>
           ) : (
             <p className="mt-2 text-sm text-zinc-400">
-              Näidisväärtused on toodud placeholderina, mitte arvutuses kasutatava väärtusena.
+              Sisesta vajalikud andmed ja vajuta "Arvuta tulemus", et näha tulemusi.
             </p>
           )}
 

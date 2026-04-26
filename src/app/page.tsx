@@ -79,17 +79,17 @@ export default function Home() {
                 <div className="flex items-center justify-between gap-3">
                   <div
                     className="inline-flex items-center rounded-full border border-amber-300/30 bg-amber-400/10 px-2 py-1 text-[11px] text-amber-100"
-                    title="Need numbrid on illustratiivsed."
+                    title="Näidisandmed – need numbrid on illustratiivsed."
                   >
                     Näidisandmed
                   </div>
                 </div>
-                <p className="text-[11px] text-amber-100/90">Need numbrid on illustratiivsed.</p>
+                <p className="text-[11px] text-amber-100/90">Näidisandmed – need numbrid on illustratiivsed.</p>
 
                 <div className="min-w-0 rounded-xl border border-emerald-300/26 bg-white/[0.03] px-3 py-3.5">
                   <p className="text-[11px] uppercase tracking-wide text-zinc-400">Praegune hind</p>
                   <p className="mt-1 truncate text-2xl font-semibold text-zinc-50">11.6 snt/kWh</p>
-                  <p className="mt-1 text-xs text-emerald-200">Andmed uuenevad jooksvalt Eesti piirkonna alusel.</p>
+                  <p className="mt-1 text-xs text-amber-100/90">Näidisandmed – need numbrid on illustratiivsed.</p>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
@@ -164,7 +164,7 @@ export default function Home() {
               Näidisandmed
             </span>
           </div>
-          <p className="mb-2 text-[11px] text-amber-100/90">Need numbrid on illustratiivsed.</p>
+          <p className="mb-2 text-[11px] text-amber-100/90">Näidisandmed – need numbrid on illustratiivsed.</p>
           <div className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-xl border border-emerald-300/22 bg-white/[0.02] px-3 py-2.5">
               <div className="text-zinc-400">Praegune börsihind</div>
